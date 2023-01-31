@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "playground-nextjs",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -12,8 +12,7 @@
     "next": "^13.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ui": "*",
-    "math-helper": "*"
+    "ui": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
