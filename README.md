@@ -3,7 +3,7 @@
 ```
 yarn global add turbo
 ```
-| !NOTE! Importing internal dependencies only work on Typescript react/next.js atm.
+> !!! NOTE !!! Importing internal dependencies only work on Typescript react/next.js atm., but you can still run it if you're not importing ts packages
 
 # Quick start
 
