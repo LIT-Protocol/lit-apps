@@ -1,0 +1,13 @@
+{
+  "name": "playground-nodejs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node select.mjs",
+    "main": "nodemon --watch src --ext js,ts --exec \"tsx src/main.mjs\""
+  },
+  "dependencies": {
+    "@lit-protocol/lit-node-client": "^2.1.16",
+    "@lit-dev/tools": "*"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "event-listener-fe",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@lit-protocol/constants": "^2.1.16",
+    "@lit-protocol/lit-node-client": "^2.1.20",
+    "@monaco-editor/react": "^4.4.6",
+    "@next/font": "13.1.6",
+    "classnames": "^2.3.2",
+    "json-beautify": "^1.1.1",
+    "next": "13.1.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "ui": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@types/node": "^17.0.12",
+    "@types/react": "^18.0.22",
+    "@types/react-dom": "^18.0.7",
+    "eslint": "7.32.0",
+    "eslint-config-custom": "*",
+    "tsconfig": "*",
+    "typescript": "^4.5.3"
+  }
+}

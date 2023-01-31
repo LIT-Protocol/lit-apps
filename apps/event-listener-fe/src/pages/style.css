@@ -1,0 +1,10 @@
+.logo{
+    position: fixed;
+    left: 12px;
+    top: 12px;
+    opacity: 0.1;
+    filter: blur(1px)
+}
+.logo svg {
+  color: white;
+}

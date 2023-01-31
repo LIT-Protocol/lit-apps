@@ -1,0 +1,6 @@
+{
+  "name": "@lit-dev/tools",
+  "version": "0.0.0",
+  "main": "./utils.mjs",
+  "types": "./utils.mjs"
+}
