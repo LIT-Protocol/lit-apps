@@ -6,6 +6,12 @@ yarn global add turbo
 
 # Quick start
 
+## install
+
+```
+yarn
+```
+
 ## Running apps
 
 ### Starting a specific app
