@@ -35,3 +35,7 @@ specify file name eg `node-test.mjs`, `main.mjs` in the `src` folder
 // passing params using '--' 
 turbo dev --filter playground-nodejs -- node-test.mjs
 ```
+
+# Setting up test on your monorepo
+
+https://jestjs.io/docs/getting-started#using-babel

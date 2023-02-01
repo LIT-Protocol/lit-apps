@@ -13,6 +13,12 @@
     },
     "start": {
       "outputs": []
+    },
+    "test": {
+      "outputs": []
+    },
+    "test:watch": {
+      "outputs": []
     }
   }
 }
