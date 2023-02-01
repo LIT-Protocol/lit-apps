@@ -4,12 +4,13 @@
   "main": "./index.tsx",
   "types": "./index.tsx",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "jest --setupFiles dotenv/config",
+    "test:watch": "jest --watch --setupFiles dotenv/config"
   },
   "dependencies": {
+    "@lit-dev/utils": "*",
     "@lit-protocol/lit-node-client": "^2.1.16",
-    "@lit-dev/utils": "*"
+    "dotenv": "^16.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",

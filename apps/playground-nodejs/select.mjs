@@ -25,5 +25,5 @@ try {
 
 // run the file
 await childRunCommand(
-  `nodemon --watch src --ext js,ts --exec "tsx src/${FILE_NAME}"`
+  `nodemon --watch src --ext js,ts,mjs --exec "tsx src/${FILE_NAME}"`
 );

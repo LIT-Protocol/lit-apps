@@ -7,7 +7,10 @@
     "main": "nodemon --watch src --ext js,ts --exec \"tsx src/main.mjs\""
   },
   "dependencies": {
+    "@lit-dev/lit-actions": "*",
+    "@lit-dev/tools": "*",
+    "@lit-dev/utils": "*",
     "@lit-protocol/lit-node-client": "^2.1.16",
-    "@lit-dev/tools": "*"
+    "dotenv": "^16.0.3"
   }
 }

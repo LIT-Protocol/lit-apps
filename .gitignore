@@ -31,3 +31,6 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+./apps/playground-nodejs/.env
+./apps/packages/lit-actions/.env

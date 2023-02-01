@@ -1,4 +1,4 @@
-export * from "./src/public-key-to-eth-address";
+export * from "./src/get-wallet-auth-sig";
 
 export const hello = async () => {
   console.log("World!");

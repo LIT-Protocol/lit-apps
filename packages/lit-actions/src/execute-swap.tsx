@@ -1,52 +1,15 @@
 import { ethers } from "ethers";
 import { Interface } from "@ethersproject/abi";
-import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
-import { publicKeyToEthAddress } from "@lit-dev/utils";
+import { computeAddress } from "ethers/lib/utils.js";
+import { arrayify, joinSignature, keccak256 } from "ethers/lib/utils.js";
+import { serialize } from "@ethersproject/transactions";
+import { Contract } from "@ethersproject/contracts";
+import { MaxUint256 } from "@ethersproject/constants";
 
-export const swapStubs = {
-  // example stub data, can be used or not
-  tokenIn: {
-    chainId: 137,
-    decimals: 18,
-    address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-    symbol: "WMATIC",
-    name: "Wrapped Matic",
-  },
-
-  tokenOut: {
-    chainId: 137,
-    decimals: 6,
-    address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
-    symbol: "USDC",
-    name: "USD//C",
-  },
-  // this is the demo PKP address that's in all of our docs
-  pkpInfo: {
-    publicKey:
-      "0x04e0fe6a5e9447112a272b3bfea3cbcb48a730c731d9edd434417d30f5b25966cb8543cece8ba67fd6bbbb9ba952e28db541de9a898cca0257e5479033c3b7b021",
-  },
-
-  authSig: {
-    sig: "0x2bdede6164f56a601fc17a8a78327d28b54e87cf3fa20373fca1d73b804566736d76efe2dd79a4627870a50e66e1a9050ca333b6f98d9415d8bca424980611ca1c",
-    derivedVia: "web3.eth.personal.sign",
-    signedMessage:
-      "localhost wants you to sign in with your Ethereum account:\n0x9D1a5EC58232A894eBFcB5e466E3075b23101B89\n\nThis is a key for Partiful\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 1LF00rraLO4f7ZSIt\nIssued At: 2022-06-03T05:59:09.959Z",
-    address: "0x9D1a5EC58232A894eBFcB5e466E3075b23101B89",
-  },
-};
-
-// these are necessary for the swap to work
-const SWAP_ROUTER_ADDRESS = "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45";
-const signEcdsaCode = `
-  async function getSignatures() {
-    const approveSig = await LitActions.signEcdsa({ toSign: approveMessage, publicKey, sigName: 'approveTx' });
-    const exactInputSingleSig = await LitActions.signEcdsa({toSign: exactInputSingleMessage, publicKey, sigName: 'exactInputSingleTx'});
-  }
-​
-  getSignatures();
-`;
-
+// ------------------------------------
+//          Typescript Types
+// ------------------------------------
 type PKPInfo = {
   publicKey: string;
 };
@@ -66,174 +29,354 @@ type AuthSig = {
   address: string;
 };
 
-interface ExecuteSwapProp {
+interface SwapJSParams {
+  chain: "matic" | "ethereum";
   tokenIn: SwapToken;
   tokenOut: SwapToken;
   pkp: PKPInfo;
   authSig: AuthSig;
   amountToSell: string;
-  provider: ethers.providers.JsonRpcProvider;
+  rpcUrl: string;
 }
-export const executeSwap = async (props: ExecuteSwapProp) => {
-  const { tokenIn, tokenOut, pkp, authSig, amountToSell, provider } = props;
 
-  const pkpAddress = publicKeyToEthAddress(pkp.publicKey);
+export const swapStubs = {
+  // example stub data, can be used or not
+  wmatic: {
+    chainId: 137,
+    decimals: 18,
+    address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    symbol: "WMATIC",
+    name: "Wrapped Matic",
+  },
 
-  const exactInputSingleParams = {
-    tokenIn: tokenIn.address,
-    tokenOut: tokenOut.address,
-    fee: 3000,
-    recipient: pkpAddress,
-    amountIn: ethers.utils
-      .parseUnits(amountToSell, tokenIn.decimals)
-      .toString(),
-    amountOutMinimum: 0,
-    sqrtPriceLimitX96: 0,
-  };
-  const approveCalldata = generateApproveCalldata(
-    SWAP_ROUTER_ADDRESS,
-    exactInputSingleParams.amountIn
-  );
-  const exactInputSingleCalldata = generateSwapExactInputSingleCalldata(
-    exactInputSingleParams
-  );
-  const gasPrice = await provider.getGasPrice();
-  const chainId = tokenIn.chainId;
-  const nonceCount = await provider.getTransactionCount(pkpAddress);
-  const approveTx = {
-    to: tokenIn.address,
-    nonce: nonceCount,
-    value: 0,
-    gasPrice: gasPrice,
-    gasLimit: 150000,
-    chainId: chainId,
-    data: approveCalldata,
-  };
-  console.log("ApproveTx: ", approveTx);
-  const approveMessage = ethers.utils.arrayify(getMessage(approveTx));
-  const exactInputSingleTx = {
-    to: SWAP_ROUTER_ADDRESS,
-    value: 0,
-    nonce: nonceCount + 1,
-    gasPrice: gasPrice,
-    gasLimit: 500000,
-    chainId: chainId,
-    data: exactInputSingleCalldata,
-  };
-  console.log("ExactInputSingleTx: ", exactInputSingleTx);
-  const exactInputSingleMessage = ethers.utils.arrayify(
-    getMessage(exactInputSingleTx)
-  );
-  let litNodeClient: LitNodeClient;
+  usdc: {
+    chainId: 137,
+    decimals: 6,
+    address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    symbol: "USDC",
+    name: "USD//C",
+  },
 
-  try {
-    litNodeClient = new LitJsSdk.LitNodeClient({
-      litNetwork: "serrano",
-      debug: false,
-    });
-    await litNodeClient.connect();
-  } catch (err) {
-    console.log("Unable to connect to network", err);
-    return;
-  }
-  if (!litNodeClient) {
-    console.log("LitNodeClient was not instantiated");
-    return;
-  }
-  console.log("LitNodeClient connected");
-  const jsParams = {
-    exactInputSingleMessage,
-    approveMessage,
-    publicKey: pkp.publicKey,
-    approveSigName: "approveTx",
-    exactInputSingleSigName: "exactInputSingleTx",
-  };
-  console.log("JsParams:", jsParams);
-  console.log("AuthSig:", authSig);
-  let litActionRes;
-  try {
-    console.log("Executing LitAction");
-    litActionRes = await litNodeClient.executeJs({
-      code: signEcdsaCode,
-      authSig,
-      jsParams: jsParams,
-    });
-    console.log("LitAction Res:", litActionRes);
-  } catch (err) {
-    console.log("Unable to execute code", err);
-    return;
-  }
-  if (
-    litActionRes["signatures"] &&
-    Object.keys(litActionRes["signatures"]).length === 2
-  ) {
-    console.log("Signing approveTx");
-    const signedApproveTx = joinAndSignTx({
-      litActionRes,
-      tx: approveTx,
-      key: "approveTx",
-    });
-    console.log("Signing exactInputSingleTx");
-    const signedExactInputSingleTx = joinAndSignTx({
-      litActionRes,
-      tx: exactInputSingleTx,
-      key: "exactInputSingleTx",
-    });
-    let signedApproveTxRes;
-    let signedExactInputSingleTxRes;
-    // send the transactions
-    try {
-      console.log("Sending signedApproveTx");
-      signedApproveTxRes = await provider.sendTransaction(signedApproveTx);
-      await signedApproveTxRes.wait();
-      signedExactInputSingleTxRes = await provider.sendTransaction(
-        signedExactInputSingleTx
-      );
-      await signedExactInputSingleTxRes.wait();
-      console.log("Successful swap - signedApproveTxRes:", signedApproveTxRes);
-      console.log(
-        "Successful swap - signedExactInputSingleTxRes:",
-        signedExactInputSingleTxRes
-      );
-    } catch (err) {
-      console.log("Failed to execute swap", err);
-    }
-  }
+  // this is the demo PKP address that's in all of our docs
+  pkpInfo: {
+    publicKey:
+      "0x04e0fe6a5e9447112a272b3bfea3cbcb48a730c731d9edd434417d30f5b25966cb8543cece8ba67fd6bbbb9ba952e28db541de9a898cca0257e5479033c3b7b021",
+  },
+
+  authSig: {
+    sig: "0x2bdede6164f56a601fc17a8a78327d28b54e87cf3fa20373fca1d73b804566736d76efe2dd79a4627870a50e66e1a9050ca333b6f98d9415d8bca424980611ca1c",
+    derivedVia: "web3.eth.personal.sign",
+    signedMessage:
+      "localhost wants you to sign in with your Ethereum account:\n0x9D1a5EC58232A894eBFcB5e466E3075b23101B89\n\nThis is a key for Partiful\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 1LF00rraLO4f7ZSIt\nIssued At: 2022-06-03T05:59:09.959Z",
+    address: "0x9D1a5EC58232A894eBFcB5e466E3075b23101B89",
+  },
 };
-function joinAndSignTx({ litActionRes, tx, key }) {
-  const { signatures } = litActionRes;
-  const encodedSignature = ethers.utils.joinSignature({
-    r: "0x" + signatures[key].r,
-    s: "0x" + signatures[key].s,
-    recoveryParam: signatures[key].recid,
+
+// these are necessary for the swap to work
+const SWAP_ROUTER_ADDRESS = "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45";
+const signEcdsaCode = `
+(async() => {
+  const approveSig = await LitActions.signEcdsa({ 
+    toSign: approveMessage, 
+    publicKey: publicKey, 
+    sigName: approveSigName
   });
-  const signedTx = ethers.utils.serializeTransaction(tx, encodedSignature);
-  return signedTx;
-}
-function getMessage(transaction) {
-  return ethers.utils.keccak256(
-    ethers.utils.arrayify(ethers.utils.serializeTransaction(transaction))
-  );
-}
-function generateApproveCalldata(spender, amount) {
-  const approveInterface = new Interface([
-    "function approve(address,uint256) returns (bool)",
-  ]);
-  return approveInterface.encodeFunctionData("approve", [spender, amount]);
-}
-export function generateSwapExactInputSingleCalldata(exactInputSingleData) {
-  const exactInputSingleInterface = new Interface([
-    "function exactInputSingle(tuple(address,address,uint24,address,uint256,uint256,uint160)) external payable returns (uint256)",
-  ]);
-  return exactInputSingleInterface.encodeFunctionData("exactInputSingle", [
-    [
-      exactInputSingleData.tokenIn,
-      exactInputSingleData.tokenOut,
-      exactInputSingleData.fee,
-      exactInputSingleData.recipient,
-      exactInputSingleData.amountIn,
-      exactInputSingleData.amountOutMinimum,
-      exactInputSingleData.sqrtPriceLimitX96,
-    ],
-  ]);
-}
+
+  const exactInputSingleSig = await LitActions.signEcdsa({
+    toSign: exactInputSingleMessage, 
+    publicKey: publicKey, 
+    sigName: exactInputSingleSigName
+  });
+})()      
+`;
+
+// ------------------------------------------------------------------------
+//          Let's pretend this function is hosting on Lit Action
+// ------------------------------------------------------------------------
+export const executeSwap = async ({ jsParams }) => {
+  // --------------------------------------
+  //          Checking JS Params
+  // --------------------------------------
+
+  const { tokenIn, tokenOut, pkp, authSig, amountToSell, rpcUrl } = jsParams;
+
+  // if pkp.public key doesn't start with 0x, add it
+  if (!pkp.publicKey.startsWith("0x")) {
+    pkp.publicKey = "0x" + pkp.publicKey;
+  }
+
+  const pkpAddress = computeAddress(pkp.publicKey);
+
+  // ------------------------------------------------------------------------------
+  //          ! NOTE ! Let's pretend these functions works on Lit Action
+  // ------------------------------------------------------------------------------
+  const LitActions = {
+    call: async (executeJsProps) => {
+      const client = new LitNodeClient({
+        litNetwork: "serrano",
+        debug: false,
+      });
+      await client.connect();
+
+      const sig = await client.executeJs(executeJsProps);
+
+      return sig;
+    },
+  };
+
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+  const Lit = {
+    Actions: {
+      getGasPrice: () => provider.getGasPrice(),
+      getTransactionCount: (walletAddress) =>
+        provider.getTransactionCount(walletAddress),
+      getNetwork: () => provider.getNetwork(),
+      sendTransaction: (tx) => provider.sendTransaction(tx),
+    },
+  };
+
+  class Code {
+    static signEcdsa = `(async() => {
+      const sigShare = await LitActions.signEcdsa({ toSign, publicKey, sigName });
+    })();`;
+  }
+
+  // ------------------------------------
+  //          Helper Functions
+  // ------------------------------------
+  /**
+   * This will check if the tx has been approved by checking if the allowance is greater than 0
+   * @param { string } tokenInAddress
+   * @param { string } pkpAddress
+   * @param { string } swapRouterAddress
+   *
+   * @returns { BigNumber } allowance
+   */
+  const getAllowance = async ({
+    tokenInAddress,
+    pkpAddress,
+    swapRouterAddress,
+  }) => {
+    const tokenInContract = new Contract(
+      tokenInAddress,
+      ["function allowance(address,address) view returns (uint256)"],
+      provider
+    );
+    const tokenInAllowance = await tokenInContract.allowance(
+      pkpAddress,
+      swapRouterAddress
+    );
+
+    return tokenInAllowance;
+  };
+
+  /**
+   * Convert a tx to a message
+   * @param { any } tx
+   * @returns { string }
+   */
+  const txToMsg = (tx) => arrayify(keccak256(arrayify(serialize(tx))));
+
+  /**
+   * Get basic tx info
+   */
+  const getBasicTxInfo = async ({ walletAddress }) => {
+    const nonce = await Lit.Actions.getTransactionCount(walletAddress);
+    const gasPrice = await Lit.Actions.getGasPrice();
+    const { chainId } = await Lit.Actions.getNetwork();
+    return { nonce, gasPrice, chainId };
+  };
+
+  /**
+   * Get encoded signature
+   */
+  const getEncodedSignature = (sig) => {
+    const _sig = {
+      r: "0x" + sig.r,
+      s: "0x" + sig.s,
+      recoveryParam: sig.recid,
+    };
+
+    console.log("_sig:", _sig);
+
+    const encodedSignature = joinSignature(_sig);
+
+    console.log("encodedSignature:", encodedSignature);
+
+    return encodedSignature;
+  };
+
+  /**
+   * Sending tx
+   * @param param0
+   */
+  const sendTx = async ({ originalUnsignedTx, signedTxSignature }) => {
+    const serialized = serialize(originalUnsignedTx, signedTxSignature);
+
+    console.log("serialized:", serialized);
+    return await Lit.Actions.sendTransaction(serialized);
+  };
+
+  /**
+   * This will approve the swap
+   */
+  const approveSwap = async ({
+    swapRouterAddress,
+    maxAmountToApprove = MaxUint256,
+    tokenInAddress,
+  }) => {
+    console.log("Approving swap...");
+
+    // getting approve data from swap router address
+    const approveData = new Interface([
+      "function approve(address,uint256) returns (bool)",
+    ]).encodeFunctionData("approve", [swapRouterAddress, maxAmountToApprove]);
+
+    // get the basic tx info such as nonce, gasPrice, chainId
+    const { nonce, gasPrice, chainId } = await getBasicTxInfo({
+      walletAddress: pkpAddress,
+    });
+
+    // create the unsigned tx
+    const unsignedTx = {
+      to: tokenInAddress,
+      nonce,
+      value: 0,
+      gasPrice,
+      gasLimit: 150000,
+      chainId,
+      data: approveData,
+    };
+
+    const message = txToMsg(unsignedTx);
+
+    // sign the tx (with lit action)
+    const sigName = "approve-tx-sig";
+    const res = await LitActions.call({
+      code: Code.signEcdsa,
+      authSig,
+      jsParams: {
+        toSign: message,
+        publicKey: pkp.publicKey,
+        sigName,
+      },
+    });
+
+    // get encoded signature
+    const encodedSignature = getEncodedSignature(res.signatures[sigName]);
+
+    const sentTx = await sendTx({
+      originalUnsignedTx: unsignedTx,
+      signedTxSignature: encodedSignature,
+    });
+
+    await sentTx.wait();
+
+    return sentTx;
+  };
+
+  /**
+   * This will swap the token
+   */
+  const swap = async ({ swapRouterAddress, swapParams }) => {
+    console.log("Swapping...");
+
+    // get "swap exact input single" data from contract
+    const swapData = new Interface([
+      "function exactInputSingle(tuple(address,address,uint24,address,uint256,uint256,uint160)) external payable returns (uint256)",
+    ]).encodeFunctionData("exactInputSingle", [
+      [
+        swapParams.tokenIn,
+        swapParams.tokenOut,
+        swapParams.fee,
+        swapParams.recipient,
+        swapParams.amountIn,
+        swapParams.amountOutMinimum,
+        swapParams.sqrtPriceLimitX96,
+      ],
+    ]);
+
+    console.log("swapData:", swapData);
+
+    console.log("pkpAddress:", pkpAddress);
+    // get the basic tx info such as nonce, gasPrice, chainId
+    const { nonce, gasPrice, chainId } = await getBasicTxInfo({
+      walletAddress: pkpAddress,
+    });
+
+    // create the unsigned tx
+    const unsignedTx = {
+      to: swapRouterAddress,
+      nonce,
+      value: 0,
+      gasPrice,
+      gasLimit: 150000,
+      chainId,
+      data: swapData,
+    };
+
+    const message = txToMsg(unsignedTx);
+
+    // sign the tx (with lit action)
+    const sigName = "swap-tx-sig";
+    const res = await LitActions.call({
+      code: Code.signEcdsa,
+      authSig,
+      jsParams: {
+        toSign: message,
+        publicKey: pkp.publicKey,
+        sigName,
+      },
+    });
+
+    // get encoded signature
+    const encodedSignature = getEncodedSignature(res.signatures[sigName]);
+
+    const sentTx = await sendTx({
+      originalUnsignedTx: unsignedTx,
+      signedTxSignature: encodedSignature,
+    });
+
+    await sentTx.wait();
+
+    return sentTx;
+  };
+
+  // --------------------------------------------------------------------------
+  //          This is where the actual logic being run in Lit Action
+  // --------------------------------------------------------------------------
+
+  // get the allowance of the contract to spend the token
+  const allowance = await getAllowance({
+    tokenInAddress: tokenIn.address,
+    pkpAddress,
+    swapRouterAddress: SWAP_ROUTER_ADDRESS,
+  });
+
+  console.log("1. allowance:", allowance.toString());
+
+  // if it's NOT approved, then we need to approve the swap
+  if (allowance <= 0) {
+    console.log("2. NOT approved! approving now...");
+    await approveSwap({
+      swapRouterAddress: SWAP_ROUTER_ADDRESS,
+      tokenInAddress: tokenIn.address,
+    });
+  }
+  
+  console.log("3. Approved! swapping now...");
+  await swap({
+    swapRouterAddress: SWAP_ROUTER_ADDRESS,
+    swapParams: {
+      tokenIn: tokenIn.address,
+      tokenOut: tokenOut.address,
+      fee: 3000,
+      recipient: pkpAddress,
+      // deadline: (optional)
+      amountIn: ethers.utils.parseUnits(amountToSell, tokenIn.decimals),
+      amountOutMinimum: 0,
+      sqrtPriceLimitX96: 0,
+    },
+  });
+};
