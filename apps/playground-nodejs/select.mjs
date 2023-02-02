@@ -10,6 +10,9 @@ const args = getArgs();
 
 const FILE_NAME = args[0];
 
+// spread the args
+const ARGS = args.join(" ");
+
 if (!FILE_NAME || FILE_NAME === "") {
   redLog("file name is required", true);
   exit();
@@ -25,5 +28,5 @@ try {
 
 // run the file
 await childRunCommand(
-  `nodemon --watch src --ext js,ts,mjs --exec "tsx src/${FILE_NAME}"`
+  `nodemon --watch src --ext js,ts,mjs --exec "tsx src/${ARGS}"`
 );

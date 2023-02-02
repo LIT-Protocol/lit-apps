@@ -39,3 +39,7 @@ turbo dev --filter playground-nodejs -- node-test.mjs
 # Setting up test on your monorepo
 
 https://jestjs.io/docs/getting-started#using-babel
+
+# Monorepo Workflow TODO
+
+[] Upon building, add root .env to projects that are depended on

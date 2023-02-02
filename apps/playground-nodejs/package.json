@@ -11,6 +11,8 @@
     "@lit-dev/tools": "*",
     "@lit-dev/utils": "*",
     "@lit-protocol/lit-node-client": "^2.1.16",
-    "dotenv": "^16.0.3"
+    "@lit-protocol/pkp-ethers.js-node": "^5.7.48",
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2"
   }
 }
