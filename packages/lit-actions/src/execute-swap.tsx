@@ -158,17 +158,22 @@ export const executeSwap = async ({ jsParams }) => {
     pkpAddress,
     swapRouterAddress,
   }) => {
-    const tokenInContract = new Contract(
-      tokenInAddress,
-      ["function allowance(address,address) view returns (uint256)"],
-      provider
-    );
-    const tokenInAllowance = await tokenInContract.allowance(
-      pkpAddress,
-      swapRouterAddress
-    );
+    try {
+      const tokenInContract = new Contract(
+        tokenInAddress,
+        ["function allowance(address,address) view returns (uint256)"],
+        provider
+      );
+      const tokenInAllowance = await tokenInContract.allowance(
+        pkpAddress,
+        swapRouterAddress
+      );
 
-    return tokenInAllowance;
+      return tokenInAllowance;
+    } catch (e) {
+      console.log(e);
+      throw new Error("Error getting allowance");
+    }
   };
 
   /**
@@ -182,29 +187,39 @@ export const executeSwap = async ({ jsParams }) => {
    * Get basic tx info
    */
   const getBasicTxInfo = async ({ walletAddress }) => {
-    const nonce = await Lit.Actions.getTransactionCount(walletAddress);
-    const gasPrice = await Lit.Actions.getGasPrice();
-    const { chainId } = await Lit.Actions.getNetwork();
-    return { nonce, gasPrice, chainId };
+    try {
+      const nonce = await Lit.Actions.getTransactionCount(walletAddress);
+      const gasPrice = await Lit.Actions.getGasPrice();
+      const { chainId } = await Lit.Actions.getNetwork();
+      return { nonce, gasPrice, chainId };
+    } catch (e) {
+      console.log(e);
+      throw new Error("Error getting basic tx info");
+    }
   };
 
   /**
    * Get encoded signature
    */
   const getEncodedSignature = (sig) => {
-    const _sig = {
-      r: "0x" + sig.r,
-      s: "0x" + sig.s,
-      recoveryParam: sig.recid,
-    };
+    try {
+      const _sig = {
+        r: "0x" + sig.r,
+        s: "0x" + sig.s,
+        recoveryParam: sig.recid,
+      };
 
-    console.log("_sig:", _sig);
+      console.log("_sig:", _sig);
 
-    const encodedSignature = joinSignature(_sig);
+      const encodedSignature = joinSignature(_sig);
 
-    console.log("encodedSignature:", encodedSignature);
+      console.log("encodedSignature:", encodedSignature);
 
-    return encodedSignature;
+      return encodedSignature;
+    } catch (e) {
+      console.log(e);
+      throw new Error("Error getting encoded signature");
+    }
   };
 
   /**
@@ -212,10 +227,15 @@ export const executeSwap = async ({ jsParams }) => {
    * @param param0
    */
   const sendTx = async ({ originalUnsignedTx, signedTxSignature }) => {
-    const serialized = serialize(originalUnsignedTx, signedTxSignature);
+    try {
+      const serialized = serialize(originalUnsignedTx, signedTxSignature);
 
-    console.log("serialized:", serialized);
-    return await Lit.Actions.sendTransaction(serialized);
+      console.log("serialized:", serialized);
+      return await Lit.Actions.sendTransaction(serialized);
+    } catch (e) {
+      console.log(e);
+      throw new Error("Error sending tx");
+    }
   };
 
   /**
@@ -364,7 +384,7 @@ export const executeSwap = async ({ jsParams }) => {
       tokenInAddress: tokenIn.address,
     });
   }
-  
+
   console.log("3. Approved! swapping now...");
   await swap({
     swapRouterAddress: SWAP_ROUTER_ADDRESS,
