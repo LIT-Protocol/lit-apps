@@ -277,7 +277,7 @@ const runBalancePortfolio = async ({
   }
 
   // this usually happens when the price of the token has spiked in the last moments
-  let spikePercentageDiff = conditions.conditions.unless.spikePercentage; // eg. 15 => 15%
+  let spikePercentageDiff = conditions.unless.spikePercentage; // eg. 15 => 15%
 
   // Unless the percentage difference is greater than 15%, then set the max gas price to 1000 gwei
   // otherwise, set the max gas price to 100 gwei
@@ -299,7 +299,7 @@ const runBalancePortfolio = async ({
   // -- Execute Swap --
   let tx;
   try {
-    await executeSwap({
+    tx = await executeSwap({
       jsParams: {
         authSig: serverAuthSig,
         rpcUrl,
@@ -321,20 +321,20 @@ const runBalancePortfolio = async ({
   return { status: 200, data: tx };
 };
 
-// let counter = 0;
+let counter = 0;
 
-// while (true) {
-//   counter++;
+while (true) {
+  counter++;
 
-//   console.log(`counter:`, counter);
+  console.log(`counter:`, counter);
 
 const res = await runBalancePortfolio({
   tokens: [tokenSwapList.WMATIC, tokenSwapList.USDC],
   pkpPublicKey: process.env.PKP_PUBLIC_KEY,
   getUSDPriceCallback: getUSDPrice,
   strategy: [
-    { token: tokenSwapList.USDC.symbol, percentage: 60 },
-    { token: tokenSwapList.WMATIC.symbol, percentage: 40 },
+    { token: tokenSwapList.USDC.symbol, percentage: 30 },
+    { token: tokenSwapList.WMATIC.symbol, percentage: 60 },
   ],
   conditions: {
     maxGasPrice: 80,
@@ -349,6 +349,6 @@ const res = await runBalancePortfolio({
 });
 
 console.log("res:", res);
-//   console.log("waiting for 5 seconds before continuing...");
-//   await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
-// }
+  console.log("waiting for 5 seconds before continuing...");
+  await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
+}
