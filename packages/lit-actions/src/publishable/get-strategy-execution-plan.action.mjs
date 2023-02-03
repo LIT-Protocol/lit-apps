@@ -86,6 +86,21 @@
  * @returns { StrategyExecutionPlan }
  */
 function getStrategyExecutionPlan(tokens, strategy) {
+  // if the strategy percentage is not 100, throw an error
+  if (strategy.reduce((sum, s) => sum + s.percentage, 0) !== 100) {
+    // show which token can be adjusted with another percentage to make the total 100
+    let tokenToAdjust = strategy.find((s) => s.percentage !== 0);
+    let adjustedPercentage =
+      100 - strategy.reduce((sum, s) => sum + s.percentage, 0);
+
+    let total = tokenToAdjust.percentage + adjustedPercentage;
+
+    throw new Error(
+      `Strategy percentages must add up to 100 -
+      The total strategy percentage for all assets must equal 100, with a suggested allocation of  ${adjustedPercentage}% for ${tokenToAdjust.token}  to reach this total. (Note: ${total}% may have been previously suggested as the allocation for ${tokenToAdjust.token} , but it is recommended to adjust to  ${adjustedPercentage}% to reach the overall total of 100%)`
+    );
+  }
+
   // this will both set the response to the client and return the data internally
   const respond = (data) => {
     Lit.Actions.setResponse({

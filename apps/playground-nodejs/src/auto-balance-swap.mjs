@@ -184,7 +184,9 @@ async function getPortfolio(
  * @returns { StrategyExecutionPlan }
  */
 async function getStrategyExecutionPlan(portfolio, strategy) {
-  console.log(`[Lit Action] Running Lit Action to get strategy execution plan...`);
+  console.log(
+    `[Lit Action] Running Lit Action to get strategy execution plan...`
+  );
 
   const res = await litNodeClient.executeJs({
     targetNodeRange: 1,
@@ -328,27 +330,27 @@ while (true) {
 
   console.log(`counter:`, counter);
 
-const res = await runBalancePortfolio({
-  tokens: [tokenSwapList.WMATIC, tokenSwapList.USDC],
-  pkpPublicKey: process.env.PKP_PUBLIC_KEY,
-  getUSDPriceCallback: getUSDPrice,
-  strategy: [
-    { token: tokenSwapList.USDC.symbol, percentage: 30 },
-    { token: tokenSwapList.WMATIC.symbol, percentage: 60 },
-  ],
-  conditions: {
-    maxGasPrice: 80,
-    minExceedPercentage: 1,
-    unless: {
-      spikePercentage: 15,
-      adjustGasPrice: 1000,
+  const res = await runBalancePortfolio({
+    tokens: [tokenSwapList.WMATIC, tokenSwapList.USDC],
+    pkpPublicKey: process.env.PKP_PUBLIC_KEY,
+    getUSDPriceCallback: getUSDPrice,
+    strategy: [
+      { token: tokenSwapList.USDC.symbol, percentage: 10 },
+      { token: tokenSwapList.WMATIC.symbol, percentage: 60 },
+    ],
+    conditions: {
+      maxGasPrice: 50,
+      minExceedPercentage: 1,
+      unless: {
+        spikePercentage: 15,
+        adjustGasPrice: 500,
+      },
     },
-  },
-  rpcUrl: process.env.MATIC_RPC,
-  dryRun: false,
-});
+    rpcUrl: process.env.MATIC_RPC,
+    dryRun: false,
+  });
 
-console.log("res:", res);
-  console.log("waiting for 5 seconds before continuing...");
+  console.log("res:", res);
+  console.log("waiting for 5 minutes before continuing...");
   await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
 }
