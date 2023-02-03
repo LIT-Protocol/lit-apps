@@ -39,6 +39,23 @@ interface SwapJSParams {
   rpcUrl: string;
 }
 
+export const tokenSwapList = {
+  WMATIC: {
+    chainId: 137,
+    decimals: 18,
+    address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+    symbol: "WMATIC",
+    name: "Wrapped Matic",
+  },
+  USDC: {
+    chainId: 137,
+    decimals: 6,
+    address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    symbol: "USDC",
+    name: "USD//C",
+  },
+};
+
 export const swapStubs = {
   // example stub data, can be used or not
   wmatic: {
@@ -386,7 +403,7 @@ export const executeSwap = async ({ jsParams }) => {
   }
 
   console.log("3. Approved! swapping now...");
-  await swap({
+  return await swap({
     swapRouterAddress: SWAP_ROUTER_ADDRESS,
     swapParams: {
       tokenIn: tokenIn.address,

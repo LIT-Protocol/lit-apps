@@ -32,4 +32,18 @@ export class ERC20 {
 
     return balance;
   }
+
+  static async getValue(
+    tokenAddress: string,
+    provider: ethers.providers.JsonRpcProvider
+  ): Promise<string> {
+    const contract = new Contract(
+      tokenAddress,
+      "function getPair(address tokenA, address tokenB) external view returns (address pair)",
+      provider
+    );
+    const price = await contract.kLast();
+
+    return price;
+  }
 }
