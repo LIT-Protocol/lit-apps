@@ -241,11 +241,7 @@ export const executeSwap = async ({ jsParams }) => {
         recoveryParam: sig.recid,
       };
 
-      console.log("_sig:", _sig);
-
       const encodedSignature = joinSignature(_sig);
-
-      console.log("encodedSignature:", encodedSignature);
 
       return encodedSignature;
     } catch (e) {
@@ -262,7 +258,6 @@ export const executeSwap = async ({ jsParams }) => {
     try {
       const serialized = serialize(originalUnsignedTx, signedTxSignature);
 
-      console.log("serialized:", serialized);
       return await Lit.Actions.sendTransaction(serialized);
     } catch (e) {
       console.log(e);
@@ -349,9 +344,6 @@ export const executeSwap = async ({ jsParams }) => {
       ],
     ]);
 
-    console.log("swapData:", swapData);
-
-    console.log("pkpAddress:", pkpAddress);
     // get the basic tx info such as nonce, gasPrice, chainId
     const { nonce, gasPrice, chainId } = await getBasicTxInfo({
       walletAddress: pkpAddress,

@@ -1,35 +1,3 @@
-import { executeSwap, swapStubs, tokenSwapList } from "@lit-dev/lit-actions";
-import { ethers } from "ethers";
-import * as utilsPkg from "@lit-dev/utils";
-import * as dotenv from "dotenv";
-import { computeAddress } from "ethers/lib/utils";
-import { exit } from "process";
-import * as LitJsSdk from "@lit-protocol/lit-node-client";
-import fs from "fs";
-import path from "path";
-
-const { getWalletAuthSig, ERC20 } = utilsPkg.default;
-
-dotenv.config({
-  path: "../../.env",
-});
-
-const serverAuthSig = await getWalletAuthSig({
-  privateKey: process.env.SERVER_PRIVATE_KEY,
-  chainId: 1,
-});
-
-const provider = new ethers.providers.JsonRpcProvider(process.env.MATIC_RPC);
-
-const pkpAddress = computeAddress(process.env.PKP_PUBLIC_KEY);
-
-const litNodeClient = new LitJsSdk.LitNodeClient({
-  litNetwork: "serrano",
-  debug: false,
-});
-
-await litNodeClient.connect();
-
 /**
  * @typedef { Object } SwapToken
  * @property { number } chainId
@@ -68,6 +36,59 @@ await litNodeClient.connect();
  * eg. { status: 200, data: 1234.56 }
  */
 
+/**
+ * @typedef { Object } TX
+ * @property { string } nonce
+ * @property { BigNumber } gasPrice
+ * @property { BigNumber } gasLimit
+ * @property { string } to
+ * @property { BigNumber } value
+ * @property { string } data
+ * @property { number } chainId
+ * @property { number } v
+ * @property { string } r
+ * @property { string } s
+ * @property { string } from
+ * @property { string } hash
+ * @property { null } type
+ * @property { number } confirmations
+ * @property { Function } wait
+ *
+ * eg. { nonce: 0, gasPrice: BigNumber { _hex: "0x...", _isBigNumber: true }, gasLimit: BigNumber { _hex: "0x...", _isBigNumber: true }, to: "0x...", value: BigNumber { _hex: "0x...", _isBigNumber: true }, data: "0x...", chainId: 1, v: 0, r: "0x...", s: "0x...", from: "0x...", hash: "0x...", type: null, confirmations: 0, wait: [Function: wait] }
+ */
+
+import { executeSwap, swapStubs, tokenSwapList } from "@lit-dev/lit-actions";
+import { ethers } from "ethers";
+import * as utilsPkg from "@lit-dev/utils";
+import * as dotenv from "dotenv";
+import { computeAddress } from "ethers/lib/utils";
+import { exit } from "process";
+import * as LitJsSdk from "@lit-protocol/lit-node-client";
+import fs from "fs";
+import path from "path";
+
+const { getWalletAuthSig, ERC20 } = utilsPkg.default;
+
+dotenv.config({
+  path: "../../.env",
+});
+
+const serverAuthSig = await getWalletAuthSig({
+  privateKey: process.env.SERVER_PRIVATE_KEY,
+  chainId: 1,
+});
+
+const provider = new ethers.providers.JsonRpcProvider(process.env.MATIC_RPC);
+
+const pkpAddress = computeAddress(process.env.PKP_PUBLIC_KEY);
+
+const litNodeClient = new LitJsSdk.LitNodeClient({
+  litNetwork: "serrano",
+  debug: false,
+});
+
+await litNodeClient.connect();
+
 const getCode = (fileName) => {
   return fs.readFileSync(
     path.join(`../../packages/lit-actions/src/publishable/${fileName}`),
@@ -81,7 +102,7 @@ const getCode = (fileName) => {
  * @param { string } symbol eg. "ETH", "USDT", "DAI"
  * @return { { PriceData  } } eg. { status: 200, data: 1234.56 }
  */
-const getUSDPrice = async (symbol) => {
+async function getUSDPrice(symbol) {
   console.log(`Running Lit Action to get ${symbol}/USD price...`);
 
   const res = await litNodeClient.executeJs({
@@ -93,7 +114,7 @@ const getUSDPrice = async (symbol) => {
     },
   });
   return res.response;
-};
+}
 
 /**
  *
@@ -107,12 +128,12 @@ const getUSDPrice = async (symbol) => {
  * @param { { getUSDPriceCallback: (symbol: string) => Promise<PriceData> } } options
  * @returns { CurrentBalance }
  */
-const getPortfolio = async (
+async function getPortfolio(
   tokens,
   pkpAddress,
   provider,
   { getUSDPriceCallback }
-) => {
+) {
   console.log(`[FAKE] Running Lit Action to get portfolio...`);
 
   // check if getUSDPriceCallback exists
@@ -155,7 +176,7 @@ const getPortfolio = async (
   );
 
   return balances;
-};
+}
 
 /**
  * This function is used to balance a token portfolio based on a given strategy.
@@ -166,7 +187,7 @@ const getPortfolio = async (
  *
  * @returns { StrategyExecutionPlan }
  */
-const getStrategyExecutionPlan = async (portfolio, strategy) => {
+async function getStrategyExecutionPlan(portfolio, strategy) {
   console.log(`Running Lit Action to get strategy execution plan...`);
 
   const res = await litNodeClient.executeJs({
@@ -179,85 +200,154 @@ const getStrategyExecutionPlan = async (portfolio, strategy) => {
     },
   });
   return res.response;
-};
+}
 
 // ------------------------------
 //          Start Here
 // ------------------------------
-let counter = 0;
 
-while (true) {
-  counter++;
-
+/**
+ *
+ * @param { Array<SwapToken> } tokens
+ * @param { string } pkpAddress
+ * @param { { getUSDPriceCallback: (symbol: string) => Promise<PriceData> } } options
+ * @param { Array<{ token: string, percentage: number }> } strategy eg. [{ token: "WMATIC", percentage: 50 }, { token: "USDC", percentage: 50 }]
+ * @param { { maxGasPrice: number, gasUnit: "gwei" | "wei", minExceedPercentage: number, unless: { spikePercentage: number, adjustGasPrice: boolean } } } conditions
+ * @param { string } rpcUrl
+ * @param { boolean } dryRun
+ * @returns { Promise<TX> }
+ *
+ *
+ */
+const runBalancePortfolio = async ({
+  tokens,
+  pkpPublicKey,
+  getUSDPriceCallback,
+  strategy,
+  conditions = {
+    maxGasPrice: 80,
+    gasUnit: "gwei",
+    minExceedPercentage: 1,
+    unless: { spikePercentage: 10, adjustGasPrice: 500 },
+  },
+  rpcUrl = "https://polygon.llamarpc.com",
+  dryRun = false,
+}) => {
   // get current date and time in the format: YYYY-MM-DD HH:mm:ss in UK time
-  const now = new Date().toLocaleString("en-GB", {
-    timeZone: "Europe/London",
-  });
+  const now = new Date().toLocaleString("en-GB");
 
-  console.log(`[${now}]counter:`, counter);
+  console.log(`[${now}] Running Balance Portfolio...`);
 
-  const portfolio = await getPortfolio(
-    [swapStubs.wmatic, swapStubs.usdc],
-    pkpAddress,
-    provider,
-    {
-      getUSDPriceCallback: getUSDPrice,
-    }
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+  const pkpAddress = computeAddress(pkpPublicKey);
+
+  // -- Portfolio --
+  let portfolio;
+  try {
+    await getPortfolio(tokens, pkpAddress, provider, {
+      getUSDPriceCallback,
+    });
+  } catch (e) {
+    console.log(`Error getting portfolio: ${e.message}`);
+    return { status: 500, data: "Error getting portfolio" };
+  }
+
+  // -- Strategy Execution Plan --
+  let plan;
+
+  try {
+    plan = await getStrategyExecutionPlan(portfolio, strategy);
+  } catch (e) {
+    console.log(`Error getting strategy execution plan: ${e.message}`);
+    return { status: 500, data: "Error getting strategy execution plan" };
+  }
+
+  console.log(
+    `Proposed to sell ${plan.tokenToSell.symbol} and buy ${plan.tokenToBuy.symbol}. Percentage difference is ${plan.valueDiff.percentage}% and value difference is ${plan.valueDiff.percentage}.`
   );
 
-  console.log("portfolio:", portfolio);
-
-  const plan = await getStrategyExecutionPlan(portfolio, [
-    { token: "USDC", percentage: 60 },
-    { token: "WMATIC", percentage: 40 },
-  ]);
-
-  console.log(plan);
-
-  let atLeastPercentageDiff = 0.05; // this is 0.05% NOT 5%
+  // -- Guard Conditions --
+  let atLeastPercentageDiff = conditions.minExceedPercentage; // eg. 1 = 1%
 
   // If the percentage difference is less than 5%, then don't execute the swap
   if (plan.valueDiff.percentage < atLeastPercentageDiff) {
     console.log(
       `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}%`
     );
-    // skip while loop
-    console.log("waiting for 5 minutes before continuing...");
-    await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
-    continue;
+    return { status: 412, data: "No need to execute swap" };
   }
 
   // this usually happens when the price of the token has spiked in the last moments
-  let spikePercentageDiff = 15;
+  let spikePercentageDiff = conditions.conditions.unless.spikePercentage; // eg. 15 => 15%
 
   // Unless the percentage difference is greater than 15%, then set the max gas price to 1000 gwei
   // otherwise, set the max gas price to 100 gwei
-  let maxGasPrice =
+  let _maxGasPrice =
     plan.valueDiff.percentage > spikePercentageDiff
       ? {
-          value: 1000,
-          unit: "gwei",
+          value: conditions.unless.adjustGasPrice,
+          unit: conditions.gasUnit,
         }
       : {
-          value: 200,
-          unit: "gwei",
+          value: conditions.maxGasPrice,
+          unit: conditions.gasUnit,
         };
 
-  const res = await executeSwap({
-    jsParams: {
-      authSig: serverAuthSig,
-      rpcUrl: "https://polygon.llamarpc.com",
-      chain: "matic",
-      tokenIn: plan.tokenToSell,
-      tokenOut: plan.tokenToBuy,
-      pkp: {
-        publicKey: process.env.PKP_PUBLIC_KEY,
+  if (dryRun) {
+    return { status: 200, data: "dry run, skipping swap..." };
+  }
+
+  // -- Execute Swap --
+  let tx;
+  try {
+    await executeSwap({
+      jsParams: {
+        authSig: serverAuthSig,
+        rpcUrl,
+        tokenIn: plan.tokenToSell,
+        tokenOut: plan.tokenToBuy,
+        pkp: {
+          publicKey: pkpPublicKey,
+        },
+        amountToSell: plan.amountToSell.toString(),
+        conditions: {
+          maxGasPrice: _maxGasPrice,
+        },
       },
-      amountToSell: plan.amountToSell.toString(),
-      conditions: {
-        maxGasPrice,
+    });
+  } catch (e) {
+    console.log(`Error executing swap: ${e.message}`);
+    return { status: 500, data: "Error executing swap" };
+  }
+  return { status: 200, data: tx };
+};
+
+let counter = 0;
+
+while (true) {
+  counter++;
+
+  console.log(`counter:`, counter);
+
+  const res = await runBalancePortfolio({
+    tokens: [swapStubs.wmatic, swapStubs.usdc],
+    pkpPublicKey: process.env.PKP_PUBLIC_KEY,
+    getUSDPriceCallback: getUSDPrice,
+    strategy: [
+      { token: "USDC", percentage: 60 },
+      { token: "WMATIC", percentage: 40 },
+    ],
+    conditions: {
+      maxGasPrice: 80,
+      gasUnit: "gwei",
+      minExceedPercentage: 1,
+      unless: {
+        spikePercentage: 15,
+        adjustGasPrice: 1000,
       },
     },
+    rpcUrl: process.env.MATIC_RPC,
+    dryRun: false,
   });
 
   console.log("res:", res);
