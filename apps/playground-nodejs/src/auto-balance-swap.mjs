@@ -184,71 +184,71 @@ const getStrategyExecutionPlan = async (portfolio, strategy) => {
 // ------------------------------
 //          Start Here
 // ------------------------------
-// let counter = 0;
-// setInterval(async () => {
-//   console.log("counter:", counter);
+let counter = 0;
+setInterval(async () => {
+  console.log("counter:", counter);
 
-const portfolio = await getPortfolio(
-  [swapStubs.wmatic, swapStubs.usdc],
-  pkpAddress,
-  provider,
-  {
-    getUSDPriceCallback: getUSDPrice,
-  }
-);
-
-console.log("portfolio:", portfolio);
-
-const plan = await getStrategyExecutionPlan(portfolio, [
-  { token: "USDC", percentage: 50 },
-  { token: "WMATIC", percentage: 50 },
-]);
-
-console.log(plan);
-
-let atLeastPercentageDiff = 0.02;
-
-// If the percentage difference is less than 5%, then don't execute the swap
-if (plan.valueDiff.percentage < atLeastPercentageDiff) {
-  console.log(
-    `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}%`
+  const portfolio = await getPortfolio(
+    [swapStubs.wmatic, swapStubs.usdc],
+    pkpAddress,
+    provider,
+    {
+      getUSDPriceCallback: getUSDPrice,
+    }
   );
-  exit();
-}
 
-// this usually happens when the price of the token has spiked in the last moments
-let spikePercentageDiff = 15;
+  console.log("portfolio:", portfolio);
 
-// Unless the percentage difference is greater than 15%, then set the max gas price to 1000 gwei
-// otherwise, set the max gas price to 100 gwei
-let maxGasPrice =
-  plan.valueDiff.percentage > spikePercentageDiff
-    ? {
-        value: 1000,
-        unit: "gwei",
-      }
-    : {
-        value: 200,
-        unit: "gwei",
-      };
+  const plan = await getStrategyExecutionPlan(portfolio, [
+    { token: "USDC", percentage: 50 },
+    { token: "WMATIC", percentage: 50 },
+  ]);
 
-const res = await executeSwap({
-  jsParams: {
-    authSig: serverAuthSig,
-    rpcUrl: "https://polygon.llamarpc.com",
-    chain: "matic",
-    tokenIn: plan.tokenToSell,
-    tokenOut: plan.tokenToBuy,
-    pkp: {
-      publicKey: process.env.PKP_PUBLIC_KEY,
+  console.log(plan);
+
+  let atLeastPercentageDiff = 0.05; // this is 0.05% NOT 5%
+
+  // If the percentage difference is less than 5%, then don't execute the swap
+  if (plan.valueDiff.percentage < atLeastPercentageDiff) {
+    console.log(
+      `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}%`
+    );
+    exit();
+  }
+
+  // this usually happens when the price of the token has spiked in the last moments
+  let spikePercentageDiff = 15;
+
+  // Unless the percentage difference is greater than 15%, then set the max gas price to 1000 gwei
+  // otherwise, set the max gas price to 100 gwei
+  let maxGasPrice =
+    plan.valueDiff.percentage > spikePercentageDiff
+      ? {
+          value: 1000,
+          unit: "gwei",
+        }
+      : {
+          value: 200,
+          unit: "gwei",
+        };
+
+  const res = await executeSwap({
+    jsParams: {
+      authSig: serverAuthSig,
+      rpcUrl: "https://polygon.llamarpc.com",
+      chain: "matic",
+      tokenIn: plan.tokenToSell,
+      tokenOut: plan.tokenToBuy,
+      pkp: {
+        publicKey: process.env.PKP_PUBLIC_KEY,
+      },
+      amountToSell: plan.amountToSell.toString(),
+      conditions: {
+        maxGasPrice,
+      },
     },
-    amountToSell: plan.amountToSell.toString(),
-    conditions: {
-      maxGasPrice,
-    },
-  },
-});
+  });
 
-console.log("res:", res);
-//   counter++;
-// }, 60000);
+  console.log("res:", res);
+  counter++;
+}, 60000);
