@@ -1,8 +1,7 @@
 {
   "name": "@lit-dev/lit-actions",
   "version": "0.0.0",
-  "main": "./index.tsx",
-  "types": "./index.tsx",
+  "main": "./index.mjs",
   "scripts": {
     "test": "jest --setupFiles dotenv/config",
     "test:watch": "jest --watch --setupFiles dotenv/config"

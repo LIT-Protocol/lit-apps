@@ -1,16 +1,18 @@
-import * as litActionPkg from "@lit-dev/lit-actions";
+import { executeSwap, swapStubs, tokenSwapList } from "@lit-dev/lit-actions";
 import { ethers } from "ethers";
 import * as utilsPkg from "@lit-dev/utils";
 import * as dotenv from "dotenv";
 import { computeAddress } from "ethers/lib/utils";
+import { exit } from "process";
+import * as LitJsSdk from "@lit-protocol/lit-node-client";
+import fs from "fs";
+import path from "path";
+
+const { getWalletAuthSig, ERC20 } = utilsPkg.default;
 
 dotenv.config({
   path: "../../.env",
 });
-
-const { getWalletAuthSig, ERC20 } = utilsPkg.default;
-const { executeSwap, swapStubs, validateParams, tokenSwapList } =
-  litActionPkg.default;
 
 const serverAuthSig = await getWalletAuthSig({
   privateKey: process.env.SERVER_PRIVATE_KEY,
@@ -21,50 +23,131 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.MATIC_RPC);
 
 const pkpAddress = computeAddress(process.env.PKP_PUBLIC_KEY);
 
-console.log("pkpAddress:", pkpAddress);
+const litNodeClient = new LitJsSdk.LitNodeClient({
+  litNetwork: "serrano",
+  debug: false,
+});
 
-const getUSDPrice = async (symbol) => {
-  // -- PRODUCTION MODE
-  const API =
-    "https://min-api.cryptocompare.com/data/price?fsym=" +
-    symbol +
-    "&tsyms=USD";
+await litNodeClient.connect();
 
-  let res;
-  let data;
+/**
+ * @typedef { Object } SwapToken
+ * @property { number } chainId
+ * @property { number } decimals
+ * @property { string } address
+ * @property { string } symbol
+ * @property { string } name
+ *
+ * eg. { chainId: 1, decimals: 18, address: "0x...", symbol: "USDT", name: "Tether USD" }
+ */
 
-  try {
-    res = await fetch(API);
-    data = await res.json();
-  } catch (e) {
-    console.log(e);
-  }
+/**
+ * @typedef { Object } CurrentBalance
+ * @property { SwapToken } token
+ * @property { number } balance
+ * @property { number } value
+ *
+ * eg. { token: "USDT", balance: 100, value: 100 }
+ */
 
-  if (!res) {
-    return { status: 500, data: null };
-  }
+/**
+ * @typedef { Object } StrategyExecutionPlan
+ * @property { string } tokenToSell
+ * @property { number } percentageToSell
+ * @property { number } amountToSell
+ * @property { string } tokenToBuy
+ *
+ * eg. { tokenToSell: "USDT", percentageToSell: 0.5, amountToSell: 100, tokenToBuy: "ETH" }
+ */
 
-  return { status: 200, data: data.USD };
+/**
+ * @typedef { Object } PriceData
+ * @property { number } status
+ * @property { number | null } data
+ *
+ * eg. { status: 200, data: 1234.56 }
+ */
+
+const getCode = (fileName) => {
+  return fs.readFileSync(
+    path.join(`../../packages/lit-actions/src/publishable/${fileName}`),
+    "utf8"
+  );
 };
 
-const getCurrentBalances = async (tokens, pkpAddress, provider) => {
-  // token symbol mapper, eg. WMATIC -> MATIC
+/**
+ * It retrieves the current price of a specific symbol in USD. The symbol is passed as a parameter to the function. It uses the CryptoCompare API to fetch the price and returns the price data in the form of an object with a status field and a data field.
+ *
+ * @param { string } symbol eg. "ETH", "USDT", "DAI"
+ * @return { { PriceData  } } eg. { status: 200, data: 1234.56 }
+ */
+const getUSDPrice = async (symbol) => {
+  console.log(`Running Lit Action to get ${symbol}/USD price...`);
+
+  const res = await litNodeClient.executeJs({
+    targetNodeRange: 1,
+    authSig: serverAuthSig,
+    code: getCode(`get-token-price.action.mjs`),
+    jsParams: {
+      tokenSymbol: symbol,
+    },
+  });
+  return res.response;
+};
+
+/**
+ *
+ * This function is used to get the current balances of the specified ERC20 tokens.
+ * It takes in the `tokens` array, `pkpAddress` (public key pair address) and the `provider`
+ * as arguments and returns an array of objects containing the token symbol, balance and value.
+ *
+ * @param { Array<SwapToken> } tokens
+ * @param { string } pkpAddress
+ * @param { JsonRpcProvider } provider
+ * @param { { getUSDPriceCallback: (symbol: string) => Promise<PriceData> } } options
+ * @returns { CurrentBalance }
+ */
+const getPortfolio = async (
+  tokens,
+  pkpAddress,
+  provider,
+  { getUSDPriceCallback }
+) => {
+  console.log(`[FAKE] Running Lit Action to get portfolio...`);
+
+  // check if getUSDPriceCallback exists
+  if (!getUSDPriceCallback) {
+    throw new Error("getUSDPriceCallback is required");
+  }
+
+  // `tokenSymbolMapper` is a symbol mapper for the ERC20 tokens,
+  // for example, if the token symbol is `WMATIC` it will map it to `MATIC`.
   const tokenSymbolMapper = {
     WMATIC: "MATIC",
     WETH: "ETH",
   };
 
+  // Using Promise.all, we retrieve the balance and value of each token in the `tokens` array.
   const balances = await Promise.all(
     tokens.map(async (token) => {
+      // Get the token balance using the `ERC20.getBalance` method.
       let balance = await ERC20.getBalance(token.address, provider, pkpAddress);
+
+      // Get the number of decimal places of the token using the `ERC20.getDecimals` method.
       const decimals = await ERC20.getDecimals(token.address, provider);
+
+      // Format the token balance to have the correct number of decimal places.
       balance = parseFloat(ethers.utils.formatUnits(balance, decimals));
 
+      // Get the token symbol using the `tokenSymbolMapper` or the original symbol if not found.
       const priceSymbol = tokenSymbolMapper[token.symbol] ?? token.symbol;
-      const value = (await getUSDPrice(priceSymbol)).data * balance;
 
+      // Get the token value in USD using the `getUSDPrice` function.
+      const value = (await getUSDPriceCallback(priceSymbol)).data * balance;
+
+      // Return an CurrentBalance object containing the token symbol, balance and value.
       return {
-        token: token.symbol,
+        token,
         balance,
         value,
       };
@@ -74,97 +157,98 @@ const getCurrentBalances = async (tokens, pkpAddress, provider) => {
   return balances;
 };
 
-function balancePortfolio(tokens, strategy) {
-  // Calculate the total value of the portfolio
-  let totalValue = tokens.reduce((sum, token) => sum + token.value, 0);
-  console.log("totalValue:", totalValue);
-  // Calculate the target percentage for each token based on the strategy
-  let targetPercentages = strategy.map((s) => s.percentage / 100);
-  console.log("targetPercentages:", targetPercentages);
+/**
+ * This function is used to balance a token portfolio based on a given strategy.
+ * It takes in the `portfolio` array and the `strategy` array as arguments and returns an object
+ * with the `tokenToSell`, `percentageToSell`, `amountToSell`, and `tokenToBuy` properties.
+ * @param { Array<CurrentBalance> } portfolio
+ * @param { Array<{ token: string, percentage: number }> } strategy
+ *
+ * @returns { StrategyExecutionPlan }
+ */
+const getStrategyExecutionPlan = async (portfolio, strategy) => {
+  console.log(`Running Lit Action to get strategy execution plan...`);
 
-  // Calculate the target value for each token
-  let targetValues = targetPercentages.map((p) => totalValue * p);
-  console.log("targetValues:", targetValues);
-
-  // Create a mapping between the token symbol and its index in the tokens array
-  let tokenIndexMap = tokens.reduce((map, token, index) => {
-    map[token.token] = index;
-    return map;
-  }, {});
-  console.log("tokenIndexMap:", tokenIndexMap);
-
-  // Calculate the difference between the target value and the current value for each token
-  let diffValues = strategy.map((s, index) => {
-    let tokenIndex = tokenIndexMap[s.token];
-    return targetValues[index] - tokens[tokenIndex].value;
+  const res = await litNodeClient.executeJs({
+    targetNodeRange: 1,
+    authSig: serverAuthSig,
+    code: getCode(`get-strategy-execution-plan.action.mjs`),
+    jsParams: {
+      portfolio,
+      strategy,
+    },
   });
-  console.log("diffValues:", diffValues);
+  return res.response;
+};
 
-  // Determine which token to buy by finding the token with the largest negative difference
-  let tokenToBuyIndex = diffValues.reduce(
-    (maxIndex, diff, index) => (diff > diffValues[maxIndex] ? index : maxIndex),
-    0
-  );
-  console.log("tokenToBuyIndex:", tokenToBuyIndex);
-  // Calculate the amount of the token to sell
-  let percentageToSell =
-    diffValues[tokenToBuyIndex] / tokens[tokenToBuyIndex].value;
-  console.log("percentageToSell:", percentageToSell);
+// ------------------------------
+//          Start Here
+// ------------------------------
+// let counter = 0;
+// setInterval(async () => {
+//   console.log("counter:", counter);
 
-  // get the actual amount of token to sell
-  let amountToSell = tokens[tokenToBuyIndex].balance * percentageToSell;
-  console.log("amountToSell:", amountToSell);
-
-  // Determine which token to sell by finding the token with the largest positive difference
-  let tokenToSellIndex = diffValues.reduce(
-    (minIndex, diff, index) => (diff < diffValues[minIndex] ? index : minIndex),
-    0
-  );
-  console.log("tokenToSellIndex:", tokenToSellIndex);
-
-  // Return the token to sell and the amount to sell
-  return {
-    tokenToSell: strategy[tokenToSellIndex].token,
-    percentageToSell: Math.abs(percentageToSell),
-    amountToSell,
-    tokenToBuy: strategy[tokenToBuyIndex].token,
-  };
-}
-
-const balances = await getCurrentBalances(
+const portfolio = await getPortfolio(
   [swapStubs.wmatic, swapStubs.usdc],
   pkpAddress,
-  provider
+  provider,
+  {
+    getUSDPriceCallback: getUSDPrice,
+  }
 );
 
-console.log("balances:", balances);
+console.log("portfolio:", portfolio);
 
-const result = balancePortfolio(balances, [
-  { token: "USDC", percentage: 70 },
-  { token: "WMATIC", percentage: 30 },
+const plan = await getStrategyExecutionPlan(portfolio, [
+  { token: "USDC", percentage: 50 },
+  { token: "WMATIC", percentage: 50 },
 ]);
 
-console.log("result:", result);
+console.log(plan);
 
-const tokenIn = tokenSwapList[result.tokenToSell];
-const tokenOut = tokenSwapList[result.tokenToBuy];
+let atLeastPercentageDiff = 0.02;
 
-console.log("tokenIn:", tokenIn);
-console.log("tokenOut:", tokenOut);
-console.log("To Sell", result.amountToSell.toString());
+// If the percentage difference is less than 5%, then don't execute the swap
+if (plan.valueDiff.percentage < atLeastPercentageDiff) {
+  console.log(
+    `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}%`
+  );
+  exit();
+}
+
+// this usually happens when the price of the token has spiked in the last moments
+let spikePercentageDiff = 15;
+
+// Unless the percentage difference is greater than 15%, then set the max gas price to 1000 gwei
+// otherwise, set the max gas price to 100 gwei
+let maxGasPrice =
+  plan.valueDiff.percentage > spikePercentageDiff
+    ? {
+        value: 1000,
+        unit: "gwei",
+      }
+    : {
+        value: 200,
+        unit: "gwei",
+      };
 
 const res = await executeSwap({
   jsParams: {
     authSig: serverAuthSig,
     rpcUrl: "https://polygon.llamarpc.com",
     chain: "matic",
-    tokenIn,
-    tokenOut,
+    tokenIn: plan.tokenToSell,
+    tokenOut: plan.tokenToBuy,
     pkp: {
       publicKey: process.env.PKP_PUBLIC_KEY,
     },
-    amountToSell: result.amountToSell.toFixed(6).toString(),
+    amountToSell: plan.amountToSell.toString(),
+    conditions: {
+      maxGasPrice,
+    },
   },
 });
 
 console.log("res:", res);
+//   counter++;
+// }, 60000);

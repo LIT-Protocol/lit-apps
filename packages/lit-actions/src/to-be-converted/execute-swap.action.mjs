@@ -7,37 +7,51 @@ import { serialize } from "@ethersproject/transactions";
 import { Contract } from "@ethersproject/contracts";
 import { MaxUint256 } from "@ethersproject/constants";
 
+// -----------------------------------------------
+//          Typescript Type Definitions
+// -----------------------------------------------
+
+/**
+ * @typedef { object } PKPInfo
+ * @property { string } publicKey
+ *
+ * eg. { publicKey: "0x..."}
+ */
+
+/**
+ * @typedef { object } SwapToken
+ * @property { number } chainId
+ * @property { number } decimals
+ * @property { string } address
+ * @property { string } symbol
+ * @property { string } name
+ * eg. { chainId: 1, decimals: 18, address: "0x...", symbol: "USDT", name: "Tether USD" }
+ */
+
+/**
+ * @typedef { object } AuthSig
+ * @property { string } sig
+ * @property { string } derivedVia
+ * @property { string } signedMessage
+ * @property { string } address
+ *
+ * eg. { sig: "0x...", derivedVia: "ethers", signedMessage: "0x...", address: "0x..." }
+ */
+
+/**
+ * @typedef { object } SwapJSParams
+ * @property { "matic" | "ethereum" } chain
+ * @property { SwapToken } tokenIn
+ * @property { SwapToken } tokenOut
+ * @property { PKPInfo } pkp
+ * @property { AuthSig } authSig
+ * @property { string } amountToSell
+ * @property { string } rpcUrl
+ *
+ * eg. { chain: "matic", tokenIn: { ... }, tokenOut: { ... }, pkp: { ... }, authSig: { ... }, amountToSell: "100", rpcUrl: "https://rpc-mainnet.maticvigil.com" }
+ */
+
 // ------------------------------------
-//          Typescript Types
-// ------------------------------------
-type PKPInfo = {
-  publicKey: string;
-};
-
-type SwapToken = {
-  chainId: number;
-  decimals: number;
-  address: string;
-  symbol: string;
-  name: string;
-};
-
-type AuthSig = {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
-};
-
-interface SwapJSParams {
-  chain: "matic" | "ethereum";
-  tokenIn: SwapToken;
-  tokenOut: SwapToken;
-  pkp: PKPInfo;
-  authSig: AuthSig;
-  amountToSell: string;
-  rpcUrl: string;
-}
 
 export const tokenSwapList = {
   WMATIC: {
@@ -115,7 +129,8 @@ export const executeSwap = async ({ jsParams }) => {
   //          Checking JS Params
   // --------------------------------------
 
-  const { tokenIn, tokenOut, pkp, authSig, amountToSell, rpcUrl } = jsParams;
+  const { tokenIn, tokenOut, pkp, authSig, amountToSell, rpcUrl, conditions } =
+    jsParams;
 
   // if pkp.public key doesn't start with 0x, add it
   if (!pkp.publicKey.startsWith("0x")) {
@@ -341,6 +356,28 @@ export const executeSwap = async ({ jsParams }) => {
     const { nonce, gasPrice, chainId } = await getBasicTxInfo({
       walletAddress: pkpAddress,
     });
+
+    // get gas price in gwei
+    const _gasPrice = ethers.utils.formatUnits(
+      gasPrice,
+      conditions.maxGasPrice.unit
+    );
+
+    console.log(`Gas Price(wei): ${gasPrice}`);
+
+    if (_gasPrice > conditions.maxGasPrice.value) {
+      console.log(`Gas price is too high, aborting!`);
+      console.log(
+        `Current gas price(${conditions.maxGasPrice.unit}): ${_gasPrice}`
+      );
+      console.log(`Max gas price: ${conditions.maxGasPrice.value}`);
+      console.log(
+        `That's ${_gasPrice - conditions.maxGasPrice.value} too high!`
+      );
+      return;
+    } else {
+      console.log(`Gas price is ok, proceeding...`);
+    }
 
     // create the unsigned tx
     const unsignedTx = {

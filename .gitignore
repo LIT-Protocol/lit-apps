@@ -34,3 +34,5 @@ yarn-error.log*
 
 apps/playground-nodejs/.env
 packages/lit-actions/.env
+
+.env
