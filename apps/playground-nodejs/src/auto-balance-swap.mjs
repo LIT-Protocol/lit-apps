@@ -57,7 +57,7 @@
  * eg. { nonce: 0, gasPrice: BigNumber { _hex: "0x...", _isBigNumber: true }, gasLimit: BigNumber { _hex: "0x...", _isBigNumber: true }, to: "0x...", value: BigNumber { _hex: "0x...", _isBigNumber: true }, data: "0x...", chainId: 1, v: 0, r: "0x...", s: "0x...", from: "0x...", hash: "0x...", type: null, confirmations: 0, wait: [Function: wait] }
  */
 
-import { executeSwap, swapStubs, tokenSwapList } from "@lit-dev/lit-actions";
+import { executeSwap, tokenSwapList } from "@lit-dev/lit-actions";
 import { ethers } from "ethers";
 import * as utilsPkg from "@lit-dev/utils";
 import * as dotenv from "dotenv";
@@ -77,10 +77,6 @@ const serverAuthSig = await getWalletAuthSig({
   privateKey: process.env.SERVER_PRIVATE_KEY,
   chainId: 1,
 });
-
-const provider = new ethers.providers.JsonRpcProvider(process.env.MATIC_RPC);
-
-const pkpAddress = computeAddress(process.env.PKP_PUBLIC_KEY);
 
 const litNodeClient = new LitJsSdk.LitNodeClient({
   litNetwork: "serrano",
@@ -103,7 +99,7 @@ const getCode = (fileName) => {
  * @return { { PriceData  } } eg. { status: 200, data: 1234.56 }
  */
 async function getUSDPrice(symbol) {
-  console.log(`Running Lit Action to get ${symbol}/USD price...`);
+  console.log(`[Lit Action] Running Lit Action to get ${symbol}/USD price...`);
 
   const res = await litNodeClient.executeJs({
     targetNodeRange: 1,
@@ -134,7 +130,7 @@ async function getPortfolio(
   provider,
   { getUSDPriceCallback }
 ) {
-  console.log(`[FAKE] Running Lit Action to get portfolio...`);
+  console.log(`[Lit Action] [FAKE] Running Lit Action to get portfolio...`);
 
   // check if getUSDPriceCallback exists
   if (!getUSDPriceCallback) {
@@ -188,7 +184,7 @@ async function getPortfolio(
  * @returns { StrategyExecutionPlan }
  */
 async function getStrategyExecutionPlan(portfolio, strategy) {
-  console.log(`Running Lit Action to get strategy execution plan...`);
+  console.log(`[Lit Action] Running Lit Action to get strategy execution plan...`);
 
   const res = await litNodeClient.executeJs({
     targetNodeRange: 1,
@@ -199,6 +195,7 @@ async function getStrategyExecutionPlan(portfolio, strategy) {
       strategy,
     },
   });
+
   return res.response;
 }
 
@@ -244,13 +241,15 @@ const runBalancePortfolio = async ({
   // -- Portfolio --
   let portfolio;
   try {
-    await getPortfolio(tokens, pkpAddress, provider, {
+    portfolio = await getPortfolio(tokens, pkpAddress, provider, {
       getUSDPriceCallback,
     });
   } catch (e) {
     console.log(`Error getting portfolio: ${e.message}`);
     return { status: 500, data: "Error getting portfolio" };
   }
+
+  console.log("portfolio:", portfolio);
 
   // -- Strategy Execution Plan --
   let plan;
@@ -263,7 +262,7 @@ const runBalancePortfolio = async ({
   }
 
   console.log(
-    `Proposed to sell ${plan.tokenToSell.symbol} and buy ${plan.tokenToBuy.symbol}. Percentage difference is ${plan.valueDiff.percentage}% and value difference is ${plan.valueDiff.percentage}.`
+    `[pkp:${pkpAddress}]: \nProposed to sell ${plan.tokenToSell.symbol} and buy ${plan.tokenToBuy.symbol}. Percentage difference is ${plan.valueDiff.percentage}%.`
   );
 
   // -- Guard Conditions --
@@ -272,7 +271,7 @@ const runBalancePortfolio = async ({
   // If the percentage difference is less than 5%, then don't execute the swap
   if (plan.valueDiff.percentage < atLeastPercentageDiff) {
     console.log(
-      `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}%`
+      `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}% required.`
     );
     return { status: 412, data: "No need to execute swap" };
   }
@@ -322,35 +321,34 @@ const runBalancePortfolio = async ({
   return { status: 200, data: tx };
 };
 
-let counter = 0;
+// let counter = 0;
 
-while (true) {
-  counter++;
+// while (true) {
+//   counter++;
 
-  console.log(`counter:`, counter);
+//   console.log(`counter:`, counter);
 
-  const res = await runBalancePortfolio({
-    tokens: [swapStubs.wmatic, swapStubs.usdc],
-    pkpPublicKey: process.env.PKP_PUBLIC_KEY,
-    getUSDPriceCallback: getUSDPrice,
-    strategy: [
-      { token: "USDC", percentage: 60 },
-      { token: "WMATIC", percentage: 40 },
-    ],
-    conditions: {
-      maxGasPrice: 80,
-      gasUnit: "gwei",
-      minExceedPercentage: 1,
-      unless: {
-        spikePercentage: 15,
-        adjustGasPrice: 1000,
-      },
+const res = await runBalancePortfolio({
+  tokens: [tokenSwapList.WMATIC, tokenSwapList.USDC],
+  pkpPublicKey: process.env.PKP_PUBLIC_KEY,
+  getUSDPriceCallback: getUSDPrice,
+  strategy: [
+    { token: tokenSwapList.USDC.symbol, percentage: 60 },
+    { token: tokenSwapList.WMATIC.symbol, percentage: 40 },
+  ],
+  conditions: {
+    maxGasPrice: 80,
+    minExceedPercentage: 1,
+    unless: {
+      spikePercentage: 15,
+      adjustGasPrice: 1000,
     },
-    rpcUrl: process.env.MATIC_RPC,
-    dryRun: false,
-  });
+  },
+  rpcUrl: process.env.MATIC_RPC,
+  dryRun: false,
+});
 
-  console.log("res:", res);
-  console.log("waiting for 5 seconds before continuing...");
-  await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
-}
+console.log("res:", res);
+//   console.log("waiting for 5 seconds before continuing...");
+//   await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
+// }
