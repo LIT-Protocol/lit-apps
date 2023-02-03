@@ -185,8 +185,16 @@ const getStrategyExecutionPlan = async (portfolio, strategy) => {
 //          Start Here
 // ------------------------------
 let counter = 0;
-setInterval(async () => {
-  console.log("counter:", counter);
+
+while (true) {
+  counter++;
+
+  // get current date and time in the format: YYYY-MM-DD HH:mm:ss in UK time
+  const now = new Date().toLocaleString("en-GB", {
+    timeZone: "Europe/London",
+  });
+
+  console.log(`[${now}]counter:`, counter);
 
   const portfolio = await getPortfolio(
     [swapStubs.wmatic, swapStubs.usdc],
@@ -200,8 +208,8 @@ setInterval(async () => {
   console.log("portfolio:", portfolio);
 
   const plan = await getStrategyExecutionPlan(portfolio, [
-    { token: "USDC", percentage: 50 },
-    { token: "WMATIC", percentage: 50 },
+    { token: "USDC", percentage: 60 },
+    { token: "WMATIC", percentage: 40 },
   ]);
 
   console.log(plan);
@@ -213,7 +221,10 @@ setInterval(async () => {
     console.log(
       `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}%`
     );
-    exit();
+    // skip while loop
+    console.log("waiting for 5 minutes before continuing...");
+    await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
+    continue;
   }
 
   // this usually happens when the price of the token has spiked in the last moments
@@ -250,5 +261,6 @@ setInterval(async () => {
   });
 
   console.log("res:", res);
-  counter++;
-}, 60000);
+  console.log("waiting for 5 seconds before continuing...");
+  await sleep(1000 * 60 * 5); // sleep for 5 minutes
+}
