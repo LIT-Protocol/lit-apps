@@ -96,8 +96,7 @@ function getStrategyExecutionPlan(tokens, strategy) {
     let total = tokenToAdjust.percentage + adjustedPercentage;
 
     throw new Error(
-      `Strategy percentages must add up to 100 -
-      The total strategy percentage for all assets must equal 100, with a suggested allocation of  ${adjustedPercentage}% for ${tokenToAdjust.token}  to reach this total. (Note: ${total}% may have been previously suggested as the allocation for ${tokenToAdjust.token} , but it is recommended to adjust to  ${adjustedPercentage}% to reach the overall total of 100%)`
+      `Strategy percentages must add up to 100 - The total strategy percentage for all assets must equal 100, with a suggested allocation of ${total}% for ${tokenToAdjust.token}  to reach this total.`
     );
   }
 
