@@ -262,5 +262,5 @@ while (true) {
 
   console.log("res:", res);
   console.log("waiting for 5 seconds before continuing...");
-  await sleep(1000 * 60 * 5); // sleep for 5 minutes
+  await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
 }
