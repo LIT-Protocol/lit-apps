@@ -225,17 +225,20 @@ const runBalancePortfolio = async ({
   strategy,
   conditions = {
     maxGasPrice: 80,
-    gasUnit: "gwei",
+    unit: "gwei",
     minExceedPercentage: 1,
     unless: { spikePercentage: 10, adjustGasPrice: 500 },
   },
   rpcUrl = "https://polygon.llamarpc.com",
-  dryRun = false,
+  dryRun = true,
 }) => {
+  // get execution time
+  const startTime = new Date().getTime();
+
   // get current date and time in the format: YYYY-MM-DD HH:mm:ss in UK time
   const now = new Date().toLocaleString("en-GB");
 
-  console.log(`[${now}] Running Balance Portfolio...`);
+  console.log(`[BalancePortfolio] Start ${now}`);
 
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
   const pkpAddress = computeAddress(pkpPublicKey);
@@ -247,11 +250,25 @@ const runBalancePortfolio = async ({
       getUSDPriceCallback,
     });
   } catch (e) {
-    console.log(`Error getting portfolio: ${e.message}`);
-    return { status: 500, data: "Error getting portfolio" };
+    const msg = `Error getting portfolio: ${e.message}`;
+
+    console.log(`[BalancePortfolio] ${msg}`);
+    return { status: 500, data: msg };
   }
 
-  console.log("portfolio:", portfolio);
+  // print each token balance and value in the format of Token: { symbol: "WMATIC", balance: 0.000000000000000001, value: 0.000000000000000001}
+  portfolio.forEach((token) => {
+    console.log(
+      `[BalancePortfolio] Token: { symbol: "${token.token.symbol}", balance: ${token.balance}, value: ${token.value} }`
+    );
+  });
+
+  console.log(
+    `[BalancePortfolio] Total value: ${portfolio.reduce(
+      (a, b) => a + b.value,
+      0
+    )}`
+  );
 
   // -- Strategy Execution Plan --
   let plan;
@@ -259,12 +276,16 @@ const runBalancePortfolio = async ({
   try {
     plan = await getStrategyExecutionPlan(portfolio, strategy);
   } catch (e) {
-    console.log(`Error getting strategy execution plan: ${e.message}`);
+    console.log(
+      `[BalancePortfolio] Error getting strategy execution plan: ${e.message}`
+    );
     return { status: 500, data: "Error getting strategy execution plan" };
   }
 
+  console.log(`[BalancePortfolio] PKP Address: ${pkpAddress}`);
+
   console.log(
-    `[pkp:${pkpAddress}]: \nProposed to sell ${plan.tokenToSell.symbol} and buy ${plan.tokenToBuy.symbol}. Percentage difference is ${plan.valueDiff.percentage}%.`
+    `[BalancePortfolio] Proposed to sell ${plan.tokenToSell.symbol} and buy ${plan.tokenToBuy.symbol}. Percentage difference is ${plan.valueDiff.percentage}%.`
   );
 
   // -- Guard Conditions --
@@ -272,10 +293,9 @@ const runBalancePortfolio = async ({
 
   // If the percentage difference is less than 5%, then don't execute the swap
   if (plan.valueDiff.percentage < atLeastPercentageDiff) {
-    console.log(
-      `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}% required.`
-    );
-    return { status: 412, data: "No need to execute swap" };
+    const msg = `No need to execute swap, percentage is only ${plan.valueDiff.percentage}% which is less than ${atLeastPercentageDiff}% required.`;
+    console.log(`[BalancePortfolio] ${msg}`);
+    return { status: 412, data: msg };
   }
 
   // this usually happens when the price of the token has spiked in the last moments
@@ -287,12 +307,13 @@ const runBalancePortfolio = async ({
     plan.valueDiff.percentage > spikePercentageDiff
       ? {
           value: conditions.unless.adjustGasPrice,
-          unit: conditions.gasUnit,
+          unit: conditions.unit,
         }
       : {
           value: conditions.maxGasPrice,
-          unit: conditions.gasUnit,
+          unit: conditions.unit,
         };
+  console.log("[BalancePortfolio] maxGasPrice:", _maxGasPrice);
 
   if (dryRun) {
     return { status: 200, data: "dry run, skipping swap..." };
@@ -317,10 +338,24 @@ const runBalancePortfolio = async ({
       },
     });
   } catch (e) {
-    console.log(`Error executing swap: ${e.message}`);
-    return { status: 500, data: "Error executing swap" };
+    const msg = `Error executing swap: ${e.message}`;
+    console.log(`[BalancePortfolio] ${msg}`);
+    return { status: 500, data: msg };
   }
-  return { status: 200, data: tx };
+
+  // get execution time
+  const endTime = new Date().getTime();
+  const executionTime = (endTime - startTime) / 1000;
+
+  console.log(`[BalancePortfolio] End ${executionTime} seconds`);
+
+  return {
+    status: 200,
+    data: {
+      tx,
+      executionTime,
+    },
+  };
 };
 
 let counter = 0;
@@ -335,12 +370,13 @@ while (true) {
     pkpPublicKey: process.env.PKP_PUBLIC_KEY,
     getUSDPriceCallback: getUSDPrice,
     strategy: [
-      { token: tokenSwapList.USDC.symbol, percentage: 10 },
-      { token: tokenSwapList.WMATIC.symbol, percentage: 60 },
+      { token: tokenSwapList.USDC.symbol, percentage: 50 },
+      { token: tokenSwapList.WMATIC.symbol, percentage: 50 },
     ],
     conditions: {
-      maxGasPrice: 50,
-      minExceedPercentage: 1,
+      maxGasPrice: 80,
+      unit: "gwei",
+      minExceedPercentage: 0.01,
       unless: {
         spikePercentage: 15,
         adjustGasPrice: 500,
@@ -350,7 +386,7 @@ while (true) {
     dryRun: false,
   });
 
-  console.log("res:", res);
-  console.log("waiting for 5 minutes before continuing...");
+  console.log("[Task[ res:", res);
+  console.log("[Task] waiting for 5 minutes before continuing...");
   await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
 }

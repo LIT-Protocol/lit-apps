@@ -327,7 +327,7 @@ export const executeSwap = async ({ jsParams }) => {
    * This will swap the token
    */
   const swap = async ({ swapRouterAddress, swapParams }) => {
-    console.log("Swapping...");
+    console.log("[Swap] Swapping...");
 
     // get "swap exact input single" data from contract
     const swapData = new Interface([
@@ -344,6 +344,7 @@ export const executeSwap = async ({ jsParams }) => {
       ],
     ]);
 
+    console.log(`[Swap] Getting basic tx info...`);
     // get the basic tx info such as nonce, gasPrice, chainId
     const { nonce, gasPrice, chainId } = await getBasicTxInfo({
       walletAddress: pkpAddress,
@@ -355,20 +356,20 @@ export const executeSwap = async ({ jsParams }) => {
       conditions.maxGasPrice.unit
     );
 
-    console.log(`Gas Price(wei): ${gasPrice}`);
+    console.log(`[Swap] Gas Price(wei): ${gasPrice}`);
 
     if (_gasPrice > conditions.maxGasPrice.value) {
-      console.log(`Gas price is too high, aborting!`);
+      console.log(`[Swap] Gas price is too high, aborting!`);
       console.log(
-        `Current gas price(${conditions.maxGasPrice.unit}): ${_gasPrice}`
+        `[Swap] Current gas price(${conditions.maxGasPrice.unit}): ${_gasPrice}`
       );
-      console.log(`Max gas price: ${conditions.maxGasPrice.value}`);
+      console.log(`[Swap] Max gas price: ${conditions.maxGasPrice.value}`);
       console.log(
-        `That's ${_gasPrice - conditions.maxGasPrice.value} too high!`
+        `[Swap] That's ${_gasPrice - conditions.maxGasPrice.value} too high!`
       );
       return;
     } else {
-      console.log(`Gas price is ok, proceeding...`);
+      console.log(`[Swap] Gas price is ok, proceeding...`);
     }
 
     // create the unsigned tx
@@ -384,6 +385,7 @@ export const executeSwap = async ({ jsParams }) => {
 
     const message = txToMsg(unsignedTx);
 
+    console.log(`[Swap] Signing with Lit Action...`);
     // sign the tx (with lit action)
     const sigName = "swap-tx-sig";
     const res = await LitActions.call({
@@ -399,11 +401,13 @@ export const executeSwap = async ({ jsParams }) => {
     // get encoded signature
     const encodedSignature = getEncodedSignature(res.signatures[sigName]);
 
+    console.log(`[Swap] Sending tx...`);
     const sentTx = await sendTx({
       originalUnsignedTx: unsignedTx,
       signedTxSignature: encodedSignature,
     });
 
+    console.log(`[Swap] Waiting for tx to be mined...`);
     await sentTx.wait();
 
     return sentTx;
@@ -420,18 +424,18 @@ export const executeSwap = async ({ jsParams }) => {
     swapRouterAddress: SWAP_ROUTER_ADDRESS,
   });
 
-  console.log("1. allowance:", allowance.toString());
+  console.log("[ExecuteSwap] 1. allowance:", allowance.toString());
 
   // if it's NOT approved, then we need to approve the swap
   if (allowance <= 0) {
-    console.log("2. NOT approved! approving now...");
+    console.log("[ExecuteSwap] 2. NOT approved! approving now...");
     await approveSwap({
       swapRouterAddress: SWAP_ROUTER_ADDRESS,
       tokenInAddress: tokenIn.address,
     });
   }
 
-  console.log("3. Approved! swapping now...");
+  console.log("[ExecuteSwap] 3. Approved! swapping now...");
   return await swap({
     swapRouterAddress: SWAP_ROUTER_ADDRESS,
     swapParams: {
