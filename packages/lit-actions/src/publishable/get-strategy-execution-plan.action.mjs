@@ -183,14 +183,17 @@ function getStrategyExecutionPlan(tokens, strategy) {
 
   // Return the token to sell and the amount to sell
   return respond({
-    tokenToSell: toSellToken,
-    percentageToSell: Math.abs(percentageToSell),
-    amountToSell: amountToSell.toFixed(6).toString(),
-    tokenToBuy: toBuyToken,
-    proposedAllocation,
-    valueDiff: {
-      token: sellPercentageDiff.token,
-      percentage: Math.abs(sellPercentageDiff.percentageDiff).toFixed(2),
+    status: 200,
+    data: {
+      tokenToSell: toSellToken,
+      percentageToSell: Math.abs(percentageToSell),
+      amountToSell: amountToSell.toFixed(6).toString(),
+      tokenToBuy: toBuyToken,
+      proposedAllocation,
+      valueDiff: {
+        token: sellPercentageDiff.token,
+        percentage: Math.abs(sellPercentageDiff.percentageDiff).toFixed(2),
+      },
     },
   });
 }

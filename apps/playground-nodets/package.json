@@ -1,0 +1,28 @@
+{
+  "name": "playground-nodets",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node select.mjs",
+    "build": "node esbuild.mjs",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@lit-dev/lit-actions": "*",
+    "@lit-dev/utils": "*",
+    "@lit-protocol/lit-node-client": "^2.1.28",
+    "dotenv": "^16.0.3",
+    "esbuild": "^0.17.5",
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@types/node": "^17.0.12",
+    "@types/react": "^18.0.22",
+    "@types/react-dom": "^18.0.7",
+    "eslint": "7.32.0",
+    "eslint-config-custom": "*",
+    "tsconfig": "*",
+    "typescript": "^4.5.3"
+  }
+}

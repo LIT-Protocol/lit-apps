@@ -356,13 +356,13 @@ export const executeSwap = async ({ jsParams }) => {
       conditions.maxGasPrice.unit
     );
 
-    console.log(`[Swap] Gas Price(wei): ${gasPrice}`);
+    console.log(
+      `[Swap] Gas Price(${conditions.maxGasPrice.unit}): ${_gasPrice}`
+    );
 
     if (_gasPrice > conditions.maxGasPrice.value) {
       console.log(`[Swap] Gas price is too high, aborting!`);
-      console.log(
-        `[Swap] Current gas price(${conditions.maxGasPrice.unit}): ${_gasPrice}`
-      );
+
       console.log(`[Swap] Max gas price: ${conditions.maxGasPrice.value}`);
       console.log(
         `[Swap] That's ${_gasPrice - conditions.maxGasPrice.value} too high!`
