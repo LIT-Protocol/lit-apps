@@ -162,7 +162,7 @@ async function getStrategyExecutionPlan(
  *
  *
  */
-async function runBalancePortfolio({
+export async function runBalancePortfolio({
   tokens,
   pkpPublicKey,
   getUSDPriceCallback,

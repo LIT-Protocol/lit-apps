@@ -2,8 +2,8 @@ import MonacoEditor from "@monaco-editor/react";
 import React, { useEffect } from "react";
 import beautify from "json-beautify";
 
-import { SelectMenu, DebugViewer } from "ui";
-import { validateParams } from "../util-param-validator";
+import { SelectMenu, DebugViewer, LitButton, LitIcon, LitHeaderV1 } from "ui";
+import { validateParams } from "../../../../packages/utils/util-param-validator";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
 import { JsonAuthSig } from "@lit-protocol/constants";
@@ -57,10 +57,10 @@ export function Index() {
   const [selectedEvent, setSelectedEvent] = React.useState("");
   const [msg, setMsg] = React.useState<{
     color: string | null;
-    text: string | null;
+    messages: Array<string> | null;
   }>({
     color: null,
-    text: null,
+    messages: null,
   });
 
   const [name, setName] = React.useState("");
@@ -72,7 +72,7 @@ export function Index() {
   const resetMessage = () => {
     setMsg({
       color: null,
-      text: null,
+      messages: null,
     });
   };
 
@@ -119,7 +119,7 @@ export function Index() {
     if (!check_1.validated || !check_2.validated) {
       setMsg({
         color: "red",
-        text: check_1.message ? check_1.message : check_2.message,
+        messages: check_1.message ? check_1.message : check_2.message,
       });
 
       return;
@@ -202,23 +202,22 @@ export function Index() {
         ]}
       />
 
+      <LitHeaderV1 title="Lit Actions Event Listener" />
+
       <div className="cls-app">
-        <div className="h-24"></div>
-        <div className="flex">
-          {/* <div className="logo">
-          <BrandLogo />
-        </div> */}
-          <h1>Lit Actions Event Listener</h1>
-        </div>
-        <div className="h-24"></div>
         {/* 
         // --------------------------------
         //          Message area                                    
         // --------------------------------
         */}
-        <div className={`${msg.text !== null ? "active" : ""} wrapper-message`}>
-          <div className={`cls-message ${msg?.color}`}>{msg?.text}</div>
-          <div className="h-24"></div>
+        <div
+          className={`${msg.messages !== null ? "active" : ""} wrapper-message`}
+        >
+          <ul className={`cls-message ${msg?.color}`}>
+            {msg?.messages?.map((item, index) => {
+              return <li key={index}>{item}</li>;
+            })}
+          </ul>
         </div>
 
         <div className="flex space-between gap-12">
@@ -294,9 +293,7 @@ export function Index() {
         //          INPUT: Submit Button                                    
         // ----------------------------------------
         */}
-        <button className="button" onClick={onRegister}>
-          Register
-        </button>
+        <LitButton onClick={onRegister}>Register</LitButton>
       </div>
     </div>
   );

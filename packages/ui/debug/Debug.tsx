@@ -13,6 +13,8 @@
 }
 
 import * as React from "react";
+// import css
+import "./Debug.css";
 
 export const DebugViewer = ({ states }: { states: any }) => {
   // react use effect

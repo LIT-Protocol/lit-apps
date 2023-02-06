@@ -1,5 +1,5 @@
 import { BrandLogo } from "./BrandLogo";
-import "./theme.demo.css";
+// import "./theme.demo.css";
 import Editor from "@monaco-editor/react";
 
 // export with children
@@ -29,7 +29,7 @@ export const ThemeDemo = ({
   }
 
   return (
-    <div className={`${className ?? ''} App`}>
+    <div className={`${className ?? ""} App`}>
       <header className="App-header">
         <BrandLogo />
         <h2 className="my-12">{pageInfo.title}</h2>

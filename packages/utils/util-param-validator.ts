@@ -1,10 +1,13 @@
 export const validateParams = (type: string, params: Array<any>) => {
-  let message: string = "";
+  const results = [];
 
-  const answer = params.every((param) => {
-    const value: any = Object.entries(param)[0][1];
+  params.forEach((param) => {
+    let message: string = "";
 
     const paramName = Object.entries(param)[0][0];
+
+    const value: any = Object.entries(param)[0][1];
+
     let validated: boolean = false;
 
     if (type === "must_have") {
@@ -28,8 +31,16 @@ export const validateParams = (type: string, params: Array<any>) => {
       }
     }
 
-    return validated;
+    results.push({ validated, message });
   });
 
-  return { validated: answer, message };
+  // check if all params are validated
+  const validated = results.every((result) => result.validated);
+
+  // join all messages
+  const messages = results
+    .map((result) => result.message)
+    .filter((m) => m !== "");
+
+  return { validated, message: messages };
 };

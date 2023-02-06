@@ -17,13 +17,18 @@
     "typescript": "^4.5.2"
   },
   "dependencies": {
+    "@lit-dev/utils": "*",
+    "@lit-protocol/contracts-sdk": "^2.1.31",
     "@radix-ui/colors": "^0.1.8",
     "@radix-ui/react-alert-dialog": "^1.0.2",
     "@radix-ui/react-icons": "^1.1.1",
     "@radix-ui/react-label": "^2.0.0",
+    "@radix-ui/react-navigation-menu": "^1.1.1",
     "@radix-ui/react-popover": "^1.0.3",
     "@radix-ui/react-radio-group": "^1.1.1",
     "@radix-ui/react-select": "^1.2.0",
-    "@radix-ui/react-toast": "^1.1.2"
+    "@radix-ui/react-toast": "^1.1.2",
+    "react-hot-toast": "^2.4.0",
+    "wagmi": "^0.11.4"
   }
 }
