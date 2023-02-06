@@ -7,8 +7,12 @@ import { validateParams } from "../../../../packages/utils/util-param-validator"
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
 import { JsonAuthSig } from "@lit-protocol/constants";
+import { useAccount } from "wagmi";
+import Router from "next/router";
 
 export function Index() {
+  const { address, isConnected } = useAccount();
+
   // ---------------------------------------
   //          Default form values
   // ---------------------------------------
@@ -69,6 +73,8 @@ export function Index() {
 
   const [litNodeClient, setLitNodeClient] = React.useState<any>();
 
+  const [_isConnected, setIsConnected] = React.useState(false);
+
   const resetMessage = () => {
     setMsg({
       color: null,
@@ -80,6 +86,19 @@ export function Index() {
   //          Use Effect
   // ------------------------------
   useEffect(() => {
+    setIsConnected(isConnected);
+
+    if (!isConnected) {
+      const { pathname } = Router;
+
+      // set redirect to local storage
+      localStorage.setItem("redirect", pathname);
+
+      if (pathname !== "/login") {
+        Router.push("/login");
+      }
+    }
+
     // -- check if the form is ready
     if (selectedEvent && jsCode && jsonCode) {
       setFormReady(true);
@@ -100,7 +119,7 @@ export function Index() {
         setLitNodeClient(client);
       })();
     }
-  }, [jsonCode, jsCode, selectedEvent, events, litNodeClient]);
+  }, [jsonCode, jsCode, selectedEvent, events, litNodeClient, isConnected]);
 
   // ------------------------------------------------
   //          Event: Click Register Button

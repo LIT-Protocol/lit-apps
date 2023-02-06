@@ -18,7 +18,8 @@
     "next": "13.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "ui": "*"
+    "ui": "*",
+    "wagmi": "^0.11.4"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

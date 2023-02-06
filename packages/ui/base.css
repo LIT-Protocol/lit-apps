@@ -111,6 +111,17 @@ body {
   animation: loading 1.8s infinite;
   text-align: center;
 }
+a.alink {
+  text-decoration: none;
+}
+.align-left {
+  text-align: left;
+  align-items: start !important;
+}
+.no-pointer {
+  pointer-events: none;
+}
+
 /* 
 // ------------------------------
 //          Animations

@@ -1,7 +1,6 @@
 import { LitButton } from "./LitButton";
 import { LitConnect } from "./LitConnect";
 import { LitIcon } from "./LitIcon";
-import { LitNavMenu } from "./LitNavMenu";
 
 export const LitHeaderV1 = ({
   title,
@@ -11,14 +10,16 @@ export const LitHeaderV1 = ({
   children?: any;
 }) => {
   return (
-    <div className="lit-header flex space-between">
+    <div className="lit-header flex space-between center-item">
       {/* logo */}
-      <div className="flex gap-12">
-        <LitIcon icon="lit-logo" width="100" className="header-logo" />
-        <div className="flex center-item">
-          <h3>{title}</h3>
+      <LitButton redirect="/">
+        <div className="flex gap-12">
+          <LitIcon icon="lit-logo" width="100" className="header-logo" />
+          <div className="flex center-item">
+            <h3>{title}</h3>
+          </div>
         </div>
-      </div>
+      </LitButton>
 
       {/* nav */}
 

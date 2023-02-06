@@ -1,11 +1,15 @@
 import { LitButton } from "./LitButton";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { getShortAddress } from "@lit-dev/utils";
+import { getShortAddress, TokenInfo } from "@lit-dev/utils";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { usePKPConnectProvider } from "./PKPConnectedProvider";
+import { LitIcon } from "./LitIcon";
 
 export const LitConnect = () => {
+  const { pkpConnected, selectedPKP } = usePKPConnectProvider();
+
   const { address, isConnected } = useAccount();
 
   const { connect } = useConnect({
@@ -16,16 +20,21 @@ export const LitConnect = () => {
   const [_isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // if (isConnected) {
     setIsConnected(isConnected);
-    // }
 
     // handle if click outside of menu, set 'lit-mini-menu' to 'none'
     const handleClickOutside = (e: any) => {
-      const menu = e.target.parentElement.querySelector(".lit-mini-menu");
+      console.log(e.target);
+
+      console.log(e.target.id);
+      const menu: any = document.querySelector(".lit-mini-menu");
+
       if (!menu) return;
 
-      if (e.target.className === "lit-button-2") {
+      if (
+        e.target.id === "lit-connect-menu" ||
+        e.target.classList.contains("lit-button-icon")
+      ) {
         menu.style.display = "flex";
         return;
       }
@@ -51,21 +60,60 @@ export const LitConnect = () => {
   const renderConnected = () => {
     return (
       <div className="flex flex-col relative">
-        <LitButton className="lit-button-2">
-          {getShortAddress(address)}
-        </LitButton>
-        <div className="lit-mini-menu flex space-between">
-          <div className="flex center-item h-30">
-            <span>{getShortAddress(address)}</span>
+        <LitButton
+          id="lit-connect-menu"
+          className="lit-button-2lines flex flex-col"
+        >
+          <div className="no-pointer">{getShortAddress(address)}</div>
+          <div className="no-pointer">
+            {pkpConnected ? (
+              <div className="flex gap-6">
+                <div className="flex center-item">
+                  {/* svg green dot */}
+                  <LitIcon className="flex center-item" icon="greendot" />
+                </div>
+                <div>
+                  PKP:ID:
+                  {getShortAddress((selectedPKP as TokenInfo).tokenId)}
+                </div>
+              </div>
+            ) : (
+              <div className="error">Connect to cloud wallet</div>
+            )}
           </div>
-          <div className="lit-mini-menu-icons flex gap-6">
-            <LitButton icon="copy" hoverText="Copy" onClick={handleCopy} />
-            {/* <LitButton icon="open-new" hoverText="Explore" /> */}
+        </LitButton>
+        <div className="lit-mini-menu flex-col">
+          <div className="flex space-between">
+            <div className="flex center-item h-30">
+              <span>{getShortAddress(address)}</span>
+            </div>
+            <div className="lit-mini-menu-icons flex gap-6">
+              <LitButton icon="copy" hoverText="Copy" onClick={handleCopy} />
+              {/* <LitButton icon="open-new" hoverText="Explore" /> */}
+              <LitButton
+                icon="shutdown"
+                hoverText="Logout"
+                onClick={() => disconnect()}
+              />
+            </div>
+          </div>
+
+          <div className="separator-t flex flex-col">
+            <LitButton className="lit-button-3" redirect="/">
+              Dashboard
+            </LitButton>
             <LitButton
-              icon="shutdown"
-              hoverText="Logout"
-              onClick={() => disconnect()}
-            />
+              className="lit-button-3 flex flex-col align-left"
+              redirect="/login"
+            >
+              <div className="lit-button-3-double-lines">
+                <span className="">
+                  Connected:
+                  {getShortAddress((selectedPKP as TokenInfo).tokenId)} <br />
+                </span>
+                <span className="txt-grey">View Cloud Wallets</span>
+              </div>
+            </LitButton>
           </div>
         </div>
       </div>

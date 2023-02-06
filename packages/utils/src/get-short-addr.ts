@@ -1,7 +1,11 @@
-export const getShortAddress = (address: string | undefined) => {
+export const getShortAddress = (
+  address: string | undefined,
+  start = 6,
+  end = 4
+) => {
   if (!address) {
     return `address is undefined`;
   }
 
-  return address.slice(0, 6) + "..." + address.slice(-4);
+  return address.slice(0, start) + "..." + address.slice(-end);
 };

@@ -1,5 +1,5 @@
 export const validateParams = (type: string, params: Array<any>) => {
-  const results = [];
+  const results: any = [];
 
   params.forEach((param) => {
     let message: string = "";
@@ -35,12 +35,12 @@ export const validateParams = (type: string, params: Array<any>) => {
   });
 
   // check if all params are validated
-  const validated = results.every((result) => result.validated);
+  const validated = results.every((result: any) => result.validated);
 
   // join all messages
   const messages = results
-    .map((result) => result.message)
-    .filter((m) => m !== "");
+    .map((result: any) => result.message)
+    .filter((m: any) => m !== "");
 
   return { validated, message: messages };
 };
