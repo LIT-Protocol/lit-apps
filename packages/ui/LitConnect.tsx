@@ -4,11 +4,11 @@ import { InjectedConnector } from "wagmi/connectors/injected";
 import { getShortAddress, TokenInfo } from "@lit-dev/utils";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { usePKPConnectProvider } from "./PKPConnectedProvider";
+import { usePKPConnectionContext } from "./PKPConnectionContext";
 import { LitIcon } from "./LitIcon";
 
 export const LitConnect = () => {
-  const { pkpConnected, selectedPKP } = usePKPConnectProvider();
+  const { pkpConnected, selectedPKP } = usePKPConnectionContext();
 
   const { address, isConnected } = useAccount();
 
@@ -24,9 +24,6 @@ export const LitConnect = () => {
 
     // handle if click outside of menu, set 'lit-mini-menu' to 'none'
     const handleClickOutside = (e: any) => {
-      console.log(e.target);
-
-      console.log(e.target.id);
       const menu: any = document.querySelector(".lit-mini-menu");
 
       if (!menu) return;

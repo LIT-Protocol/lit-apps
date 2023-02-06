@@ -6,7 +6,7 @@ const PKPConnectedContext = createContext({
   setSelected: (props: any) => {},
 });
 
-export const PKPConnectedProvider = (props: any) => {
+export const PKPConnectionContext = (props: any) => {
   const [pkpConnectionInfo, setPKPConnectionInfo] = useState<any>({
     pkpConnected: false,
     selectedPKP: {},
@@ -14,12 +14,12 @@ export const PKPConnectedProvider = (props: any) => {
 
   useEffect(() => {
     function loadData() {
-      // check localstorage if 'selected-pkp' exists
+      // check localstorage if 'lit-selected-pkp' exists
       // if yes, set pkpConnected to true
       // else, set pkpConnected to false
 
       try {
-        const selectedPKP = localStorage.getItem("selected-pkp");
+        const selectedPKP = localStorage.getItem("lit-selected-pkp");
         if (selectedPKP) {
           // set pkpConnected to true
           setPKPConnectionInfo({
@@ -59,6 +59,6 @@ export const PKPConnectedProvider = (props: any) => {
   );
 };
 
-export const usePKPConnectProvider = () => {
+export const usePKPConnectionContext = () => {
   return useContext(PKPConnectedContext);
 };

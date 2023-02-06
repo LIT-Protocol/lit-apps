@@ -2,16 +2,26 @@ import MonacoEditor from "@monaco-editor/react";
 import React, { useEffect } from "react";
 import beautify from "json-beautify";
 
-import { SelectMenu, DebugViewer, LitButton, LitIcon, LitHeaderV1 } from "ui";
+import {
+  SelectMenu,
+  DebugViewer,
+  LitButton,
+  LitIcon,
+  LitHeaderV1,
+  usePKPConnectionContext,
+} from "ui";
 import { validateParams } from "../../../../packages/utils/util-param-validator";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
 import { JsonAuthSig } from "@lit-protocol/constants";
 import { useAccount } from "wagmi";
 import Router from "next/router";
+import toast from "react-hot-toast";
 
 export function Index() {
   const { address, isConnected } = useAccount();
+
+  const { pkpConnected } = usePKPConnectionContext();
 
   // ---------------------------------------
   //          Default form values
@@ -88,7 +98,8 @@ export function Index() {
   useEffect(() => {
     setIsConnected(isConnected);
 
-    if (!isConnected) {
+    if (!isConnected || !pkpConnected) {
+      // this will redirect back to this page after login
       const { pathname } = Router;
 
       // set redirect to local storage

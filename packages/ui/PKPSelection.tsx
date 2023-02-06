@@ -7,7 +7,7 @@ import { LitCopy } from "./LitCopy";
 import { LitIcon } from "./LitIcon";
 import { LitLoading } from "./LitLoading";
 import { PKPCard } from "./PKPCard";
-import { usePKPConnectProvider } from "./PKPConnectedProvider";
+import { usePKPConnectionContext } from "./PKPConnectionContext";
 import { StateReducer } from "./StateReducer";
 
 const fetchPKPs = async (
@@ -50,8 +50,14 @@ const fetchPKPs = async (
   return tokens;
 };
 
-export const PKPSelection = ({ address }: { address: string }) => {
-  const { pkpConnected, selectedPKP, setSelected } = usePKPConnectProvider();
+export const PKPSelection = ({
+  address,
+  onDone,
+}: {
+  address: string;
+  onDone: any;
+}) => {
+  const { pkpConnected, selectedPKP, setSelected } = usePKPConnectionContext();
 
   const [state, dispatch] = useReducer(StateReducer, {
     data: [],
@@ -76,7 +82,7 @@ export const PKPSelection = ({ address }: { address: string }) => {
       dispatch({ type: "SET_DATA", payload: { pkps: result } });
 
       // check if localstorage has a selected pkp
-      const selectedPKP = localStorage.getItem("selected-pkp");
+      const selectedPKP = localStorage.getItem("lit-selected-pkp");
       if (selectedPKP) {
         const pkp = JSON.parse(selectedPKP);
         dispatch({ type: "SET_DATA", payload: { selectedPKP: pkp } });
@@ -91,6 +97,11 @@ export const PKPSelection = ({ address }: { address: string }) => {
           });
         }
       }
+
+      // callback done
+      if (onDone) {
+        onDone();
+      }
     }
     loadData();
   }, []);
@@ -103,7 +114,7 @@ export const PKPSelection = ({ address }: { address: string }) => {
 
     // save the selected pkp to localstorage
     try {
-      localStorage.setItem("selected-pkp", JSON.stringify(pkp));
+      localStorage.setItem("lit-selected-pkp", JSON.stringify(pkp));
       dispatch({ type: "SET_DATA", payload: { selectedPKP: pkp } });
 
       // update PKPConnectedProvider

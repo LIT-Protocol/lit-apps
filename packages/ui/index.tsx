@@ -17,4 +17,4 @@ export * from "./LitConnect";
 export * from "./PKPCard";
 export * from "./StateReducer";
 export * from "./LitCopy";
-export * from "./PKPConnectedProvider";
+export * from "./PKPConnectionContext";

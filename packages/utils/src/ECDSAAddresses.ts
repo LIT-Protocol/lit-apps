@@ -103,7 +103,7 @@ export const ECDSAAddresses = async ({
   }
 
   if (publicKey === undefined) {
-    throw new Error("publicKey is undefined");
+    console.warn("publicKey is undefined");
   }
 
   // if publicKey is provided, validate it
