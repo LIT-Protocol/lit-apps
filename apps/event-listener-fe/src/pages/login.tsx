@@ -1,8 +1,6 @@
-import { ECDSAAddresses } from "@lit-dev/utils";
 import Router from "next/router";
 import { useEffect, useReducer, useState } from "react";
 import {
-  LitButton,
   LitHeaderV1,
   LitLoading,
   PKPSelection,
