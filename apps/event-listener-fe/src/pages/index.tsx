@@ -2,6 +2,9 @@ import MonacoEditor from "@monaco-editor/react";
 import React, { useEffect } from "react";
 import beautify from "json-beautify";
 
+// @ts-ignore
+import DJSON from "dirty-json";
+
 import {
   SelectMenu,
   DebugViewer,
@@ -33,10 +36,42 @@ export function Index() {
   const [jsonCode, setJsonCode] = React.useState(
     beautify(
       {
-        sig: "exmaple-lit-action-sig",
-        pubKey: "123",
+        tokens: [
+          {
+            chainId: 137,
+            decimals: 18,
+            address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+            symbol: "WMATIC",
+            name: "Wrapped Matic",
+          },
+          {
+            chainId: 137,
+            decimals: 6,
+            address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+            symbol: "USDC",
+            name: "USD//C",
+          },
+        ],
+        pkpPublicKey:
+          "0x0499713b16636af841756431b73bd1a88d1837d110ae981ff3711c9239af95d8849b149fb6f2d46697b4d75c62ae4e63f8b8b941d4ca0a06a02b8b47d12f42b61d",
+        strategy: [
+          { token: "USDC", percentage: 52 },
+          { token: "WMATIC", percentage: 48 },
+        ],
+        conditions: {
+          maxGasPrice: 75,
+          unit: "gwei",
+          minExceedPercentage: 1,
+          unless: {
+            spikePercentage: 15,
+            adjustGasPrice: 500,
+          },
+        },
+        rpcUrl: "https://polygon.llamarpc.com",
+        dryRun: false,
       },
-      [],
+      // @ts-ignore
+      null,
       2
     )
   );
@@ -218,6 +253,20 @@ export function Index() {
     console.log("data:", data);
   };
 
+  const beautifyJson = () => {
+    if (jsonCode) {
+      try {
+        setJsonCode(JSON.stringify(DJSON.parse(jsonCode), null, 2));
+      } catch (e: any) {
+        // setMsg({
+        //   color: "red",
+        //   messages: [`[Error]: ${e.message}`],
+        // });
+        toast.error(e.message);
+      }
+    }
+  };
+
   return (
     <div className="flex-col">
       <DebugViewer
@@ -294,7 +343,7 @@ export function Index() {
               value={jsCode}
               onChange={(e: any) => setJsCode(e)}
               theme="vs-dark"
-              height="200px"
+              // height="200px"
             />
           </div>
         </div>
@@ -307,12 +356,18 @@ export function Index() {
         */}
         <div className="cls-code">
           <div className="MonacoEditor">
+            <LitButton
+              className="lit-button-3 justify-center"
+              onClick={beautifyJson}
+            >
+              Beautify
+            </LitButton>
             <MonacoEditor
               language="json"
               value={jsonCode}
               onChange={(e: any) => setJsonCode(e)}
               theme="vs-dark"
-              height="200px"
+              // height="200px"
             />
           </div>
         </div>

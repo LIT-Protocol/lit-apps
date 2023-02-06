@@ -40,7 +40,8 @@ h6 {
 body {
   background: var(--brand-primary);
   background: var(--radial-gradient);
-  height: 100vh;
+  min-height: 100vh;
+  max-height: 100%;
 }
 .heading h3 {
   font-size: 36px;
@@ -240,7 +241,7 @@ body {
 .cls-app {
   padding: 24px;
   margin: auto;
-  max-width: 600px;
+  max-width: 800px;
   /* width: 100%; */
   display: flex;
   flex-direction: column;
@@ -259,6 +260,7 @@ body {
   background: #1e1e1e;
   padding: 12px;
   box-sizing: border-box;
+  height: 50vh;
 }
 .cls-message {
   border-radius: 12px;
@@ -1095,6 +1097,9 @@ p {
   cursor: pointer;
   text-decoration: none;
   margin-bottom: 4px;
+}
+[data-lit-theme="purple"] .justify-center {
+  justify-content: center !important;
 }
 [data-lit-theme="purple"] .lit-button-3:hover {
   color: var(--lit-text-color);

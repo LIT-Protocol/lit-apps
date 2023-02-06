@@ -71,6 +71,7 @@ async function getPortfolio(
 
   // check if getUSDPriceCallback exists
   if (!getUSDPriceCallback) {
+    getUSDPriceCallback = getUSDPrice;
     throw new Error("getUSDPriceCallback is required");
   }
 
@@ -165,7 +166,7 @@ async function getStrategyExecutionPlan(
 export async function runBalancePortfolio({
   tokens,
   pkpPublicKey,
-  getUSDPriceCallback,
+
   strategy,
   conditions = {
     maxGasPrice: 80,
@@ -191,7 +192,7 @@ export async function runBalancePortfolio({
   let portfolio: Array<CurrentBalance> = [];
   try {
     const res: Response = await getPortfolio(tokens, pkpAddress, provider, {
-      getUSDPriceCallback,
+      getUSDPriceCallback: getUSDPrice,
     });
     portfolio = res.data;
   } catch (e) {
@@ -328,7 +329,6 @@ export async function runBalancePortfolio({
     const res = await runBalancePortfolio({
       tokens: [tokenSwapList.WMATIC, tokenSwapList.USDC],
       pkpPublicKey: process.env.PKP_PUBLIC_KEY,
-      getUSDPriceCallback: getUSDPrice,
       strategy: [
         { token: tokenSwapList.USDC.symbol, percentage: 52 },
         { token: tokenSwapList.WMATIC.symbol, percentage: 48 },
@@ -351,3 +351,39 @@ export async function runBalancePortfolio({
     await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000));
   }
 })();
+
+const json = {
+  tokens: [
+    {
+      chainId: 137,
+      decimals: 18,
+      address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+      symbol: "WMATIC",
+      name: "Wrapped Matic",
+    },
+    {
+      chainId: 137,
+      decimals: 6,
+      address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      symbol: "USDC",
+      name: "USD//C",
+    },
+  ],
+  pkpPublicKey:
+    "0x0499713b16636af841756431b73bd1a88d1837d110ae981ff3711c9239af95d8849b149fb6f2d46697b4d75c62ae4e63f8b8b941d4ca0a06a02b8b47d12f42b61d",
+  strategy: [
+    { token: "USDC", percentage: 52 },
+    { token: "WMATIC", percentage: 48 },
+  ],
+  conditions: {
+    maxGasPrice: 75,
+    unit: "gwei",
+    minExceedPercentage: 1,
+    unless: {
+      spikePercentage: 15,
+      adjustGasPrice: 500,
+    },
+  },
+  rpcUrl: "https://polygon.llamarpc.com",
+  dryRun: false,
+};

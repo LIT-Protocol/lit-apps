@@ -1,6 +1,7 @@
 import { ThemeDemo } from "ui";
 import { useState } from "react";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
+import "ui/theme.demo.css";
 
 export default function SimpleEncryptDecryptDemo({
   litDependencies,

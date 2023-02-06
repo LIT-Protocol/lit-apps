@@ -5189,6 +5189,15 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
+dirty-json@^0.9.2:
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/dirty-json/-/dirty-json-0.9.2.tgz#221b25898ac9d326512fc373e466fa189b77fffa"
+  integrity sha512-7SCDfnQtBObcngVXNPZcnxGxqqPTK4UqeXeKAch+RGH5qpqadWbV9FmN71x9Bb4tTs0TNFb4FT/4Kz4P4Cjqcw==
+  dependencies:
+    lex "^1.7.9"
+    unescape-js "^1.1.4"
+    utf8 "^3.0.0"
+
 doctrine@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/doctrine/-/doctrine-2.1.0.tgz"
@@ -7263,6 +7272,11 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
+lex@^1.7.9:
+  version "1.7.9"
+  resolved "https://registry.yarnpkg.com/lex/-/lex-1.7.9.tgz#5d5636ccef574348362938b79a47f0eed8ed0d43"
+  integrity sha512-vzaalVBmFLnMaedq0QAsBAaXsWahzRpvnIBdBjj7y+7EKTS6lnziU2y/PsU2c6rV5qYj2B5IDw0uNJ9peXD0vw==
+
 lie@~3.3.0:
   version "3.3.0"
   resolved "https://registry.npmjs.org/lie/-/lie-3.3.0.tgz"
@@ -8696,6 +8710,11 @@ string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
     is-fullwidth-code-point "^3.0.0"
     strip-ansi "^6.0.1"
 
+string.fromcodepoint@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/string.fromcodepoint/-/string.fromcodepoint-0.2.1.tgz#8d978333c0bc92538f50f383e4888f3e5619d653"
+  integrity sha512-n69H31OnxSGSZyZbgBlvYIXlrMhJQ0dQAX1js1QDhpaUH6zmU3QYlj07bCwCNlPOu3oRXIubGPl2gDGnHsiCqg==
+
 string.prototype.matchall@^4.0.7, string.prototype.matchall@^4.0.8:
   version "4.0.8"
   resolved "https://registry.npmjs.org/string.prototype.matchall/-/string.prototype.matchall-4.0.8.tgz"
@@ -9065,6 +9084,13 @@ unbox-primitive@^1.0.2:
     has-symbols "^1.0.3"
     which-boxed-primitive "^1.0.2"
 
+unescape-js@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/unescape-js/-/unescape-js-1.1.4.tgz#4bc6389c499cb055a98364a0b3094e1c3d5da395"
+  integrity sha512-42SD8NOQEhdYntEiUQdYq/1V/YHwr1HLwlHuTJB5InVVdOSbgI6xu8jK5q65yIzuFCfczzyDF/7hbGzVbyCw0g==
+  dependencies:
+    string.fromcodepoint "^0.2.1"
+
 unicode-canonical-property-names-ecmascript@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/unicode-canonical-property-names-ecmascript/-/unicode-canonical-property-names-ecmascript-2.0.0.tgz"
@@ -9134,6 +9160,11 @@ utf-8-validate@^5.0.2, utf-8-validate@^5.0.8:
   integrity sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ==
   dependencies:
     node-gyp-build "^4.3.0"
+
+utf8@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/utf8/-/utf8-3.0.0.tgz#f052eed1364d696e769ef058b183df88c87f69d1"
+  integrity sha512-E8VjFIQ/TyQgp+TZfS6l8yp/xWppSAHzidGiRrqe4bK4XP9pTRyKFgGJpO3SN7zdX4DeomTrwaseCHovfpFcqQ==
 
 util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   version "1.0.2"
