@@ -114,6 +114,11 @@ export const ECDSAAddresses = async ({
     pubkeyBuffer = Buffer.from(publicKey, "hex");
   }
 
+  if (!publicKey) {
+    console.warn("publicKey is undefined");
+    return;
+  }
+
   // get the address from the public key
   const ethAddress = computeAddress(pubkeyBuffer);
 

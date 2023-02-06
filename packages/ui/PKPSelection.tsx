@@ -131,8 +131,11 @@ export const PKPSelection = ({
       <h3>My Cloud Wallets</h3>
       <div className="pkp-cards">
         {state.data.pkps.map((pkp: TokenInfo, i: number) => {
+          // skip if pkp is undefined
+          if (!pkp) return null;
+
           const selected =
-            (state.data.selectedPKP as TokenInfo)?.tokenId == pkp.tokenId;
+            (state.data.selectedPKP as TokenInfo)?.tokenId == pkp?.tokenId;
 
           return (
             <PKPCard
