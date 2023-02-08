@@ -168,8 +168,8 @@ export default async function handler(
 
   //  reset
   // clear queue
-  // await blockEventWaitingList.empty();
-  // await blockEventProcessingList.empty();
+  await blockEventWaitingList.empty();
+  await blockEventProcessingList.empty();
 
   // ---------------------------------------------------
   //          Add to Block Event Waiting List
