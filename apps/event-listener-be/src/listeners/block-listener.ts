@@ -1,8 +1,9 @@
 import * as Bull from "bull";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { ActionListener, BlockEventParams, JobFilter } from "../types";
+import { ActionListener, JobFilter } from "../types";
 import { moveQueue } from "../util/util-queue";
 import { Logger } from "../util/util-log";
+import { BlockEventRequirements, JobData } from "@lit-dev/utils";
 
 export class BlockListener implements ActionListener {
   provider: JsonRpcProvider;
@@ -48,33 +49,22 @@ export class BlockListener implements ActionListener {
     this.processList = _args.processList;
   }
 
-  getFilter(name: string): any {
-    try {
-      return this.filters.find((f: JobFilter) => f.name === name)?.filter;
-    } catch (e) {
-      throw Error("Cannot find filter");
-    }
-  }
-
-  filters: Array<JobFilter> = [
-    {
-      name: "lessThanOrEqual",
-      filter: (job: Bull.Job, eventParams: BlockEventParams) => {
-        return (
-          job.data.payload.eventParams.blockNumber <= eventParams.blockNumber
-        );
-      },
-    },
-  ];
-
   start(opts?: { beforeEnd?: () => any }) {
     const _opts = opts || {
       beforeEnd: null,
     };
 
+    const waitingList = this.waitingList;
+    const provider = this.provider;
+
     let blockEventProcessStarted = false;
 
     this.provider.on("block", async (blockNumber) => {
+      // -------------------------------------------------
+      //          Values that you check against
+      // -------------------------------------------------
+      const BLOCK_NUMBER = blockNumber;
+
       // -- don't process if already processing
       if (blockEventProcessStarted) return;
       blockEventProcessStarted = true;
@@ -82,13 +72,30 @@ export class BlockListener implements ActionListener {
       // -- get all waiting jobs
       let waitingJobs = await this.waitingList.getWaiting();
 
-      // -- filter jobs
-      let filterdJobs = waitingJobs.filter((job) =>
-        this.getFilter("lessThanOrEqual")(job, { blockNumber })
-      );
+      // -- get counts
+      let waitingJobsCount = await this.waitingList.count();
+
+      // -- set requirement filter
+      const requirement = (job: Bull.Job) => {
+        const jobData = job.data.jobData as JobData;
+
+        const requirements = new BlockEventRequirements(
+          jobData.eventParams,
+          BLOCK_NUMBER
+        );
+
+        return requirements
+          .is("CURRENT_BLOCK_GREATER_THAN_START_BLOCK")
+          .is("CURRENT_BLOCK_LESS_THAN_END_BLOCK").result;
+      };
+
+      // -- filter jobs that meets the condition
+      let filterdJobs = waitingJobs.filter(requirement);
 
       if (filterdJobs.length <= 0) {
-        this.log.info(`No jobs found. Continue.`);
+        this.log.info(
+          `[${BLOCK_NUMBER}] No jobs were found that met the conditions, but there are ${waitingJobsCount} on the waiting list. Continue...`
+        );
         blockEventProcessStarted = false;
         return;
       }
@@ -97,7 +104,7 @@ export class BlockListener implements ActionListener {
 
       // -- log it
       this.log.info(
-        `event:BlockEvent, block:${blockNumber}, waiting:${waitingJobs.length}, filtered:${filterdJobs.length}`
+        `event:BlockEvent, block:${BLOCK_NUMBER}, waiting:${waitingJobs.length}, filtered:${filterdJobs.length}`
       );
 
       // -- move all waiting jobs to processing list
@@ -105,24 +112,60 @@ export class BlockListener implements ActionListener {
         type: "waiting",
         from: this.waitingList,
         to: this.processList,
-        filter: (job) =>
-          this.getFilter("lessThanOrEqual")(job, { blockNumber }),
+        filter: requirement,
         debug: true,
       });
 
       // -- start processing
       blockEventProcessStarted = false;
+
+      // this.processList.process(this.concurrency, function (job, done) {
+      //   console.log("processing job", job.data.jobData);
+      //   // done();
+      // });
     });
 
-    this.processList.process(this.concurrency, function (job, done) {
-      this.log.info(`processing job ${job.id}: ${JSON.stringify(job.data)}`);
+    // ---------------------------------------------------------------------------------------
+    //          Proceed to execute jobs when they have been moved from waiting list
+    // ---------------------------------------------------------------------------------------
+    // this.processList.process(this.concurrency, function (job, done) {
+    //   this.log.info(`processing job ${job.id}: ${JSON.stringify(job.data)}`);
+
+    //   // calling done signals that the job is completed
+    //   // done();
+    // });
+    this.processList.process(this.concurrency, function (job: Bull.Job, done) {
+      const jobData: JobData = job.data.jobData;
+      const jobName: string = job.data.name;
+
+      const log = new Logger(`[Process Job ID:${job.id}]`);
+      log.info(`Job Name: ${jobName}`);
+
+      // get block number
+      provider.getBlockNumber().then((BLOCK_NUMBER) => {
+        log.info(`Current Block Number: ${BLOCK_NUMBER}`);
+
+        const requirements = new BlockEventRequirements(
+          jobData.eventParams,
+          BLOCK_NUMBER
+        );
+        const metConditions = requirements
+          .is("CURRENT_BLOCK_GREATER_THAN_START_BLOCK")
+          .is("CURRENT_BLOCK_LESS_THAN_END_BLOCK");
+
+        // if the condition is still met, then re-add the job back to waiting list
+        // if the conditions are not met, then we will not add it back to the waiting list
+        if (metConditions.result) {
+          log.warning(
+            "Conditions are still met, moving job back to waiting list"
+          );
+          waitingList.add(job.data);
+        }
+      });
+
+      // done anyway, cus this particular job is done
       done();
     });
-
-    // // blockEventWaitingList.process(10, function (job, done) {
-    // //   console.log("processing job", job.data);
-    // //   done();
-    // // });
 
     if (_opts.beforeEnd) {
       _opts.beforeEnd();

@@ -19,6 +19,8 @@ export const LitConnect = () => {
 
   const [_isConnected, setIsConnected] = useState(false);
 
+  const [selectedAddr, setSelectedAddr] = useState("eth");
+
   useEffect(() => {
     setIsConnected(isConnected);
 
@@ -28,9 +30,11 @@ export const LitConnect = () => {
 
       if (!menu) return;
 
+      // allow list of elements to be clicked
       if (
         e.target.id === "lit-connect-menu" ||
-        e.target.classList.contains("lit-button-icon")
+        e.target.classList.contains("lit-button-icon") ||
+        e.target.classList.contains("click-allowed")
       ) {
         menu.style.display = "flex";
         return;
@@ -46,12 +50,19 @@ export const LitConnect = () => {
     };
   }, [isConnected]);
 
-  const handleCopy = () => {
-    if (!address) return;
-    navigator.clipboard.writeText(address);
-    toast(`🔥 Copied ${getShortAddress(address)}`, {
-      duration: 2000,
-    });
+  const handleCopy = (addr: string) => {
+    if (addr) {
+      navigator.clipboard.writeText(addr);
+      toast.success(`Copied ${getShortAddress(addr)}`, {
+        duration: 2000,
+      });
+      return;
+    }
+    // if (!address) return;
+    // navigator.clipboard.writeText(address);
+    // toast.success(`Copied ${getShortAddress(address)}`, {
+    //   duration: 2000,
+    // });
   };
 
   const renderConnected = () => {
@@ -85,12 +96,117 @@ export const LitConnect = () => {
               <span>{getShortAddress(address)}</span>
             </div>
             <div className="lit-mini-menu-icons flex gap-6">
-              <LitButton icon="copy" hoverText="Copy" onClick={handleCopy} />
-              {/* <LitButton icon="open-new" hoverText="Explore" /> */}
               <LitButton
+                icon="copy"
+                hovertext="Copy"
+                onClick={() => handleCopy(address ?? "")}
+              />
+              <LitButton
+                icon="open-new"
+                hovertext="Explore"
+                onClick={() => {
+                  // go to polygonscan explorer by address
+                  window.open(
+                    `https://polygonscan.com/address/${address}`,
+                    "_blank"
+                  );
+                }}
+              />
+              <LitButton
+                className="bg-error"
                 icon="shutdown"
-                hoverText="Logout"
+                hovertext="Logout"
                 onClick={() => disconnect()}
+              />
+            </div>
+          </div>
+
+          <div className="flex space-between pt-21">
+            <div className="flex center-item h-30">
+              <div className="flex flex-col">
+                <div className="flex gap-6">
+                  <div className="flex center-item">
+                    {/* svg green dot */}
+                    <LitIcon
+                      className="flex center-item"
+                      icon={`${
+                        selectedAddr === "eth" ? "greendot" : "greydot"
+                      }`}
+                    />
+                  </div>
+                  <div
+                    onClick={() => setSelectedAddr("eth")}
+                    className={`click-allowed text-sm ${
+                      selectedAddr === "eth" ? "" : "txt-grey"
+                    }`}
+                  >
+                    PKP:ETH:
+                    {getShortAddress((selectedPKP as TokenInfo).ethAddress)}
+                  </div>
+                </div>
+
+                <div className="flex gap-6">
+                  <div className="flex center-item">
+                    {/* svg green dot */}
+                    <LitIcon
+                      className="flex center-item"
+                      icon={`${
+                        selectedAddr === "btc" ? "greendot" : "greydot"
+                      }`}
+                    />
+                  </div>
+                  <div
+                    onClick={() => setSelectedAddr("btc")}
+                    className={`click-allowed text-sm ${
+                      selectedAddr === "btc" ? "" : "txt-grey"
+                    }`}
+                  >
+                    PKP:BTC:
+                    {getShortAddress((selectedPKP as TokenInfo).btcAddress)}
+                  </div>
+                </div>
+
+                {/* <div className="flex">
+                  <LitIcon className="lit-icon" icon="btc" />
+                </div> */}
+              </div>
+            </div>
+            <div className="lit-mini-menu-icons flex gap-6">
+              <LitButton
+                icon="copy"
+                hovertext="Copy"
+                onClick={() =>
+                  handleCopy(
+                    selectedAddr === "eth"
+                      ? (selectedPKP as TokenInfo).ethAddress
+                      : (selectedPKP as TokenInfo).btcAddress
+                  )
+                }
+              />
+              <LitButton
+                icon="open-new"
+                hovertext="Explore"
+                onClick={() => {
+                  // go to polygonscan explorer by address
+                  if (selectedAddr === "eth") {
+                    window.open(
+                      `https://polygonscan.com/address/${
+                        (selectedPKP as TokenInfo).ethAddress
+                      }`,
+                      "_blank"
+                    );
+                  }
+
+                  if (selectedAddr === "btc") {
+                    //  go to btc explorer by address
+                    window.open(
+                      `https://www.blockchain.com/btc/address/${
+                        (selectedPKP as TokenInfo).btcAddress
+                      }`,
+                      "_blank"
+                    );
+                  }
+                }}
               />
             </div>
           </div>

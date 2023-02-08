@@ -1,5 +1,5 @@
+import { BlockEventParams } from "@lit-dev/utils";
 import Queue from "bull";
-import { BlockEventParams } from "../types";
 const blockEventWaitingList = new Queue("blockEventWaitingList");
 
 export const mockAddBlockJobs = async (

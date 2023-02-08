@@ -1,23 +1,7 @@
 import * as bitcoinjs from "bitcoinjs-lib";
 import { Contract, ethers } from "ethers";
 import { computeAddress } from "ethers/lib/utils";
-
-// {
-//   tokenId: pkpTokenId,
-//   publicKey,
-//   publicKeyBuffer: pubkeyBuffer,
-//   ethAddress,
-//   btcAddress,
-//   isNewPKP,
-// };
-export type TokenInfo = {
-  tokenId: string;
-  publicKey: string;
-  publicKeyBuffer: Buffer;
-  ethAddress: string;
-  btcAddress: string;
-  isNewPKP: boolean;
-};
+import { TokenInfo } from "./types";
 
 export const ECDSAAddresses = async ({
   publicKey,
@@ -129,7 +113,7 @@ export const ECDSAAddresses = async ({
 
   return {
     tokenId: pkpTokenId,
-    publicKey,
+    publicKey: `0x${publicKey}`,
     publicKeyBuffer: pubkeyBuffer,
     ethAddress,
     btcAddress,

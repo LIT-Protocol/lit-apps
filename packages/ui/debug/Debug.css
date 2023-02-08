@@ -1,32 +1,35 @@
 .DEBUG {
-    z-index: -1;
-    position: fixed;
-    color: white;
-    font-size: 12px;
-    padding: 4px;
-    width: 250px;
-    border: 2px solid black;
-    border-radius: 12px;
-    margin: 12px;
-    visibility: hidden;
-    transition: var(--animate-1);
-    opacity: 0;
-    pointer-events: none;
-  }
-  .DEBUG ul {
-    padding: 0;
-  }
-  .DEBUG ul li {
-    border-bottom: 1px solid white;
-    padding: 6px;
-    box-sizing: border-box;
-  }
-  .DEBUG ul li:nth-child(odd) {
-    background-color: #8c40b5;
-  }
-  
-  .debug .DEBUG {
-    pointer-events: all;
-    opacity: 1;
-    visibility: visible;
-  }
+  z-index: 999;
+  position: fixed;
+  color: white;
+  font-size: 12px;
+  padding: 4px;
+  width: 250px;
+  border: 2px solid black;
+  border-radius: 12px;
+  margin: 12px;
+  visibility: hidden;
+  transition: var(--animate-1);
+  opacity: 0;
+  /* pointer-events: none; */
+  bottom: 0;
+  left: 0;
+}
+.DEBUG ul {
+  padding: 0;
+}
+.DEBUG ul li {
+  border-bottom: 1px solid white;
+  padding: 6px;
+  box-sizing: border-box;
+  overflow: auto;
+}
+.DEBUG ul li:nth-child(odd) {
+  background-color: #8c40b5;
+}
+
+.debug .DEBUG {
+  /* pointer-events: all; */
+  opacity: 1;
+  visibility: visible;
+}

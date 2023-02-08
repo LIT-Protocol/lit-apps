@@ -20,6 +20,10 @@ export const StateReducer = (
 
       newState = { data: { ...state.data, ...action.payload }, loading: false };
       break;
+    case "STOP_LOADING":
+      newState = { data: { ...state.data, ...action.payload }, loading: false };
+      break;
+
     default:
       throw new Error();
   }

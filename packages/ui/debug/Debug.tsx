@@ -39,6 +39,17 @@ export const DebugViewer = ({ states }: { states: any }) => {
     };
   }, []);
 
+  // json parseable
+  const jsonParseable = (str: string) => {
+    try {
+      const obj = JSON.parse(str);
+      if (Object.keys(obj).length > 0) return <code>{str}</code>;
+      return str;
+    } catch (e) {
+      return str;
+    }
+  };
+
   return (
     <div className="DEBUG">
       <h2>Debug Viewer</h2>
@@ -66,7 +77,7 @@ export const DebugViewer = ({ states }: { states: any }) => {
                         ? JSON.stringify(varValue)
                         : // check if varValue is a string
                         typeof varValue === "string"
-                        ? varValue
+                        ? jsonParseable(varValue)
                         : // check if varValue is a number
                         typeof varValue === "number"
                         ? varValue

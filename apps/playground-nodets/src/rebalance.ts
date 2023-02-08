@@ -166,7 +166,6 @@ async function getStrategyExecutionPlan(
 export async function runBalancePortfolio({
   tokens,
   pkpPublicKey,
-
   strategy,
   conditions = {
     maxGasPrice: 80,

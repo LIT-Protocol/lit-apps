@@ -1,8 +1,9 @@
+import { TokenInfo } from "@lit-dev/utils";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const PKPConnectedContext = createContext({
   pkpConnected: false,
-  selectedPKP: {},
+  selectedPKP: {} as TokenInfo,
   setSelected: (props: any) => {},
 });
 

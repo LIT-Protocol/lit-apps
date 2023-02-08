@@ -85,6 +85,7 @@ const getUSDPrice = async (symbol) => {
 
   try {
     jsParams.tokenSymbol = tokenSymbol;
+    jsParams.minSellPrice = minSellPrice;
   } catch (e) {
     console.error("[ERROR] tokenSymbol is required");
     return;
@@ -95,5 +96,15 @@ const getUSDPrice = async (symbol) => {
   // -----------------------
   const res = await getUSDPrice(jsParams.tokenSymbol);
 
-  console.log("res:", res);
+  console.log("res:", res.data);
+  console.log("jsParams:", jsParams);
+
+  if (res.data >= jsParams.minSellPrice) {
+    console.log(
+      `${res.data} is higher than ${jsParams.minSellPrice}, signing...`
+    );
+    await LitActions.signEcdsa({ toSign, publicKey, sigName });
+  } else {
+    console.log(`${res.data} is lower than ${jsParams.minSellPrice}, abort.`);
+  }
 })();

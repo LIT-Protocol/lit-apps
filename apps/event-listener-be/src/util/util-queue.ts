@@ -1,3 +1,4 @@
+import { JobData } from "@lit-dev/utils";
 import * as Bull from "bull";
 import { Log } from "./util-log";
 
@@ -12,7 +13,7 @@ export const moveQueue = async ({
   to: Bull.Queue;
   type: Bull.JobStatus;
   debug?: boolean;
-  filter?: (job: Bull.Job, data: any) => boolean;
+  filter?: (job: Bull.Job) => any;
 }) => {
   let jobs: Array<Bull.Job> = [];
 
@@ -51,8 +52,10 @@ export const moveQueue = async ({
 
   // do a async for each
   jobs.forEach(async (job: Bull.Job) => {
+    const jobData: JobData = job.data.jobData;
+
     if (debug) {
-      Log.info(`[MoveQueue] ...adding ${JSON.stringify(job.data)}`);
+      Log.info(`[MoveQueue] ...adding ${job.data.name}`);
     }
 
     to.add(job.data);
@@ -60,6 +63,7 @@ export const moveQueue = async ({
     try {
       const waitingJob = await from.getJob(job.id);
       waitingJob?.remove();
+      // Log.info(`[MoveQueue] ...removed it from ${from.name}`);
     } catch (e) {
       // swallow error
     }

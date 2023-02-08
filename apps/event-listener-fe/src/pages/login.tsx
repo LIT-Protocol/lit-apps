@@ -1,7 +1,6 @@
 import Router from "next/router";
 import { useEffect, useReducer, useState } from "react";
 import {
-  LitHeaderV1,
   LitLoading,
   PKPSelection,
   StateReducer,
@@ -47,35 +46,31 @@ export function Login() {
       }
     }
     loadData();
-  }, [isConnected]);
+  }, [isConnected, pkpConnected]);
 
   return (
-    <div>
-      <LitHeaderV1 title="Lit Actions Event Listener" />
-
-      <div className="flex flex-col center-item">
-        {!pkpConnected && startChecking ? (
-          <div className="mb-36">
-            <LitLoading
-              icon="lit-logo"
-              text="Please connect to your cloud wallet to continue"
-            />
-          </div>
-        ) : (
-          ""
-        )}
-        {!_isConnected || !address ? (
-          <LitLoading icon="lit-logo" text={state.data} />
-        ) : (
-          <PKPSelection
-            address={address}
-            onDone={() => {
-              console.log("Done?????");
-              setStartChecking(true);
-            }}
+    <div className="flex flex-col center-item">
+      {!pkpConnected && startChecking ? (
+        <div className="mb-36">
+          <LitLoading
+            icon="lit-logo"
+            text="Please connect to your cloud wallet to continue"
           />
-        )}
-      </div>
+        </div>
+      ) : (
+        ""
+      )}
+      {!_isConnected || !address ? (
+        <LitLoading icon="lit-logo" text={state.data} />
+      ) : (
+        <PKPSelection
+          address={address}
+          onDone={() => {
+            console.log("Connected both wallet and PKP");
+            setStartChecking(true);
+          }}
+        />
+      )}
     </div>
   );
 }

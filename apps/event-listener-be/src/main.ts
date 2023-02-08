@@ -9,7 +9,7 @@ const blockListener = new BlockListener({
 });
 
 blockListener.start({
-  beforeEnd: () => {
-    mockAddBlockJobs(30304200, 5000, 10);
-  },
+  // beforeEnd: () => {
+  //   mockAddBlockJobs(30304200, 5000, 10);
+  // },
 });

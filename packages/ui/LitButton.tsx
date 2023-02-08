@@ -37,7 +37,7 @@ export const LitButton = (props: LitButtonProp) => {
 
   if (isRedirect(props)) {
     const redirect = (e: any) => {
-      console.log(e);
+      // console.log(e);
       e.preventDefault();
       Router.push(props.redirect);
     };
@@ -52,16 +52,24 @@ export const LitButton = (props: LitButtonProp) => {
     return <a className="lit-button" {...props} />;
   }
   if (isIcon(props)) {
+    const defaultClass = "lit-button-icon";
+
+    const newProp = props.className
+      ? {
+          ...props,
+          className: [...props.className, ` ${defaultClass}`].join(""),
+        }
+      : { ...props, className: defaultClass };
+
     return (
       <button
         type="button"
-        className="lit-button-icon"
         onMouseOver={handleMouseOver}
         onMouseLeave={handleMouseLeave}
-        onClick={props.onClick}
+        {...newProp}
       >
         <LitIcon className="no-pointer" icon={props.icon} />
-        <span className="">{props.hoverText}</span>
+        <span className="">{props.hovertext}</span>
       </button>
     );
   }
