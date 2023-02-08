@@ -2,19 +2,14 @@ import { BlockEventParams, JobData, Logger, TokenInfo } from "@lit-dev/utils";
 import type { NextApiRequest, NextApiResponse } from "next";
 import Queue from "bull";
 import { JsonRpcProvider } from "@ethersproject/providers";
+import { redisConfig } from "@lit-dev/utils/src/redisConfig";
 
 const blockEventWaitingList = new Queue("blockEventWaitingList", {
-  redis: {
-    host: process.env.REDIS_HOST as unknown as string,
-    port: process.env.REDIS_PORT as unknown as number,
-  },
+  redis: redisConfig(),
 });
 
 const blockEventProcessingList = new Queue("blockEventProcessingList", {
-  redis: {
-    host: process.env.REDIS_HOST as unknown as string,
-    port: process.env.REDIS_PORT as unknown as number,
-  },
+  redis: redisConfig(),
 });
 
 type Data = {

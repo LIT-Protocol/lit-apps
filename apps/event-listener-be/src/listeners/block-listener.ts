@@ -160,7 +160,14 @@ export class BlockListener implements ActionListener {
         }
 
         // get block number
-        const currentBlockNumber = await provider.getBlockNumber();
+        let currentBlockNumber;
+
+        try {
+          currentBlockNumber = await provider.getBlockNumber();
+        } catch (e) {
+          log.error(`Error getting block number: ${e.message}`);
+          return done();
+        }
 
         log.info(`Current Block Number: ${currentBlockNumber}`);
 
@@ -175,9 +182,7 @@ export class BlockListener implements ActionListener {
         // if the condition is still met, then re-add the job back to waiting list
         // if the conditions are not met, then we will not add it back to the waiting list
         if (metConditions.result) {
-          log.info(
-            "Conditions are still met, moving job back to waiting list"
-          );
+          log.info("Conditions are still met, moving job back to waiting list");
           waitingList.add(job.data);
         }
 

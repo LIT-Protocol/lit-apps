@@ -8,6 +8,7 @@ export * from "./src/types";
 export * from "./src/Log";
 export * from "./src/fetchJson";
 export * from "./src/BlockEventRequirements";
+export * from "./src/redisConfig";
 export const hello = async () => {
   console.log("World!");
 };

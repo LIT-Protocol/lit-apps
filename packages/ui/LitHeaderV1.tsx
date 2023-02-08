@@ -22,6 +22,14 @@ export const LitHeaderV1 = ({
       </LitButton>
 
       {/* nav */}
+      <ul className="flex gap-18">
+        <LitButton className="lit-link" redirect="/">
+          Dashboard
+        </LitButton>
+        <LitButton className="lit-link" redirect="/tasks">
+          Tasks
+        </LitButton>
+      </ul>
 
       <LitConnect />
     </div>

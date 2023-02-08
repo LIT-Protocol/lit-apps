@@ -334,6 +334,12 @@ export function Custom() {
     // dispatch({ type: "SET_DATA" });
   };
 
+  const test = async () => {
+    const res = await safeFetch("/api/get-jobs");
+
+    console.log("res:", res);
+  };
+
   return (
     <div className="flex-col">
       {/* <DebugViewer
@@ -358,6 +364,7 @@ export function Custom() {
           anybody could run
         </li>
       </ul> */}
+      {/* <LitButton onClick={test}>Test</LitButton> */}
 
       <div className="cls-app max-width-1024">
         {/* 

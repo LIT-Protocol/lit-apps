@@ -5,6 +5,7 @@ import { BlockListener } from "./listeners/block-listener";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { getWalletAuthSig, Logger } from "@lit-dev/utils";
 import * as dotenv from "dotenv";
+import { redisConfig } from "@lit-dev/utils/src/redisConfig";
 
 dotenv.config();
 
@@ -28,8 +29,10 @@ const bootstrap = async () => {
   log.warning(`Server AuthSig generated`);
 
   const blockListener = new BlockListener({
-    waitingList: new Queue("blockEventWaitingList"),
-    processList: new Queue("blockEventProcessingList"),
+    waitingList: new Queue("blockEventWaitingList", { redis: redisConfig() }),
+    processList: new Queue("blockEventProcessingList", {
+      redis: redisConfig(),
+    }),
     litNodeClient,
     serverAuthSig,
   });

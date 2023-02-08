@@ -88,6 +88,18 @@ body {
 .gap-12 {
   gap: 12px;
 }
+.gap-14 {
+  gap: 14px;
+}
+.gap-16 {
+  gap: 16px;
+}
+.gap-18 {
+  gap: 18px;
+}
+.gap-20 {
+  gap: 20px;
+}
 .w-full {
   width: 100%;
 }
@@ -223,7 +235,7 @@ body {
 .pr-12 {
   padding-right: 12px;
 }
-.pr-14{
+.pr-14 {
   padding-right: 14px;
 }
 .pr-15 {
@@ -1741,4 +1753,15 @@ p {
   position: absolute;
   top: -20px;
   right: 0;
+}
+
+[data-lit-theme="purple"] .lit-link {
+  font-size: 13px;
+  text-decoration: none;
+  color: var(--lit-text-color);
+  text-decoration: underline;
+}
+[data-lit-theme="purple"] .lit-link:hover {
+  text-decoration: underline;
+  color: var(--lit-main-color);
 }
