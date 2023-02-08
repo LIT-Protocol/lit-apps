@@ -6,22 +6,24 @@ import { LitLoading } from "ui";
 export function Tasks() {
   const [data, setData] = useState<any>();
 
+  const fetchData = async () => {
+    const res = await safeFetch("/api/get-jobs");
+
+    console.log("res:", res.data);
+    setData(res.data);
+  };
+
   useEffect(() => {
     var interval: any;
-    
-    if (!data) {
-      (async () => {
-        // run every 10 seconds
-        interval = setInterval(async () => {
-          const res = await safeFetch("/api/get-jobs");
 
-          console.log("res:", res.data);
-          setData(res.data);
-        }, 10000);
-      })();
+    interval = setInterval(async () => {
+      fetchData();
+    }, 10000);
+    if (!data) {
+      fetchData();
     }
     return () => clearInterval(interval);
-  }, []);
+  }, [data]);
 
   return (
     <div className="max-width-880">
