@@ -1,9 +1,10 @@
 import * as Bull from "bull";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { ActionListener, JobFilter } from "../types";
+import { ActionListener } from "../types";
 import { moveQueue } from "../util/util-queue";
 import { Logger } from "../util/util-log";
 import { BlockEventRequirements, JobData } from "@lit-dev/utils";
+import { LitNodeClient } from "@lit-protocol/lit-node-client";
 
 export class BlockListener implements ActionListener {
   provider: JsonRpcProvider;
@@ -13,6 +14,8 @@ export class BlockListener implements ActionListener {
   log: Logger;
   logPrefix: string;
   concurrency: number;
+  litNodeClient: LitNodeClient;
+  serverAuthSig: any;
 
   constructor(args?: {
     waitingList: Bull.Queue;
@@ -20,6 +23,8 @@ export class BlockListener implements ActionListener {
     rpcUrl?: string;
     logPrefix?: string;
     concurrency?: number;
+    litNodeClient: LitNodeClient;
+    serverAuthSig: any;
   }) {
     const _args = args || {
       waitingList: null,
@@ -27,6 +32,8 @@ export class BlockListener implements ActionListener {
       rpcUrl: null,
       logPrefix: null,
       concurrency: null,
+      litNodeClient: null,
+      serverAuthSig: null,
     };
 
     this.log = new Logger(_args.logPrefix ?? "[BlockEvent]");
@@ -47,6 +54,8 @@ export class BlockListener implements ActionListener {
     this.provider = new JsonRpcProvider(_args.rpcUrl ?? this.rpcUrl);
     this.waitingList = _args.waitingList;
     this.processList = _args.processList;
+    this.litNodeClient = _args.litNodeClient;
+    this.serverAuthSig = _args.serverAuthSig;
   }
 
   start(opts?: { beforeEnd?: () => any }) {
@@ -56,6 +65,8 @@ export class BlockListener implements ActionListener {
 
     const waitingList = this.waitingList;
     const provider = this.provider;
+    const litNodeClient = this.litNodeClient;
+    const serverAuthSig = this.serverAuthSig;
 
     let blockEventProcessStarted = false;
 
@@ -118,36 +129,44 @@ export class BlockListener implements ActionListener {
 
       // -- start processing
       blockEventProcessStarted = false;
-
-      // this.processList.process(this.concurrency, function (job, done) {
-      //   console.log("processing job", job.data.jobData);
-      //   // done();
-      // });
     });
 
     // ---------------------------------------------------------------------------------------
     //          Proceed to execute jobs when they have been moved from waiting list
     // ---------------------------------------------------------------------------------------
-    // this.processList.process(this.concurrency, function (job, done) {
-    //   this.log.info(`processing job ${job.id}: ${JSON.stringify(job.data)}`);
 
-    //   // calling done signals that the job is completed
-    //   // done();
-    // });
-    this.processList.process(this.concurrency, function (job: Bull.Job, done) {
-      const jobData: JobData = job.data.jobData;
-      const jobName: string = job.data.name;
+    this.processList.process(
+      this.concurrency,
+      async function (job: Bull.Job, done) {
+        const jobData: JobData = job.data.jobData;
+        const jobName: string = job.data.name;
 
-      const log = new Logger(`[Process Job ID:${job.id}]`);
-      log.info(`Job Name: ${jobName}`);
+        const log = new Logger(`[Process Job ID:${job.id}]`);
+        log.info(`Job Name: ${jobName}`);
 
-      // get block number
-      provider.getBlockNumber().then((BLOCK_NUMBER) => {
-        log.info(`Current Block Number: ${BLOCK_NUMBER}`);
+        try {
+          // execute task
+          let res = await litNodeClient.executeJs({
+            targetNodeRange: 1,
+            ipfsId: jobData.ipfsId,
+            authSig: serverAuthSig,
+            jsParams: JSON.parse(jobData.jsParams),
+          });
+
+          log.info(`Result: ${JSON.stringify(res)}`);
+        } catch (e) {
+          console.log("error:", e);
+          log.error(`Error: ${e.message}`);
+        }
+
+        // get block number
+        const currentBlockNumber = await provider.getBlockNumber();
+
+        log.info(`Current Block Number: ${currentBlockNumber}`);
 
         const requirements = new BlockEventRequirements(
           jobData.eventParams,
-          BLOCK_NUMBER
+          currentBlockNumber
         );
         const metConditions = requirements
           .is("CURRENT_BLOCK_GREATER_THAN_START_BLOCK")
@@ -156,16 +175,16 @@ export class BlockListener implements ActionListener {
         // if the condition is still met, then re-add the job back to waiting list
         // if the conditions are not met, then we will not add it back to the waiting list
         if (metConditions.result) {
-          log.warning(
+          log.info(
             "Conditions are still met, moving job back to waiting list"
           );
           waitingList.add(job.data);
         }
-      });
 
-      // done anyway, cus this particular job is done
-      done();
-    });
+        // done anyway, cus this particular job is done, new job is added back to waiting list
+        done();
+      }
+    );
 
     if (_opts.beforeEnd) {
       _opts.beforeEnd();

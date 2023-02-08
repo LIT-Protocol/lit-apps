@@ -215,36 +215,6 @@ export function Custom() {
 
     resetMessage();
 
-    // -- submit job
-    dispatch({
-      type: "LOADING",
-      payload: "Submitting Job...",
-    });
-
-    const submitData = await safeFetch(
-      "/api/submit-job",
-      {
-        ownerAddress: address,
-        pkpInfo: selectedPKP,
-        ipfsId: "QmZxPovUdhy74w3zBnkq29JSjcAcnNpE4eYYyZ4uZcajju",
-        jsParams: jsonCode,
-        eventType: selectedEvent,
-        eventParams: eventState.data,
-      },
-      (e: Error) => {
-        toast.error(e.message);
-        dispatch({ type: "SET_DATA" });
-      }
-    );
-
-    console.log("submitData:", submitData);
-
-    dispatch({
-      type: "SET_DATA",
-    });
-
-    return;
-
     // -- get auth sig
     dispatch({
       type: "LOADING",
@@ -273,7 +243,7 @@ export function Custom() {
 
     const registerData = await safeFetch(
       "/api/register-lit-action",
-      jsonCode,
+      jsCode,
       (e: Error) => {
         dispatch({ type: "SET_DATA" });
         toast.error(e.message);
@@ -306,6 +276,36 @@ export function Custom() {
       dispatch({ type: "SET_DATA" });
       return;
     }
+
+    // -- submit job
+    dispatch({
+      type: "LOADING",
+      payload: "Submitting Job...",
+    });
+
+    const submitData = await safeFetch(
+      "/api/submit-job",
+      {
+        ownerAddress: address,
+        pkpInfo: selectedPKP,
+        ipfsId: registerData.data.IpfsHash,
+        jsParams: jsonCode,
+        eventType: selectedEvent,
+        eventParams: eventState.data,
+      },
+      (e: Error) => {
+        toast.error(e.message);
+        dispatch({ type: "SET_DATA" });
+      }
+    );
+
+    console.log("submitData:", submitData);
+
+    dispatch({
+      type: "SET_DATA",
+    });
+
+    toast.success("Job Submitted Successfully. Create another one?");
 
     // -- test run the lit action
     // dispatch({
@@ -496,10 +496,10 @@ export function Custom() {
                   />
                 </div>
                 <div className="lit-input-1 text-xs txt-grey text-right flex gap-6">
-                  <LitButton className="lit-mini-button active capitalize">
-                    Repeat every block
+                  <LitButton className="lit-mini-button active">
+                    Repeat until
                   </LitButton>
-                  <LitButton className="lit-mini-button capitalize disabled">
+                  <LitButton className="lit-mini-button  disabled">
                     Repeat every x blocks
                   </LitButton>
                 </div>
