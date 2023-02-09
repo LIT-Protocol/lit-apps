@@ -1268,7 +1268,7 @@ p {
 [data-lit-theme="purple"] .lit-button-3 {
   display: inline-flex;
   align-items: center;
-  justify-content: start;
+  justify-content: flex-start;
   border-radius: var(--border-radius);
   padding: 0 15px;
   font-size: 13px;
@@ -1654,7 +1654,7 @@ p {
 [data-lit-theme="purple"] .lit-button-6 {
   display: inline-flex;
   align-items: center;
-  justify-content: start;
+  justify-content: flex-start;
   border-radius: var(--lit-border-radius);
   padding: 0 15px;
   font-size: 13px;
@@ -1756,12 +1756,21 @@ p {
 }
 
 [data-lit-theme="purple"] .lit-link {
-  font-size: 13px;
+  font-size: 16px;
   text-decoration: none;
   color: var(--lit-text-color);
-  text-decoration: underline;
+  opacity: 0.6;
+  font-weight: 600;
+
+  padding: 5px 15px;
+  border-radius: var(--lit-border-radius-tag);
 }
 [data-lit-theme="purple"] .lit-link:hover {
-  text-decoration: underline;
-  color: var(--lit-main-color);
+  color: var(--lit-text-color);
+  opacity: 1;
+  background: var(--lit-border-color);
+}
+
+[data-lit-theme="purple"] .active.lit-link {
+  opacity: 1;
 }
