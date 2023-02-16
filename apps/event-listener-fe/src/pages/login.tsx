@@ -27,7 +27,7 @@ export function Login() {
         dispatch({
           type: "LOADING",
           loading: true,
-          payload: "Please connect your wallet to continue",
+          loadingMessage: "Please connect your wallet to continue",
         });
 
         return;
@@ -61,7 +61,7 @@ export function Login() {
         ""
       )}
       {!_isConnected || !address ? (
-        <LitLoading icon="lit-logo" text={state.data} />
+        <LitLoading icon="lit-logo" text={state.loadingMessage} />
       ) : (
         <PKPSelection
           address={address}

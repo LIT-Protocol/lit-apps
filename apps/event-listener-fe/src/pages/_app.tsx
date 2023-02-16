@@ -1,6 +1,6 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import "ui/theme.a.css";
+import "ui/theme.purple.css";
 import { LitHeaderV1, PKPConnectionContext, ThemeA, Web3Auth } from "ui";
 import { Toaster } from "react-hot-toast";
 

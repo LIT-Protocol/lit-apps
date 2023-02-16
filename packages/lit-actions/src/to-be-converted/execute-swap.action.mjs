@@ -105,21 +105,6 @@ export const swapStubs = {
 
 // these are necessary for the swap to work
 const SWAP_ROUTER_ADDRESS = "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45";
-const signEcdsaCode = `
-(async() => {
-  const approveSig = await LitActions.signEcdsa({ 
-    toSign: approveMessage, 
-    publicKey: publicKey, 
-    sigName: approveSigName
-  });
-
-  const exactInputSingleSig = await LitActions.signEcdsa({
-    toSign: exactInputSingleMessage, 
-    publicKey: publicKey, 
-    sigName: exactInputSingleSigName
-  });
-})()      
-`;
 
 // ------------------------------------------------------------------------
 //          Let's pretend this function is hosting on Lit Action

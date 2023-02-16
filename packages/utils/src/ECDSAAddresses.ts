@@ -76,7 +76,7 @@ export const ECDSAAddresses = async ({
           cachedPkpJSON[pkpTokenId] = publicKey;
           localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
         } else {
-          const cachedPkpJSON = {};
+          const cachedPkpJSON: { [key: string]: any } = {};
           cachedPkpJSON[pkpTokenId] = publicKey;
           localStorage.setItem(CACHE_KEY, JSON.stringify(cachedPkpJSON));
         }
@@ -91,17 +91,15 @@ export const ECDSAAddresses = async ({
   }
 
   // if publicKey is provided, validate it
-  if (publicKey) {
-    if (publicKey.startsWith("0x")) {
-      publicKey = publicKey.slice(2);
-    }
-    pubkeyBuffer = Buffer.from(publicKey, "hex");
+  if (!publicKey) {
+    // console.warn("publicKey is undefined");
+    throw new Error("publicKey or pubkeyBuffer is undefined");
   }
 
-  if (!publicKey) {
-    console.warn("publicKey is undefined");
-    return;
+  if (publicKey.startsWith("0x")) {
+    publicKey = publicKey.slice(2);
   }
+  pubkeyBuffer = Buffer.from(publicKey, "hex");
 
   // get the address from the public key
   const ethAddress = computeAddress(pubkeyBuffer);
@@ -110,6 +108,25 @@ export const ECDSAAddresses = async ({
   const btcAddress = bitcoinjs.payments.p2pkh({
     pubkey: pubkeyBuffer,
   }).address;
+
+  if (!pkpTokenId || !btcAddress || !ethAddress) {
+    // push to error reporting service
+    const errors = [];
+
+    if (!pkpTokenId) {
+      errors.push("pkpTokenId is undefined");
+    }
+
+    if (!btcAddress) {
+      errors.push("btcAddress is undefined");
+    }
+
+    if (!ethAddress) {
+      errors.push("ethAddress is undefined");
+    }
+
+    throw new Error(errors.join(", "));
+  }
 
   return {
     tokenId: pkpTokenId,

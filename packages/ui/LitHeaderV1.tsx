@@ -13,6 +13,17 @@ export const LitHeaderV1 = ({
 }) => {
   const [currentPath, setCurrentPath] = useState<string>("/");
 
+  const navItems = [
+    {
+      route: "/",
+      name: "Apps",
+    },
+    {
+      route: "/tasks",
+      name: "Tasks",
+    },
+  ];
+
   useEffect(() => {
     const { pathname } = Router;
     setCurrentPath(pathname);
@@ -31,21 +42,20 @@ export const LitHeaderV1 = ({
       </LitButton>
 
       {/* nav */}
-      <ul className="flex">
-        <LitButton
-          className={`lit-link animate ${currentPath == "/" ? "active" : ""}`}
-          redirect="/"
-        >
-          Apps
-        </LitButton>
-        <LitButton
-          className={`lit-link animate ${
-            currentPath == "/tasks" ? "active" : ""
-          }`}
-          redirect="/tasks"
-        >
-          Tasks
-        </LitButton>
+      <ul className="lit-nav-middle flex">
+        {navItems.map((item: any, index: number) => {
+          return (
+            <LitButton
+              key={index}
+              className={`lit-link animate ${
+                currentPath == item.route ? "active" : ""
+              }`}
+              redirect={item.route}
+            >
+              {item.name}
+            </LitButton>
+          );
+        })}
       </ul>
 
       <LitConnect />

@@ -6,18 +6,20 @@ export const StateReducer = (
     type: string;
     payload?: any;
     loading?: boolean;
+    loadingMessage?: string;
   }
 ) => {
   let newState;
 
   switch (action.type) {
     case "LOADING":
-      newState = { data: action.payload, loading: true };
+      newState = {
+        data: { ...state.data },
+        loading: true,
+        loadingMessage: action.loadingMessage ?? "Loading...",
+      };
       break;
     case "SET_DATA":
-      // copy the previous action.payload
-      // newState = { ...state, data: action.payload };
-
       newState = { data: { ...state.data, ...action.payload }, loading: false };
       break;
     case "STOP_LOADING":

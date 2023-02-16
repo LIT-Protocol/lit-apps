@@ -8,22 +8,32 @@ type Data = {
   jsParams: any;
 };
 
+type Error = {
+  message: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<Data | Error>
 ) {
   const log = new Logger();
   log.info("called => demo-code.ts");
 
-  const code = fs.readFileSync(
-    `${process.cwd()}/src/demos/get-price.js`,
-    "utf8"
-  );
+  const fileName = req.body.fileName ?? "get-price";
 
-  const jsParams = fs.readFileSync(
-    `${process.cwd()}/src/demos/get-price.json`,
-    "utf8"
-  );
+  try {
+    const code = fs.readFileSync(
+      `${process.cwd()}/src/demos/${fileName}.js`,
+      "utf8"
+    );
 
-  res.status(200).json({ code, jsParams });
+    const jsParams = fs.readFileSync(
+      `${process.cwd()}/src/demos/${fileName}.json`,
+      "utf8"
+    );
+
+    res.status(200).json({ code, jsParams });
+  } catch (e: any) {
+    res.status(500).json({ message: e.message });
+  }
 }

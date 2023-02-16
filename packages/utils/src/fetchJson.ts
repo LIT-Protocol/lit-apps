@@ -4,7 +4,7 @@ export const safeFetch = async (
   onError?: Function,
   options?: { debug?: boolean }
 ) => {
-  const log = (msg, param?: any) => {
+  const log = (msg: any, param?: any) => {
     if (options?.debug) {
       console.warn(`[safeFetch] ${msg}`, param ?? "");
     }
@@ -13,6 +13,8 @@ export const safeFetch = async (
   log("Fetching", url);
   // if there's a body, use 'post', otherwise use 'get'
   let method: string = body ? "post" : "get";
+
+  log("Body:", body);
 
   try {
     log("Trying to fetch in try block", url);
@@ -27,7 +29,7 @@ export const safeFetch = async (
     if (res.status !== 200) {
       const error = {
         status: res.status,
-        message: (await res.json()).data.message,
+        message: (await res.json()).data?.message,
       };
 
       log("Got an error:", error);
@@ -38,7 +40,7 @@ export const safeFetch = async (
         return;
       }
       log("throwing error 1");
-      throw new Error(error.message);
+      throw new Error(error?.message);
     }
 
     let result: any;

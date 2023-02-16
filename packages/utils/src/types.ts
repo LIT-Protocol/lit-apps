@@ -93,3 +93,14 @@ export interface BlockEventParams extends BaseEventParams {
   startBlock: number;
   endBlock: number;
 }
+
+export type SelectionItem = {
+  id: string;
+  name: string;
+  enabled: boolean;
+};
+
+export type MergedJob = Partial<JobData> & {
+  jobIds: Array<string>;
+  name: string;
+};

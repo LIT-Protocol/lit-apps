@@ -66,15 +66,17 @@ export const PKPSelection = ({
 
   useEffect(() => {
     async function loadData() {
-      dispatch({ type: "LOADING", loading: true, payload: "Fetching PKPs..." });
+      dispatch({
+        type: "LOADING",
+        loadingMessage: "Fetching PKPs...",
+      });
 
       const result = await fetchPKPs(
         address,
         (tokens: Array<TokenInfo>, tokenInfo: TokenInfo, progress: number) => {
           dispatch({
             type: "LOADING",
-            loading: true,
-            payload: `Loading ${progress}%..`,
+            loadingMessage: `Loading ${progress}%..`,
           });
         }
       );
@@ -106,9 +108,6 @@ export const PKPSelection = ({
     loadData();
   }, []);
 
-  if (state.loading || !state.data.pkps)
-    return <LitLoading icon="lit-logo" text={state.data} />;
-
   const onSelectToken = (e: any, pkp: TokenInfo) => {
     if (![...e.target.classList]?.includes("pkp-card-focus")) return;
 
@@ -125,6 +124,9 @@ export const PKPSelection = ({
       });
     }
   };
+
+  if (state.loading || !state.data.pkps)
+    return <LitLoading icon="lit-logo" text={state.loadingMessage} />;
 
   return (
     <div className="heading">

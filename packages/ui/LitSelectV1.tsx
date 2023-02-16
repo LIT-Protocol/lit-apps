@@ -1,5 +1,16 @@
 import { useState } from "react";
 
+// Usage:
+{/* <LitSelectionV1
+  items={events}
+  button={{
+    component: LitButton,
+    className: "lit-mini-button capitalize",
+  }}
+  onClick={(item: { name: string }) => {
+    setSelectedEvent(item.name);
+  }}
+/>; */}
 export const LitSelectionV1 = (prop: any) => {
   const defaultClass = "lit-selection-v1";
 

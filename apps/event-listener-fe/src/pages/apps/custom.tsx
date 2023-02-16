@@ -28,6 +28,7 @@ import { useAccount } from "wagmi";
 import Router from "next/router";
 import toast from "react-hot-toast";
 import { getShortAddress, safeFetch } from "@lit-dev/utils";
+import { ELNotes } from "../../components/ELNotes";
 
 export function Custom() {
   const { address, isConnected } = useAccount();
@@ -218,7 +219,7 @@ export function Custom() {
     // -- get auth sig
     dispatch({
       type: "LOADING",
-      payload: "Checking and Signing Auth Message...",
+      loadingMessage: "Checking and Signing Auth Message...",
     });
 
     let authSig: JsonAuthSig;
@@ -238,7 +239,7 @@ export function Custom() {
     // -- upload lit ction
     dispatch({
       type: "LOADING",
-      payload: "Uploading Lit Action...",
+      loadingMessage: "Uploading Lit Action...",
     });
 
     const registerData = await safeFetch(
@@ -255,7 +256,7 @@ export function Custom() {
     // -- permit lit action to use the pkp
     dispatch({
       type: "LOADING",
-      payload: "Permitting Lit Action to use PKP...",
+      loadingMessage: "Permitting Lit Action to use PKP...",
     });
 
     const contract = new LitContracts();
@@ -280,7 +281,7 @@ export function Custom() {
     // -- submit job
     dispatch({
       type: "LOADING",
-      payload: "Submitting Job...",
+      loadingMessage: "Submitting Job...",
     });
 
     const submitData = await safeFetch(
@@ -310,7 +311,7 @@ export function Custom() {
     // -- test run the lit action
     // dispatch({
     //   type: "LOADING",
-    //   payload: `Testing Lit Action as ${authSig.address}...`,
+    //   loadingMessage: `Testing Lit Action as ${authSig.address}...`,
     // });
 
     // try {
@@ -487,7 +488,7 @@ export function Custom() {
                   </span>
                   <span>{currentBlockNumber}</span>
                 </div>
-                <div className="lit-input-1">
+                <div className="lit-input-v1">
                   <label>Start Block</label>
                   <input
                     type="text"
@@ -502,7 +503,7 @@ export function Custom() {
                     }}
                   />
                 </div>
-                <div className="lit-input-1 text-xs txt-grey text-right flex gap-6">
+                <div className="lit-input-v1 text-xs txt-grey text-right flex gap-6">
                   <LitButton className="lit-mini-button active">
                     Repeat until
                   </LitButton>
@@ -510,7 +511,7 @@ export function Custom() {
                     Repeat every x blocks
                   </LitButton>
                 </div>
-                <div className="lit-input-1">
+                <div className="lit-input-v1">
                   <label>End Block</label>
                   <input
                     type="text"
@@ -537,33 +538,7 @@ export function Custom() {
         */}
         <div className={`animate ${!selectedEvent ? "disabled" : ""}`}>
           <div className="h-12"></div>
-          <LitNote>
-            {/* <h2 className="mb-4">NOTE</h2> */}
-            <div className="error-box mb-8 text-center bold">
-              Use at your own risk! This is a demo app.
-              <br /> We are not responsible for any damages caused by this app.
-            </div>
-            {/* <h2>Upload and permit lit action to use your PKP</h2> */}
-            {/* <div>TokenID: {selectedPKP.tokenId}</div> */}
-            <div className="mb-8 flex flex-col text-center">
-              <p>
-                By creating this trigger, you will allow the lit action to use
-                your PKP for signing.
-              </p>
-              <p>
-                Anyone can run this trigger as long as it meets the conditions.
-              </p>
-            </div>
-
-            <div>
-              <div className="flex flex-col txt-grey text-sm">
-                <div>PKP Token ID: {getShortAddress(selectedPKP.tokenId)}</div>
-                <div>
-                  ETH Address: {getShortAddress(selectedPKP.ethAddress)}
-                </div>
-              </div>
-            </div>
-          </LitNote>
+          <ELNotes />
           <div className="h-12"></div>
           {/* -- if it's not loading */}
           {!state.loading ? (
@@ -573,7 +548,7 @@ export function Custom() {
           ) : (
             // -- if it's loading
             <div className="mb-12 flex center-item justify-center">
-              <LitLoading icon="lit-logo" text={state.data} />
+              <LitLoading icon="lit-logo" text={state.loadingMessage} />
             </div>
           )}
         </div>

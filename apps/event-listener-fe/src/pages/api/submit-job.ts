@@ -34,6 +34,36 @@ export default async function handler(
     eventParams,
   }: JobData = jobData;
 
+  // ---------------------------
+  //          Set Ids
+  // ---------------------------
+  // a combination of owner address, pkp tokenId, event type, ipfsId
+  const jobId = `${ownerAddress}-${pkpInfo.tokenId}-${eventType}-${ipfsId}`;
+
+  // get hash of jobId
+  // const jobIdHash = Buffer.from(jobId).toString("hex");
+
+  // ---------------------------------------
+  //          Validate Job Exists
+  // ---------------------------------------
+  [
+    ...(await blockEventWaitingList.getJobs(["waiting", "active"])),
+    ...(await blockEventProcessingList.getJobs(["waiting", "active"])),
+  ].forEach((job) => {
+    // FIXME: atm. we will just remove the job and add it again
+    // check if job.data.name === jobId
+    if (job.data.name === jobId) {
+      // remove job
+      job.remove();
+
+      // res.status(500).json({
+      //   data: {
+      //     message: "job already exists",
+      //   },
+      // });
+    }
+  });
+
   // ---------------------------------------
   //          Validate Event Type
   // ---------------------------------------
@@ -159,12 +189,6 @@ export default async function handler(
   //   eventType: ${eventType}
   //   eventParams: ${JSON.stringify(_eventParams)}
   // `);
-
-  // ---------------------------
-  //          Set Ids
-  // ---------------------------
-  // a combination of owner address, pkp tokenId, event type, ipfsId
-  const jobId = `${ownerAddress}-${pkpInfo.tokenId}-${eventType}-${ipfsId}`;
 
   //  reset
   // clear queue

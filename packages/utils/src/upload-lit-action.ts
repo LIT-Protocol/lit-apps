@@ -27,6 +27,10 @@ export const uploadLitAction = async ({
   code,
   PINATA_API_KEY,
   PINATA_SECRET_KEY,
+}: {
+  code: string;
+  PINATA_API_KEY: string;
+  PINATA_SECRET_KEY: string;
 }): Promise<Response> => {
   // if any of the required parameters are missing, throw an error
   if (!code || !PINATA_API_KEY || !PINATA_SECRET_KEY) {

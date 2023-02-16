@@ -19,11 +19,22 @@ export const validateParams = (type: string, params: Array<any>) => {
     }
 
     if (type === "is_json") {
-      try {
-        JSON.parse(value);
-        validated = true;
-      } catch (e) {
-        validated = false;
+      if (typeof value === "string") {
+        try {
+          JSON.parse(value);
+          validated = true;
+        } catch (e) {
+          validated = false;
+        }
+      }
+
+      if (typeof value === "object") {
+        try {
+          JSON.stringify(value);
+          validated = true;
+        } catch (e) {
+          validated = false;
+        }
       }
 
       if (!validated) {

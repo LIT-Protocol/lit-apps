@@ -3,7 +3,11 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { ActionListener } from "../types";
 import { moveQueue } from "../util/util-queue";
 import { Logger } from "../util/util-log";
-import { BlockEventRequirements, JobData } from "@lit-dev/utils";
+import {
+  BlockEventRequirements,
+  JobData,
+  runBalancePortfolio,
+} from "@lit-dev/utils";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
 
 export class BlockListener implements ActionListener {
@@ -144,19 +148,42 @@ export class BlockListener implements ActionListener {
         const log = new Logger(`[Process Job ID:${job.id}]`);
         log.info(`Job Name: ${jobName}`);
 
-        try {
-          // execute task
-          let res = await litNodeClient.executeJs({
-            targetNodeRange: 1,
-            ipfsId: jobData.ipfsId,
-            authSig: serverAuthSig,
-            jsParams: JSON.parse(jobData.jsParams),
-          });
+        // FIXME: refactor this
+        const isRebalancer = jobName.toLowerCase().includes("mock_rebalancer");
 
-          log.info(`Result: ${JSON.stringify(res)}`);
-        } catch (e) {
-          console.log("error:", e);
-          log.error(`Error: ${e.message}`);
+        if (isRebalancer) {
+          log.warning(`Rebalancer job detected, skipping...`);
+
+          if (typeof jobData.jsParams === "string") {
+            jobData.jsParams = JSON.parse(jobData.jsParams);
+          }
+
+          try {
+            const rebalance = await runBalancePortfolio(
+              jobData.jsParams as any,
+              serverAuthSig
+            );
+
+            log.info(`Rebalance result: ${JSON.stringify(rebalance)}`);
+          } catch (e) {
+            log.error(`Error: ${e.message}`);
+          }
+
+          // return done();
+        } else {
+          try {
+            // execute task
+            let res = await litNodeClient.executeJs({
+              targetNodeRange: 1,
+              ipfsId: jobData.ipfsId,
+              authSig: serverAuthSig,
+              jsParams: JSON.parse(jobData.jsParams),
+            });
+
+            log.info(`Result: ${JSON.stringify(res)}`);
+          } catch (e) {
+            log.error(`Error: ${e.message}`);
+          }
         }
 
         // get block number
@@ -183,6 +210,9 @@ export class BlockListener implements ActionListener {
         // if the conditions are not met, then we will not add it back to the waiting list
         if (metConditions.result) {
           log.info("Conditions are still met, moving job back to waiting list");
+          log.info(
+            `Event Params: ${JSON.stringify(job.data.jobData.eventParams)}`
+          );
           waitingList.add(job.data);
         }
 

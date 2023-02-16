@@ -15,8 +15,8 @@ export default async function handler(
 
   const result = await uploadLitAction({
     code: req.body,
-    PINATA_API_KEY: process.env.PINATA_API_KEY,
-    PINATA_SECRET_KEY: process.env.PINATA_SECRET_KEY,
+    PINATA_API_KEY: process.env.PINATA_API_KEY as string,
+    PINATA_SECRET_KEY: process.env.PINATA_SECRET_KEY as string,
   });
 
   res.status(result.status).json({

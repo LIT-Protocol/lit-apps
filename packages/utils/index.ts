@@ -9,6 +9,9 @@ export * from "./src/Log";
 export * from "./src/fetchJson";
 export * from "./src/BlockEventRequirements";
 export * from "./src/redisConfig";
+export * from "./src/lit-actions/rebalance";
+
+//
 export const hello = async () => {
   console.log("World!");
 };

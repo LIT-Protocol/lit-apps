@@ -101,53 +101,7 @@ ul {
 //          utils                                    
 // -------------------------
 */
-.flex {
-  display: flex;
-}
-.center-item {
-  align-items: center;
-}
-.relative {
-  position: relative;
-}
-.lit-loading-icon {
-  animation: loading 1.8s infinite;
-  text-align: center;
-}
-a.alink {
-  text-decoration: none;
-}
-.align-left {
-  text-align: left;
-  align-items: start !important;
-}
-.no-pointer {
-  pointer-events: none;
-}
-.grid {
-  display: grid;
-}
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.grid-cols-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.grid-cols-5 {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-.invisible {
-  visibility: hidden;
-}
-.relative {
-  position: relative;
-}
-.text-right {
-  text-align: right;
-}
+@import url("./utils.css");
 
 /* 
 // ------------------------------

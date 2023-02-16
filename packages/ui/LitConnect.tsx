@@ -86,7 +86,7 @@ export const LitConnect = () => {
                 </div>
               </div>
             ) : (
-              <div className="error">Connect to cloud wallet</div>
+              <div className="error text-sm">Connect to cloud wallet</div>
             )}
           </div>
         </LitButton>
@@ -121,95 +121,100 @@ export const LitConnect = () => {
             </div>
           </div>
 
-          <div className="flex space-between pt-21">
-            <div className="flex center-item h-30">
-              <div className="flex flex-col">
-                <div className="flex gap-6">
-                  <div className="flex center-item">
-                    {/* svg green dot */}
-                    <LitIcon
-                      className="flex center-item"
-                      icon={`${
-                        selectedAddr === "eth" ? "greendot" : "greydot"
+          {/* If not PKP was selected or not found */}
+          {Object.keys(selectedPKP).length <= 0 ? (
+            ""
+          ) : (
+            <div className="flex space-between pt-21">
+              <div className="flex center-item h-30">
+                <div className="flex flex-col">
+                  <div className="flex gap-6">
+                    <div className="flex center-item">
+                      {/* svg green dot */}
+                      <LitIcon
+                        className="flex center-item"
+                        icon={`${
+                          selectedAddr === "eth" ? "greendot" : "greydot"
+                        }`}
+                      />
+                    </div>
+                    <div
+                      onClick={() => setSelectedAddr("eth")}
+                      className={`click-allowed text-sm ${
+                        selectedAddr === "eth" ? "" : "txt-grey"
                       }`}
-                    />
+                    >
+                      PKP:ETH:
+                      {getShortAddress((selectedPKP as TokenInfo).ethAddress)}
+                    </div>
                   </div>
-                  <div
-                    onClick={() => setSelectedAddr("eth")}
-                    className={`click-allowed text-sm ${
-                      selectedAddr === "eth" ? "" : "txt-grey"
-                    }`}
-                  >
-                    PKP:ETH:
-                    {getShortAddress((selectedPKP as TokenInfo).ethAddress)}
-                  </div>
-                </div>
 
-                <div className="flex gap-6">
-                  <div className="flex center-item">
-                    {/* svg green dot */}
-                    <LitIcon
-                      className="flex center-item"
-                      icon={`${
-                        selectedAddr === "btc" ? "greendot" : "greydot"
+                  <div className="flex gap-6">
+                    <div className="flex center-item">
+                      {/* svg green dot */}
+                      <LitIcon
+                        className="flex center-item"
+                        icon={`${
+                          selectedAddr === "btc" ? "greendot" : "greydot"
+                        }`}
+                      />
+                    </div>
+                    <div
+                      onClick={() => setSelectedAddr("btc")}
+                      className={`click-allowed text-sm ${
+                        selectedAddr === "btc" ? "" : "txt-grey"
                       }`}
-                    />
+                    >
+                      PKP:BTC:
+                      {getShortAddress((selectedPKP as TokenInfo).btcAddress)}
+                    </div>
                   </div>
-                  <div
-                    onClick={() => setSelectedAddr("btc")}
-                    className={`click-allowed text-sm ${
-                      selectedAddr === "btc" ? "" : "txt-grey"
-                    }`}
-                  >
-                    PKP:BTC:
-                    {getShortAddress((selectedPKP as TokenInfo).btcAddress)}
-                  </div>
-                </div>
 
-                {/* <div className="flex">
+                  {/* <div className="flex">
                   <LitIcon className="lit-icon" icon="btc" />
                 </div> */}
+                </div>
+              </div>
+              <div className="lit-mini-menu-icons flex gap-6">
+                <LitButton
+                  icon="copy"
+                  hovertext="Copy"
+                  onClick={() =>
+                    handleCopy(
+                      selectedAddr === "eth"
+                        ? (selectedPKP as TokenInfo).ethAddress
+                        : (selectedPKP as TokenInfo).btcAddress
+                    )
+                  }
+                />
+                <LitButton
+                  icon="open-new"
+                  hovertext="Explore"
+                  onClick={() => {
+                    // go to polygonscan explorer by address
+                    if (selectedAddr === "eth") {
+                      window.open(
+                        `https://polygonscan.com/address/${
+                          (selectedPKP as TokenInfo).ethAddress
+                        }`,
+                        "_blank"
+                      );
+                    }
+
+                    if (selectedAddr === "btc") {
+                      //  go to btc explorer by address
+                      window.open(
+                        `https://www.blockchain.com/btc/address/${
+                          (selectedPKP as TokenInfo).btcAddress
+                        }`,
+                        "_blank"
+                      );
+                    }
+                  }}
+                />
               </div>
             </div>
-            <div className="lit-mini-menu-icons flex gap-6">
-              <LitButton
-                icon="copy"
-                hovertext="Copy"
-                onClick={() =>
-                  handleCopy(
-                    selectedAddr === "eth"
-                      ? (selectedPKP as TokenInfo).ethAddress
-                      : (selectedPKP as TokenInfo).btcAddress
-                  )
-                }
-              />
-              <LitButton
-                icon="open-new"
-                hovertext="Explore"
-                onClick={() => {
-                  // go to polygonscan explorer by address
-                  if (selectedAddr === "eth") {
-                    window.open(
-                      `https://polygonscan.com/address/${
-                        (selectedPKP as TokenInfo).ethAddress
-                      }`,
-                      "_blank"
-                    );
-                  }
-
-                  if (selectedAddr === "btc") {
-                    //  go to btc explorer by address
-                    window.open(
-                      `https://www.blockchain.com/btc/address/${
-                        (selectedPKP as TokenInfo).btcAddress
-                      }`,
-                      "_blank"
-                    );
-                  }
-                }}
-              />
-            </div>
-          </div>
+          )}
 
           <div className="separator-t flex flex-col">
             <LitButton className="lit-button-3" redirect="/">
@@ -221,8 +226,18 @@ export const LitConnect = () => {
             >
               <div className="lit-button-3-double-lines">
                 <span className="">
-                  Connected:
-                  {getShortAddress((selectedPKP as TokenInfo).tokenId)} <br />
+                  {Object.keys(selectedPKP).length <= 0 ? (
+                    <>
+                      No PKP Connected, Click to Connect
+                      <br />
+                    </>
+                  ) : (
+                    <>
+                      Connected:
+                      {getShortAddress((selectedPKP as TokenInfo).tokenId)}{" "}
+                      <br />
+                    </>
+                  )}
                 </span>
                 <span className="txt-grey">View Cloud Wallets</span>
               </div>
