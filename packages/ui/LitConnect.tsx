@@ -4,7 +4,7 @@ import { InjectedConnector } from "wagmi/connectors/injected";
 import { getShortAddress, TokenInfo } from "@lit-dev/utils";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { usePKPConnectionContext } from "./PKPConnectionContext";
+import { usePKPConnectionContext } from "./useContext/usePKPConnectionContext";
 import { LitIcon } from "./LitIcon";
 
 export const LitConnect = () => {
@@ -116,7 +116,9 @@ export const LitConnect = () => {
                 className="bg-error"
                 icon="shutdown"
                 hovertext="Logout"
-                onClick={() => disconnect()}
+                onClick={() => {
+                  disconnect();
+                }}
               />
             </div>
           </div>

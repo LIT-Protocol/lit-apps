@@ -3,6 +3,7 @@ import beautify from "json-beautify";
 import { NextPageContext } from "next";
 import { useEffect, useReducer } from "react";
 import {
+  AuthProviderContext,
   DivWithTitle,
   ELEventSelector,
   ELEventSelectorOptions,
@@ -17,10 +18,7 @@ import { ssFetch } from "../../utils/ssFetch";
 import toast from "react-hot-toast";
 import { validateParams } from "@lit-dev/utils/util-param-validator";
 import { useAccount } from "wagmi";
-import {
-  AuthProviderContext,
-  useAuthProviderContext,
-} from "../../utils/useAuth";
+
 
 type PageProp = {
   demoCode: string;

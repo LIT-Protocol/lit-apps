@@ -17,16 +17,20 @@ export * from "./LitConnect";
 export * from "./PKPCard";
 export * from "./StateReducer";
 export * from "./LitCopy";
-export * from "./PKPConnectionContext";
+export * from "./useContext/usePKPConnectionContext";
 export * from "./LitCard";
 export * from "./LitHero";
 export * from "./LitNote";
 export * from "./LitSelectV1";
 export * from "./DivWithTitle";
+export * from "./LitMint";
 
 // form
 export * from "./form/LitInputTextV1";
 export * from "./form/LitEditor";
+
+// useContext
+export * from "./useContext/useAuth";
 
 // event listener project
 export * from "./event-listener/ELHelloWorld";

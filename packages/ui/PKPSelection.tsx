@@ -7,8 +7,10 @@ import { LitCopy } from "./LitCopy";
 import { LitIcon } from "./LitIcon";
 import { LitLoading } from "./LitLoading";
 import { PKPCard } from "./PKPCard";
-import { usePKPConnectionContext } from "./PKPConnectionContext";
+import { usePKPConnectionContext } from "./useContext/usePKPConnectionContext";
 import { StateReducer } from "./StateReducer";
+import { LitButton } from "./LitButton";
+import { watchSigner } from "@wagmi/core";
 
 const fetchPKPs = async (
   walletAddress: string,
@@ -63,6 +65,32 @@ export const PKPSelection = ({
     data: [],
     loading: false,
   });
+
+  watchSigner(
+    {
+      chainId: 1,
+    },
+    async (provider) => {
+      dispatch({
+        type: "LOADING",
+        loadingMessage: "Fetching PKPs...",
+      });
+
+      const addr = (await provider?.getAddress()) as string;
+
+      const result = await fetchPKPs(
+        addr,
+        (tokens: Array<TokenInfo>, tokenInfo: TokenInfo, progress: number) => {
+          dispatch({
+            type: "LOADING",
+            loadingMessage: `Loading ${progress}%..`,
+          });
+        }
+      );
+
+      dispatch({ type: "SET_DATA", payload: { pkps: result } });
+    }
+  );
 
   useEffect(() => {
     async function loadData() {
@@ -125,8 +153,62 @@ export const PKPSelection = ({
     }
   };
 
-  if (state.loading || !state.data.pkps)
+  const onMint = async () => {
+    dispatch({
+      type: "LOADING",
+      loadingMessage: "Minting PKP...",
+    });
+
+    try {
+      const litContracts = new LitContracts({
+        debug: false,
+      });
+      await litContracts.connect();
+
+      const tx = await litContracts.pkpNftContractUtil.write.mint();
+      console.log("Tx: ", tx);
+      toast.success("Successfully minted PKP!", {
+        duration: 1000,
+      });
+
+      const result = await fetchPKPs(
+        address,
+        (tokens: Array<TokenInfo>, tokenInfo: TokenInfo, progress: number) => {
+          dispatch({
+            type: "LOADING",
+            loadingMessage: `Loading ${progress}%..`,
+          });
+        }
+      );
+
+      dispatch({ type: "SET_DATA", payload: { pkps: result } });
+    } catch (e: any) {
+      toast.error(e?.data?.message ?? "Error minting", {
+        duration: 1000,
+      });
+    }
+
+    dispatch({ type: "SET_DATA" });
+  };
+
+  if (state.data.pkps?.length <= 0) {
+    return (
+      <div className="flex flex-col gap-12">
+        <h2>Oops... it seems that you don't have any cloud wallets!</h2>
+        <div className="m-auto">
+          {state.loading ? (
+            <LitLoading icon="lit-logo" text={state.loadingMessage} />
+          ) : (
+            <LitButton onClick={onMint}>Mint PKP</LitButton>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (state.loading || !state.data.pkps) {
     return <LitLoading icon="lit-logo" text={state.loadingMessage} />;
+  }
 
   return (
     <div className="heading">

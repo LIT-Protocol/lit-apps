@@ -1,9 +1,8 @@
 import { JobData, MergedJob, safeFetch } from "@lit-dev/utils";
 import { useEffect, useState } from "react";
 import { sha256 } from "ethers/lib/utils";
-import { LitLoading } from "ui";
+import { AuthProviderContext, LitLoading } from "ui";
 import Bull from "bull";
-import { AuthProviderContext } from "../utils/useAuth";
 
 export function Tasks() {
   const [data, setData] = useState<any>();

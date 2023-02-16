@@ -398,3 +398,6 @@ a.alink {
 .uppercase {
   text-transform: uppercase;
 }
+.m-auto{
+  margin: auto;
+}
