@@ -37,3 +37,6 @@ export * from "./event-listener/ELHelloWorld";
 export * from "./event-listener/ELEventSelector";
 export * from "./event-listener/ELIntervalSelector";
 export * from "./event-listener/ELEventSelectorOptions";
+
+// radix
+export * from "./radix/AlertDialog/LitAlertDialog";

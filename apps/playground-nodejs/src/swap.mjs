@@ -1,4 +1,4 @@
-import * as litActionPkg from "@lit-dev/lit-actions";
+import { executeSwap, swapStubs } from "@lit-dev/lit-actions";
 import { ethers } from "ethers";
 import * as utilsPkg from "@lit-dev/utils";
 import * as dotenv from "dotenv";
@@ -6,7 +6,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const { getWalletAuthSig } = utilsPkg.default;
-const { executeSwap, swapStubs, validateParams } = litActionPkg.default;
+// const { executeSwap, swapStubs, validateParams } = litActionPkg.default;
 
 const serverAuthSig = await getWalletAuthSig({
   privateKey: process.env.SERVER_PRIVATE_KEY,
@@ -18,13 +18,22 @@ const res = await executeSwap({
     authSig: serverAuthSig,
     rpcUrl: "https://polygon.llamarpc.com",
     chain: "matic",
-    tokenIn: swapStubs.wmatic,
-    tokenOut: swapStubs.usdc,
+    tokenIn: swapStubs.usdc,
+    tokenOut: swapStubs.wmatic,
     pkp: {
       publicKey:
         "0499713b16636af841756431b73bd1a88d1837d110ae981ff3711c9239af95d8849b149fb6f2d46697b4d75c62ae4e63f8b8b941d4ca0a06a02b8b47d12f42b61d",
     },
     amountToSell: "0.1",
+    conditions: {
+      maxGasPrice: 75,
+      unit: "gwei",
+      minExceedPercentage: 1,
+      unless: {
+        spikePercentage: 15,
+        adjustGasPrice: 500,
+      },
+    },
   },
 });
 

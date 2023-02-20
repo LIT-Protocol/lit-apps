@@ -34,18 +34,27 @@ const fetchPKPs = async (
 
   // async for each
   for (let i = 0; i < tokenIds.length; i++) {
-    const tokenInfo = await ECDSAAddresses({
-      pkpTokenId: tokenIds[i],
-      options: {
-        cacheContractCall: true,
-      },
-    });
 
-    tokens.push(tokenInfo);
+    let tokenInfo: TokenInfo;
+    try {
+      tokenInfo = await ECDSAAddresses({
+        pkpTokenId: tokenIds[i],
+        options: {
+          cacheContractCall: true,
+        },
+      });
 
-    if (onProgress) {
-      const progress = parseInt((((i + 1) / tokenIds.length) * 100).toFixed(2));
-      onProgress(tokens, tokenInfo, progress);
+      tokens.push(tokenInfo);
+
+      if (onProgress) {
+        const progress = parseInt(
+          (((i + 1) / tokenIds.length) * 100).toFixed(2)
+        );
+        onProgress(tokens, tokenInfo, progress);
+      }
+    } catch (e) {
+      console.error(e);
+      continue;
     }
   }
 
