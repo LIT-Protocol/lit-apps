@@ -46,6 +46,7 @@ export default async function handler(
   }
 
   const message = `Delete job id: ${jobId}`;
+  console.log("jobid:", jobId);
 
   // convert message to hash
   const messageHash = ethers.utils.hashMessage(message);
@@ -55,21 +56,15 @@ export default async function handler(
     console.log("Valid signature - message was signed by the registered user");
 
     // find and delete job
-    const jobs = [
-      ...(await blockEventWaitingList.getJobs(["waiting", "active"])),
-      ...(await blockEventProcessingList.getJobs(["waiting", "active"])),
-    ];
+    const jobs = await blockEventWaitingList.getJobs(["waiting", "active"]);
 
     const job = jobs.find((item: any) => item.id === jobId);
 
-    if (job) {
-      await job.remove();
-    }
+    await job?.remove();
 
     res.status(200).json({
       message: `${jobId} deleted successfully`,
     });
-    
   } else {
     console.log(
       "Invalid signature - message was not signed by the registered user"

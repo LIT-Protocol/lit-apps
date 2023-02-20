@@ -22,9 +22,11 @@ export default async function handler(
   const log = new Logger();
   log.info("called => api/get-jobs.ts");
 
+  const { address } = req.body;
+
   //   test redis connection
 
-  const searchTerm = "0x3B5dD260598B7579A0b015A1F3BBF322aDC499A1";
+  const searchTerm = address;
 
   const blockEventWaitingJobs = await blockEventWaitingList.getJobs([
     "waiting",

@@ -9,14 +9,18 @@ import { ethers } from "ethers";
 import { arrayify, joinSignature, keccak256 } from "ethers/lib/utils.js";
 import { serialize } from "@ethersproject/transactions";
 import toast from "react-hot-toast";
+import { useAccount } from "wagmi";
 
 export function Tasks() {
   const [data, setData] = useState<any>();
   const [modalOpened, setModalOpened] = useState(false);
   const [deleteJob, setDeleteJob] = useState<Bull.Job>();
+  const { address, isConnected } = useAccount();
 
   const fetchData = async () => {
-    const res = await safeFetch("/api/get-jobs");
+    const res = await safeFetch("/api/get-jobs", {
+      address,
+    });
 
     setData(res.data);
   };
@@ -57,19 +61,17 @@ export function Tasks() {
         signature: signature,
       },
       (e: any) => {
+        toast.error("Oops, something went wrong");
         console.log(e);
       }
     );
 
-    if (res.status === 200) {
-      setModalOpened(false);
-      toast.success("Job deleted successfully");
-    } else {
-      toast.error("Oops, something went wrong");
-    }
+    setModalOpened(false);
+    toast.success("Job deleted successfully");
+    fetchData();
   };
 
-  const renderItem = (job: Bull.Job) => {
+  const renderItem = (job: Bull.Job, { hideDelete = false }) => {
     // convert job.data.name to buffer
     const buf = Buffer.from(job.data.name, "base64");
     // convert buffer to hash
@@ -90,16 +92,20 @@ export function Tasks() {
           <div>Event Params: {JSON.stringify(jobData.eventParams)}</div>
           <div>Ipfs ID: {jobData.ipfsId}</div>
         </div>
-        <div className="">
-          <LitButton
-            onClick={() => {
-              setModalOpened(true);
-              setDeleteJob(job);
-            }}
-          >
-            Delete
-          </LitButton>
-        </div>
+        {hideDelete ? (
+          ""
+        ) : (
+          <div className="">
+            <LitButton
+              onClick={() => {
+                setModalOpened(true);
+                setDeleteJob(job);
+              }}
+            >
+              Delete
+            </LitButton>
+          </div>
+        )}
       </div>
     );
   };
@@ -167,13 +173,13 @@ export function Tasks() {
             <div className="flex flex-col">
               <h3 className="mb-12">Waiting jobs: {data.waitingJobs.length}</h3>
               {data.waitingJobs.map((job: Bull.Job) => {
-                return renderItem(job);
+                return renderItem(job, { hideDelete: false });
               })}
               <h3 className="mb-12">
                 Processing jobs: {data.processingJobs.length}
               </h3>
               {data.processingJobs.map((job: any) => {
-                return renderItem(job);
+                return renderItem(job, { hideDelete: true });
               })}
 
               <h3 className="mb-12">
