@@ -1021,7 +1021,6 @@ p {
 }
 
 [data-lit-theme="purple"] .pkp-card {
-  font-family: var(--brand-font);
   border-radius: var(--lit-border-radius);
   padding: 12px;
   margin-bottom: 12px;
