@@ -1,1 +1,1 @@
-web: cd apps/event-listener-be && yarn start
+worker: cd apps/event-listener-be && yarn start
