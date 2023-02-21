@@ -21,7 +21,7 @@ const bootstrap = async () => {
 
   await litNodeClient.connect();
   log.warning(`LitNodeClient connected`);
-
+  LitJsSdk
   const serverAuthSig = await getWalletAuthSig({
     privateKey: process.env.SERVER_PRIVATE_KEY,
     chainId: 80001,
@@ -36,6 +36,7 @@ const bootstrap = async () => {
     litNodeClient,
     serverAuthSig,
   });
+
 
   blockListener.start({
     // beforeEnd: () => {

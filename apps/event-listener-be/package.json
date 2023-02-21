@@ -22,5 +22,12 @@
     "eslint-config-custom": "*",
     "tsconfig": "*",
     "typescript": "^4.5.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "packageManager": "yarn@1.22.19",
+  "resolutions": {
+    "ethereumjs-abi": "https://registry.npmjs.org/ethereumjs-abi/-/ethereumjs-abi-0.6.8.tgz"
   }
 }
