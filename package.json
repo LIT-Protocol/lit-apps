@@ -7,11 +7,11 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
-    "lint": "turbo run lint",
+    "build": "yarn turbo run build",
+    "dev": "yarn turbo run dev --parallel",
+    "lint": "yarn turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "dev:el": "turbo dev --filter event-listener-fe --filter event-listener-be"
+    "dev:el": "yarn turbo dev --filter event-listener-fe --filter event-listener-be"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
