@@ -7,11 +7,12 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
-    "lint": "turbo run lint",
+    "build": "./node_modules/turbo/bin/turbo run build",
+    "dev": "./node_modules/turbo/bin/turbo run dev --parallel",
+    "lint": "./node_modules/turbo/bin/turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "dev:el": "turbo dev --filter event-listener-fe --filter event-listener-be"
+    "dev:el": "./node_modules/turbo/bin/turbo dev --filter event-listener-fe --filter event-listener-be",
+    "postinstall": "./node_modules/turbo/bin/turbo"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
