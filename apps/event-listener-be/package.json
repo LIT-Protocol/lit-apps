@@ -5,12 +5,13 @@
   "scripts": {
     "dev": "nodemon --watch src --ext js,ts --exec \"tsx src/main.ts\"",
     "build": "node esbuild.mjs",
-    "start": "node dist/main.js"
+    "start": "pm2-runtime start ecosystem.config.js --env production"
   },
   "dependencies": {
     "bull": "^4.10.2",
     "esbuild": "^0.17.5",
     "ethers": "^5.7.2",
+    "pm2": "^5.2.2",
     "utils": "*"
   },
   "devDependencies": {
