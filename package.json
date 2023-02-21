@@ -11,7 +11,12 @@
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "dev:el": "turbo dev --filter event-listener-fe --filter event-listener-be"
+    "dev:el": "turbo dev --filter event-listener-fe --filter event-listener-be",
+    "build:el:fe": "turbo run build --filter event-listener-fe",
+    "build:el:be": "turbo run build --filter event-listener-be",
+    "prod-el:fe": "yarn run build:el:fe",
+    "prod-el:be": "yarn run build:el:be",
+    "heroku-postbuild": "if [ $CLIENT_ENV ]; then yarn run prod-el:fe; elif [ $SERVER_ENV ]; then yarn run prod-el:be; else echo no environment detected, please set CLIENT_ENV or SERVER_ENV; fi"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
