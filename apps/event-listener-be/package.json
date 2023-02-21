@@ -22,8 +22,5 @@
     "eslint-config-custom": "*",
     "tsconfig": "*",
     "typescript": "^4.5.3"
-  },
-  "engines": {
-    "node": "18.x"
   }
 }
