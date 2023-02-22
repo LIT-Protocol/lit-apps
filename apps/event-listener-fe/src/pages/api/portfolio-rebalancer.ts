@@ -65,16 +65,16 @@ export default async function handler(
 
   // try to run rebalance
   let rebalance;
-  try {
-    rebalance = await runBalancePortfolio(jsParams, serverAuthSig);
-  } catch (e) {
-    res.status(500).json({
-      data: {
-        message: "rebalance failed",
-      },
-    });
-    return;
-  }
+  // try {
+  //   rebalance = await runBalancePortfolio(jsParams, serverAuthSig);
+  // } catch (e) {
+  //   res.status(500).json({
+  //     data: {
+  //       message: "rebalance failed",
+  //     },
+  //   });
+  //   return;
+  // }
 
   res.status(200).json({ data: { rebalance } });
 }
