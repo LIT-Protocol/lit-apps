@@ -14,7 +14,7 @@
     "dev:el": "turbo dev --filter event-listener-fe --filter event-listener-be",
     "build:el:fe": "turbo run build --filter event-listener-fe",
     "build:el:be": "turbo run build --filter event-listener-be",
-    "heroku-postbuild": "if [ $CLIENT_ENV ]; then yarn build:el:fe; elif [ $SERVER_ENV ]; then yarn run build:el:be; else echo no environment detected, please set CLIENT_ENV or SERVER_ENV; fi"
+    "heroku-postbuild": "if [ \"$APP_ENV\" = \"event-listener-fe\" ]; then yarn build:el:fe; elif [ \"$APP_ENV\" = \"event-listener-be\" ]; then yarn run build:el:be; else echo no environment detected, please set APP_ENV; fi"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
