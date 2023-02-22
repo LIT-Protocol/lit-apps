@@ -152,19 +152,40 @@ export class BlockListener implements ActionListener {
         const isRebalancer = jobName.toLowerCase().includes("mock_rebalancer");
 
         if (isRebalancer) {
-          log.warning(`Rebalancer job detected, skipping...`);
+          log.warning(`Rebalancer job detected, using custom logic`);
+          const ipfsId = jobData.ipfsId.split("-")[1];
+          log.warning(`ipfsId: ${ipfsId}`);
 
           if (typeof jobData.jsParams === "string") {
             jobData.jsParams = JSON.parse(jobData.jsParams);
           }
 
           try {
-            const rebalance = await runBalancePortfolio(
-              jobData.jsParams as any,
-              serverAuthSig
-            );
+            // execute task
+            let res = await litNodeClient.executeJs({
+              ipfsId,
+              authSig: serverAuthSig,
+              jsParams: {
+                publicKey: (jobData.jsParams as any).pkpPublicKey,
+                toSign: [1, 2, 3, 4, 5],
+                sigName: "portfolio-rebalancer-test",
+                ...(jobData.jsParams as Object),
+              },
+            });
 
-            log.info(`Rebalance result: ${JSON.stringify(rebalance)}`);
+            log.info(`Result: ${JSON.stringify(res)}`);
+
+            try {
+              const rebalance = await runBalancePortfolio(
+                jobData.jsParams as any,
+                serverAuthSig,
+                ipfsId
+              );
+
+              log.info(`Rebalance result: ${JSON.stringify(rebalance)}`);
+            } catch (e) {
+              log.error(`Error: ${e.message}`);
+            }
           } catch (e) {
             log.error(`Error: ${e.message}`);
           }

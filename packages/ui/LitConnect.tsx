@@ -157,18 +157,18 @@ export const LitConnect = () => {
                       <LitIcon
                         className="flex center-item"
                         icon={`${
-                          selectedAddr === "btc" ? "greendot" : "greydot"
+                          selectedAddr === "pub" ? "greendot" : "greydot"
                         }`}
                       />
                     </div>
                     <div
-                      onClick={() => setSelectedAddr("btc")}
+                      onClick={() => setSelectedAddr("pub")}
                       className={`click-allowed text-sm ${
-                        selectedAddr === "btc" ? "" : "txt-grey"
+                        selectedAddr === "pub" ? "" : "txt-grey"
                       }`}
                     >
-                      PKP:BTC:
-                      {getShortAddress((selectedPKP as TokenInfo).btcAddress)}
+                      PKP:PUB:
+                      {getShortAddress((selectedPKP as TokenInfo).publicKey)}
                     </div>
                   </div>
 
@@ -185,7 +185,7 @@ export const LitConnect = () => {
                     handleCopy(
                       selectedAddr === "eth"
                         ? (selectedPKP as TokenInfo).ethAddress
-                        : (selectedPKP as TokenInfo).btcAddress
+                        : (selectedPKP as TokenInfo).publicKey
                     )
                   }
                 />

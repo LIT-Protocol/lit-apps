@@ -44,7 +44,7 @@ https://jestjs.io/docs/getting-started#using-babel
 
 [] Upon building, add root .env to projects that are depended on
 
-# Deploy Notes
+# Deploy Notes & Stack
 
 - The whole repo is deployed to Heroku, but we use Procfile to separate the apps (see https://dev.to/tgmarinhodev/how-to-deploy-a-monorepo-with-turborepo-on-heroku-3ge4)
 
@@ -60,6 +60,13 @@ https://jestjs.io/docs/getting-started#using-babel
     web: cd apps/event-listener-fe && yarn start
     ```
 
+```
+heroku buildpacks:add -a event-listener-fe heroku/nodejs
+heroku buildpacks:add -a event-listener-fe heroku/nodejs
+
+heroku buildpacks:add -a event-listener-be heroku-community/multi-procfile
+heroku buildpacks:add -a event-listener-be heroku/nodejs
+```
 
 - pm2-runtime is used for worker app, it will be connected to the pm2 dashboard automatically when PM2_PUBLIC_KEY and PM2_SECRET_KEY env keys are provided
 

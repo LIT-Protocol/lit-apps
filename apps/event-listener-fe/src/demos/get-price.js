@@ -87,7 +87,7 @@ const getUSDPrice = async (symbol) => {
     jsParams.tokenSymbol = tokenSymbol;
     jsParams.minSellPrice = minSellPrice;
   } catch (e) {
-    console.error("[ERROR] tokenSymbol is required");
+    // console.error("[ERROR] tokenSymbol is required");
     return;
   }
 

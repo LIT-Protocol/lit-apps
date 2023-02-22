@@ -182,18 +182,21 @@ export async function runBalancePortfolio(
     },
     rpcUrl = "https://polygon.llamarpc.com",
     dryRun = true,
+    isDemo = true,
   },
-  serverAuthSig
+  serverAuthSig,
+  ipfsId,
 ) {
   // -- validate
   // if any of the required params are missing, throw an error
-  if (!tokens || !pkpPublicKey || !strategy || !serverAuthSig) {
+  if (!tokens || !pkpPublicKey || !strategy || !serverAuthSig || !ipfsId) {
     // check which params are missing
     const missingParams = [];
     if (!tokens) missingParams.push("tokens");
     if (!pkpPublicKey) missingParams.push("pkpPublicKey");
     if (!strategy) missingParams.push("strategy");
     if (!serverAuthSig) missingParams.push("serverAuthSig");
+    if (!ipfsId) missingParams.push("ipfsId");
 
     // throw an error with the missing params
     throw new Error(`Missing params: ${missingParams.join(", ")}`);
@@ -315,6 +318,7 @@ export async function runBalancePortfolio(
         conditions: {
           maxGasPrice: _maxGasPrice,
         },
+        ipfsId,
       },
     });
   } catch (e) {

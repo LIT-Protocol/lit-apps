@@ -18,11 +18,13 @@ import { ssFetch } from "../../utils/ssFetch";
 import toast from "react-hot-toast";
 import { validateParams } from "@lit-dev/utils/util-param-validator";
 import { useAccount } from "wagmi";
-
+import { LitContracts } from "@lit-protocol/contracts-sdk";
 
 type PageProp = {
   demoCode: string;
   demoParams: string;
+  signCode: string;
+  signParams: string;
 };
 
 export default function PortfolioRebalancer(ssProp: PageProp) {
@@ -45,6 +47,9 @@ export default function PortfolioRebalancer(ssProp: PageProp) {
   const runPipeline = async () => {
     console.warn("state.data:", state.data);
 
+    // -------------------------------
+    //          Validations
+    // -------------------------------
     const check_1 = validateParams("must_have", [
       {
         "Lit Action Code": state.data.jsCode,
@@ -66,6 +71,46 @@ export default function PortfolioRebalancer(ssProp: PageProp) {
       return;
     }
 
+    // --------------------------------------------------------
+    //          Uploading to Lit Action Code to IPFS
+    // --------------------------------------------------------
+    console.log("ssProp.signCode:", ssProp.signCode);
+    dispatch({
+      type: "LOADING",
+      loadingMessage: "Uploading Lit Action...",
+    });
+
+    const registerData = await safeFetch(
+      "/api/register-lit-action",
+      ssProp.signCode as any,
+      (e: Error) => {
+        dispatch({ type: "SET_DATA" });
+        toast.error(e.message);
+      }
+    );
+
+    // ----------------------------------------------------
+    //          Permit Lit Action to use the PKP
+    // ----------------------------------------------------
+    const contract = new LitContracts();
+    await contract.connect();
+
+    let addPermittedActionRes;
+
+    try {
+      addPermittedActionRes =
+        await contract.pkpPermissionsContractUtil.write.addPermittedAction(
+          selectedPKP.tokenId,
+          registerData.data.IpfsHash
+        );
+      console.log("addPermittedActionRes:", addPermittedActionRes);
+    } catch (e: any) {
+      toast.error("Error permitting action");
+      console.error("e:", e);
+      dispatch({ type: "SET_DATA" });
+      return;
+    }
+
     dispatch({
       type: "LOADING",
       loadingMessage: "Submitting Job...",
@@ -76,7 +121,7 @@ export default function PortfolioRebalancer(ssProp: PageProp) {
       {
         ownerAddress: address,
         pkpInfo: selectedPKP,
-        ipfsId: "MOCK_REBALANCER",
+        ipfsId: `MOCK_REBALANCER-${registerData.data.IpfsHash}`,
         jsParams: state.data.jsonCode,
         eventType: state.data.event?.name,
         eventParams: state.data.eventOptions,
@@ -250,9 +295,18 @@ export async function getServerSideProps(ctx: NextPageContext) {
 
   const data: any = await ssFetch(ctx, option).then((res) => res.json());
 
+  const signCodeData: any = await ssFetch(ctx, {
+    path: "api/demo-code",
+    body: {
+      fileName: "sign",
+    },
+  }).then((res) => res.json());
+
   const ssProp: PageProp = {
     demoCode: data.code,
     demoParams: data.jsParams,
+    signCode: signCodeData.code,
+    signParams: signCodeData.jsParams,
   };
 
   return {

@@ -114,7 +114,7 @@ export const executeSwap = async ({ jsParams }) => {
   //          Checking JS Params
   // --------------------------------------
 
-  const { tokenIn, tokenOut, pkp, authSig, amountToSell, rpcUrl, conditions } =
+  const { tokenIn, tokenOut, pkp, authSig, amountToSell, rpcUrl, conditions, ipfsId } =
     jsParams;
 
   // if pkp.public key doesn't start with 0x, add it
@@ -286,7 +286,8 @@ export const executeSwap = async ({ jsParams }) => {
     // sign the tx (with lit action)
     const sigName = "approve-tx-sig";
     const res = await LitActions.call({
-      code: Code.signEcdsa,
+      // code: Code.signEcdsa,
+      ipfsId,
       authSig,
       jsParams: {
         toSign: message,
@@ -374,7 +375,8 @@ export const executeSwap = async ({ jsParams }) => {
     // sign the tx (with lit action)
     const sigName = "swap-tx-sig";
     const res = await LitActions.call({
-      code: Code.signEcdsa,
+      // code: Code.signEcdsa,
+      ipfsId,
       authSig,
       jsParams: {
         toSign: message,
