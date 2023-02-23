@@ -128,12 +128,42 @@ export const ECDSAAddresses = async ({
     throw new Error(errors.join(", "));
   }
 
+  // https://docs.cosmos.network/main/spec/addresses/bech32
+  // To covert between other binary representation of addresses and keys, 
+  // it is important to first apply the Amino encoding process before Bech32 encoding.
+  // PubKeySecp256k1	tendermint/PubKeySecp256k1	0xEB5AE987	0x21
+  // https://github.com/tendermint/tendermint/blob/d419fffe18531317c28c29a292ad7d253f6cafdf/docs/spec/blockchain/encoding.md#public-key-cryptography
+  function getCosmosAddress(pubkeyBuffer: Buffer) {
+    const hash = bitcoinjs.crypto.sha256(pubkeyBuffer);
+    const ripemd160 = bitcoinjs.crypto.ripemd160(hash);
+
+    // first apply the Amino encoding process
+    const aminoPrefix = Buffer.from("eb5ae987", "hex");
+    const aminoBuffer = Buffer.concat([aminoPrefix, ripemd160]);
+
+    // then bech32 encode the result
+    const cosmosAddress = bitcoinjs.address.toBech32(
+      aminoBuffer,
+      0,
+      "cosmos"
+    );
+
+    return cosmosAddress;
+  
+  }
+
+  // get cosmos address from the public key
+  const cosmosAddress = getCosmosAddress(pubkeyBuffer);
+
+  console.log("cosmosAddress", cosmosAddress);
+
   return {
     tokenId: pkpTokenId,
     publicKey: `0x${publicKey}`,
     publicKeyBuffer: pubkeyBuffer,
     ethAddress,
     btcAddress,
+    cosmosAddress,
     isNewPKP,
   };
 };

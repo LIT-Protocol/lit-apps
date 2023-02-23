@@ -72,6 +72,7 @@ export type TokenInfo = {
   publicKeyBuffer: Buffer;
   ethAddress: string;
   btcAddress: string;
+  cosmosAddress: string;
   isNewPKP: boolean;
 };
 

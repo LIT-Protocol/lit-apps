@@ -282,6 +282,9 @@ export const PKPSelection = ({
                       )}`}
                     />
                   </div>
+                  <div>
+                    cosmos:{pkp.cosmosAddress}
+                  </div>
                 </div>
                 {!selected ? (
                   ""

@@ -21,11 +21,6 @@ export default function App({ Component, pageProps }: AppProps | any) {
           <Toaster />
           <Head>
             <title>{appName}</title>
-            <script
-              defer
-              data-domain="event-listener.litgateway.com"
-              src="https://plausible.io/js/script.js"
-            ></script>
           </Head>
           <ThemeA className="app" data-lit-theme="purple">
             <LitHeaderV1 title={appName} />
