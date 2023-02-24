@@ -211,6 +211,7 @@ button {
   color: var(--violet11);
   box-shadow: 0 2px 10px var(--blackA7);
   cursor: pointer;
+  text-decoration: none;
 }
 .SelectTrigger:hover,
 .lit-button:hover {

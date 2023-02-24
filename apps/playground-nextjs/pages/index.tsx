@@ -1,24 +1,28 @@
-import { BrandLogo, Button, ThemeA } from "ui";
-import { hello } from "@lit-dev/utils";
-import { useEffect } from "react";
+import { useState } from "react";
+import { LitButton } from "ui";
+import "ui/theme.purple.css";
 
 export default function Web() {
-  useEffect(() => {
-    hello();
-  });
+  const [links, setLinks] = useState([
+    {
+      name: "Simple Encrypt Decrypt Demo",
+      path: "/simple-encrypt-decrypt",
+    },
+  ]);
 
   return (
-    <ThemeA>
-      <div className="flex flex-col center p-12">
-        <h1>Demos</h1>
+    <div className="flex flex-col center p-12">
+      <h1>Lit Demo Apps</h1>
 
-        <ul>
-          <li>
-            {" "}
-            <a href="/simple-encrypt-decrypt">Simple Encrypt Decrypt Page</a>
+      <ul className="flex flex-col gap-8 pt-24">
+        {links.map((link, index) => (
+          <li key={index}>
+            <LitButton className="lit-button-2" redirect={link.path}>
+              {link.name}
+            </LitButton>
           </li>
-        </ul>
-      </div>
-    </ThemeA>
+        ))}
+      </ul>
+    </div>
   );
 }

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@lit-dev/utils": "*",
-    "@lit-protocol/lit-node-client": "^2.1.27",
+    "@lit-protocol/lit-node-client": "^2.1.42",
     "@monaco-editor/react": "^4.4.6",
     "next": "^13.1.1",
     "react": "^18.2.0",

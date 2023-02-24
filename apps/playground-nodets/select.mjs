@@ -14,7 +14,10 @@ const FILE_NAME = args[0];
 const ARGS = args.join(" ");
 
 if (!FILE_NAME || FILE_NAME === "") {
-  redLog("file name is required", true);
+  redLog(`file name is required:`, true);
+  redLog(`turbo dev --filter playground-nodets -- main.ts`, true);
+  redLog(`or`, true);
+  redLog(`yarn dev:notets main.ts`, true);
   exit();
 }
 
