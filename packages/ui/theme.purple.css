@@ -1072,6 +1072,8 @@ p {
   align-items: center;
   margin-left: auto;
   padding-right: 4px;
+  pointer-events: none;
+  min-width: 120px;
 }
 
 [data-lit-theme="purple"] .pkp-card-tick div {

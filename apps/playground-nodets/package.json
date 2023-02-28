@@ -10,7 +10,7 @@
   "dependencies": {
     "@lit-dev/lit-actions": "*",
     "@lit-dev/utils": "*",
-    "@lit-protocol/lit-node-client": "^2.1.28",
+    "@lit-protocol/lit-node-client": "^2.1.43",
     "dotenv": "^16.0.3",
     "esbuild": "^0.17.5",
     "ethers": "^5.7.2"

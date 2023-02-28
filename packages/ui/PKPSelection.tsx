@@ -34,7 +34,6 @@ const fetchPKPs = async (
 
   // async for each
   for (let i = 0; i < tokenIds.length; i++) {
-
     let tokenInfo: TokenInfo;
     try {
       tokenInfo = await ECDSAAddresses({
@@ -190,6 +189,8 @@ export const PKPSelection = ({
         }
       );
 
+      console.log("result:", result);
+
       dispatch({ type: "SET_DATA", payload: { pkps: result } });
     } catch (e: any) {
       toast.error(e?.data?.message ?? "Error minting", {
@@ -221,7 +222,12 @@ export const PKPSelection = ({
 
   return (
     <div className="heading">
-      <h3>My Cloud Wallets</h3>
+      <div className="flex gap-12">
+        <h3>My Cloud Wallets</h3>
+        <LitButton className="lit-button-5" onClick={onMint}>
+          Mint PKP
+        </LitButton>
+      </div>
       <div className="pkp-cards">
         {state.data.pkps.map((pkp: TokenInfo, i: number) => {
           // skip if pkp is undefined
@@ -282,17 +288,13 @@ export const PKPSelection = ({
                       )}`}
                     />
                   </div>
-                  <div>
+                  {/* <div>
                     cosmos:{pkp.cosmosAddress}
-                  </div>
+                  </div> */}
                 </div>
-                {!selected ? (
-                  ""
-                ) : (
-                  <div className="pkp-card-tick">
-                    <LitIcon icon="tick" />
-                  </div>
-                )}
+                <div className="pkp-card-tick">
+                  {!selected ? "Select" : <LitIcon icon="tick" />}
+                </div>
               </div>
               <div></div>
             </PKPCard>

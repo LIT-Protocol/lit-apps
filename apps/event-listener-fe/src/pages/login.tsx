@@ -54,13 +54,13 @@ export function Login() {
         <div className="mb-36">
           <LitLoading
             icon="lit-logo"
-            text="Please connect to your cloud wallet to continue"
+            text="Please select to your cloud wallet to continue"
           />
         </div>
       ) : (
         ""
       )}
-      {!_isConnected || !address ? (
+      {!isConnected || !address ? (
         <LitLoading icon="lit-logo" text={state.loadingMessage} />
       ) : (
         <PKPSelection

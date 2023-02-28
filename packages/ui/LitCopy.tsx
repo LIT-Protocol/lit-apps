@@ -8,7 +8,7 @@ export const LitCopy = (props: any) => {
 
     navigator.clipboard.writeText(props.copyText);
 
-    toast(`🔥 Copied ${props.text}`, { duration: 500 });
+    toast(`🔥 Copied ${props.text}`, { duration: 1000 });
   };
 
   return (

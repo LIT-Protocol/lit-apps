@@ -6,7 +6,6 @@ import { Toaster } from "react-hot-toast";
 import { hotjar } from "react-hotjar";
 import { useEffect } from "react";
 import PlausibleProvider from "next-plausible";
-
 export default function App({ Component, pageProps }: AppProps | any) {
   const appName = `Lit Actions Event Listener`;
 
