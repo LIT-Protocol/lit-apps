@@ -250,7 +250,7 @@ export const PKPSelection = ({
                 <div className="flex flex-col">
                   <div className="pkp-card-title flex space-between">
                     <LitCopy
-                      copyText={pkp.publicKey}
+                      copyText={pkp.tokenId}
                       text={`#${i + 1} | Token ID: ${getShortAddress(
                         pkp.tokenId,
                         8,
@@ -270,7 +270,7 @@ export const PKPSelection = ({
                   </div>
                   <div className="pkp-card-addr flex space-between">
                     <LitCopy
-                      copyText={pkp.publicKey}
+                      copyText={pkp.ethAddress}
                       text={`ETH Address: ${getShortAddress(
                         pkp.ethAddress,
                         8,
@@ -280,7 +280,7 @@ export const PKPSelection = ({
                   </div>
                   <div className="pkp-card-addr flex space-between">
                     <LitCopy
-                      copyText={pkp.publicKey}
+                      copyText={pkp.btcAddress}
                       text={`BTC Address: ${getShortAddress(
                         pkp.btcAddress,
                         8,
@@ -288,9 +288,16 @@ export const PKPSelection = ({
                       )}`}
                     />
                   </div>
-                  {/* <div>
-                    cosmos:{pkp.cosmosAddress}
-                  </div> */}
+                  <div className="pkp-card-addr flex space-between">
+                    <LitCopy
+                      copyText={pkp.cosmosAddress}
+                      text={`Cosmos Address: ${getShortAddress(
+                        pkp.cosmosAddress,
+                        8,
+                        4
+                      )}`}
+                    />
+                  </div>
                 </div>
                 <div className="pkp-card-tick">
                   {!selected ? "Select" : <LitIcon icon="tick" />}
