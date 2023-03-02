@@ -133,14 +133,14 @@ const convertBigNumber = (bigNumberObj) => {
         ...(args !== null ? args : {}),
         ...{
           RPC_URL: ENV_RPC,
-          TOKEN_IN: {
+          TOKEN_OUT: {
             chainId: ENV_CHAIN_ID,
             decimals: 18,
             address: ENV_WMATIC_ADDRESS,
             symbol: "WMATIC",
             name: "Wrapped Matic",
           },
-          TOKEN_OUT: {
+          TOKEN_IN: {
             chainId: ENV_CHAIN_ID,
             decimals: 6,
             address: ENV_WUSD_ADDRESS,
@@ -527,7 +527,7 @@ const convertBigNumber = (bigNumberObj) => {
   // testWithoutSendTx("GET_ALLOWANCE");
   // testAndSendTx("TEST_GET_UNSIGNED_TX");
   // await testAndSendTx("GET_APPROVE_UNSIGNED_TX");
-  // await testAndSendTx("GET_SWAP_UNSIGNED_TX");
+  await testAndSendTx("GET_SWAP_UNSIGNED_TX");
   // testAndSendTx("GET_REVOKE_APPROVE_UNSIGNED_TX");
   // testWithoutSendTx("SIGN_TX", {
   //   sigName: "test-sign-tx",
@@ -553,5 +553,5 @@ const convertBigNumber = (bigNumberObj) => {
 
   // runAll();
   // testCombineShares();
-  testLocalSwap();
+  // testLocalSwap();
 })();

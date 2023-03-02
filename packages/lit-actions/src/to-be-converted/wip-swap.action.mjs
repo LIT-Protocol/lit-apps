@@ -1,9 +1,8 @@
 /**
- * NAME: Execute Uniswap Swap
- * DESCRIPTION: This Lit Action allows you to swap tokens using the Uniswap Router
- * NOTE: This is a work in progress. Each function is separated into commands
- * so that it can be executed individually. This is to avoid the 30 seconds rate limit.
- * A 'ALL' command is also available to run all commands, which will take longer than 30 seconds, and will probably need a rate limit NFT to increae its rate limits.
+ * Lit Action Name: Execute Uniswap Swap
+ * Version: 0.0.95
+ * Description: This Lit Action allows you to swap tokens using the Uniswap Router (This is a work in progress. Each function is separated so that it could be executed individually. This is to avoid the 30 seconds rate limit(for this demo). A 'ALL' command is also available to run all commands, which will take longer than 30 seconds, and will probably need a rate limit NFT to increae its rate limits.)
+ * Author: Anson <anson@litprotocol.com>
  * 
  * Available commands:
  * ---------------------------------------------------------------------
@@ -69,6 +68,17 @@
       },
     });
   }
+  *
+  * Example of calling a particular function:
+  * ---------------------------------------------------------------------
+  // Calling without arguments
+  const res = await runLitAction("GET_ALLOWANCE");
+
+  // Calling with arguments
+  const sendApproveTx = await runLitAction("SEND_TX", {
+    unsignedTx: (res.response as any).unsignedApproveTx,
+    encodedSig: approveEncodedSig,
+  });
  */
 
 /**
@@ -164,10 +174,7 @@ const getEncodedSignature = (sig) => {
 const getBasicTxInfo = async ({ walletAddress, provider }) => {
   try {
     const nonce = await provider.getTransactionCount(walletAddress);
-    // const gasPrice = ethers.utils.parseUnits(
-    //   (await provider.getGasPrice()).toString(),
-    //   "gwei"
-    // );
+
     const gasPrice = await provider.getGasPrice();
 
     const chainId = (await provider.getNetwork()).chainId;
@@ -733,10 +740,12 @@ const getRunAll = async () => {
 
   return {
     allowance,
+
     // approve tx
     unsignedApproveTx,
     unsignedApproveBuffer,
     signedApproveTx,
+
     // swap tx
     unsignedSwapTx,
     unsignedSwapBuffer,
