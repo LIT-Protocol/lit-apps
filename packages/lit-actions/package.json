@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@lit-dev/utils": "*",
-    "@lit-protocol/lit-node-client": "^2.1.16",
+    "@lit-protocol/lit-node-client": "^2.1.47",
     "dotenv": "^16.0.3"
   },
   "devDependencies": {

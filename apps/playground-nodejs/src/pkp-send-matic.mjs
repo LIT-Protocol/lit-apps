@@ -44,7 +44,7 @@ if (!AMOUNT_TO_SEND || AMOUNT_TO_SEND === "" || isNaN(AMOUNT_TO_SEND)) {
 // -------------------------
 
 const decimals = await utilsPkg.default.ERC20.getDecimals(
-  process.env.MATIC_NATIVE_ADDRESS,
+  process.env.MATIC_WMATIC_ADDRESS,
   new ethers.providers.JsonRpcProvider(process.env.MATIC_RPC)
 );
 
@@ -112,7 +112,7 @@ try {
     redLog("Insufficient funds, try a smaller amount");
 
     const yourBalance = await utilsPkg.default.ERC20.getBalance(
-      process.env.MATIC_NATIVE_ADDRESS,
+      process.env.MATIC_WMATIC_ADDRESS,
       new ethers.providers.JsonRpcProvider(process.env.MATIC_RPC),
       computeAddress(process.env.PKP_PUBLIC_KEY)
     );

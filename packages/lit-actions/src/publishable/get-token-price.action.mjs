@@ -77,23 +77,23 @@ const getUSDPrice = async (symbol) => {
   return respond({ status: 200, data: data.USD });
 };
 
-(async () => {
-  // --------------------------------------
-  //          JS Params Handling
-  // --------------------------------------
-  const jsParams = {};
+// (async () => {
+//   // --------------------------------------
+//   //          JS Params Handling
+//   // --------------------------------------
+//   const jsParams = {};
 
-  try {
-    jsParams.tokenSymbol = tokenSymbol;
-  } catch (e) {
-    console.error("[ERROR] tokenSymbol is required");
-    return;
-  }
+//   try {
+//     jsParams.tokenSymbol = tokenSymbol;
+//   } catch (e) {
+//     console.error("[ERROR] tokenSymbol is required");
+//     return;
+//   }
 
-  // -----------------------
-  //          GO!
-  // -----------------------
-  const res = await getUSDPrice(jsParams.tokenSymbol);
+//   // -----------------------
+//   //          GO!
+//   // -----------------------
+//   const res = await getUSDPrice(jsParams.tokenSymbol);
 
-  console.log("res:", res);
-})();
+//   console.log("res:", res);
+// })();

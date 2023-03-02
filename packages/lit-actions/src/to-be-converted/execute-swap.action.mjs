@@ -114,8 +114,16 @@ export const executeSwap = async ({ jsParams }) => {
   //          Checking JS Params
   // --------------------------------------
 
-  const { tokenIn, tokenOut, pkp, authSig, amountToSell, rpcUrl, conditions, ipfsId } =
-    jsParams;
+  const {
+    tokenIn,
+    tokenOut,
+    pkp,
+    authSig,
+    amountToSell,
+    rpcUrl,
+    conditions,
+    ipfsId,
+  } = jsParams;
 
   // if pkp.public key doesn't start with 0x, add it
   if (!pkp.publicKey.startsWith("0x")) {

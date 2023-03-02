@@ -110,13 +110,13 @@ export const ECDSAAddresses = async ({
     pubkey: pubkeyBuffer,
   }).address;
 
-  if (!pkpTokenId || !btcAddress || !ethAddress) {
+  if (!btcAddress || !ethAddress) {
     // push to error reporting service
     const errors = [];
 
-    if (!pkpTokenId) {
-      errors.push("pkpTokenId is undefined");
-    }
+    // if (!pkpTokenId) {
+    //   errors.push("pkpTokenId is undefined");
+    // }
 
     if (!btcAddress) {
       errors.push("btcAddress is undefined");
