@@ -277,6 +277,7 @@ const getTestUnsignedTx = async () => {
     walletAddress: PKP_ADDRESS,
     provider,
   });
+  
   log("[GET_TEST_UNSIGNED_TX] nonce", nonce);
   log("[GET_TEST_UNSIGNED_TX] gasPrice", gasPrice);
   log("[GET_TEST_UNSIGNED_TX] chainId", chainId);
