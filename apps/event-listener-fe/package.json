@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lit-protocol/constants": "^2.1.16",
-    "@lit-protocol/contracts-sdk": "^2.1.25",
-    "@lit-protocol/lit-node-client": "^2.1.20",
+    "@lit-protocol/constants": "^2.1.121",
+    "@lit-protocol/contracts-sdk": "^2.1.121",
+    "@lit-protocol/lit-node-client": "^2.1.121",
     "@monaco-editor/react": "^4.4.6",
     "@next/font": "13.1.6",
     "@pinata/sdk": "^2.1.0",

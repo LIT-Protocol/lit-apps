@@ -23,7 +23,6 @@ import {
 import { validateParams } from "@lit-dev/utils/util-param-validator";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
-import { JsonAuthSig } from "@lit-protocol/constants";
 import { useAccount } from "wagmi";
 import Router from "next/router";
 import toast from "react-hot-toast";
@@ -111,7 +110,9 @@ export function Custom() {
     setIsConnected(isConnected);
 
     if (!jsonRpcProvider && !currentBlockNumber) {
-      const provider = new JsonRpcProvider("https://rpc-mumbai.maticvigil.com");
+      const provider = new JsonRpcProvider(
+        "https://matic-mumbai.chainstacklabs.com"
+      );
       setJsonRpcProvider(provider);
 
       provider.on("block", async (blockNumber: number) => {
@@ -222,7 +223,7 @@ export function Custom() {
       loadingMessage: "Checking and Signing Auth Message...",
     });
 
-    let authSig: JsonAuthSig;
+    let authSig: any;
 
     try {
       authSig = await LitJsSdk.checkAndSignAuthMessage({

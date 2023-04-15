@@ -140,7 +140,7 @@ export default async function handler(
     }
 
     // -- check block number
-    const provider = new JsonRpcProvider("https://rpc-mumbai.maticvigil.com");
+    const provider = new JsonRpcProvider("https://chain-rpc.litprotocol.com/http");
 
     const blockNumber = await provider.getBlockNumber();
 

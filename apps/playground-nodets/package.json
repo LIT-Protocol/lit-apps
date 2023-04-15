@@ -10,10 +10,11 @@
   "dependencies": {
     "@lit-dev/lit-actions": "*",
     "@lit-dev/utils": "*",
-    "@lit-protocol/lit-node-client": "^2.1.47",
+    "@lit-protocol/lit-node-client": "^2.1.55",
     "dotenv": "^16.0.3",
     "esbuild": "^0.17.5",
-    "ethers": "^5.7.2"
+    "ethers": "^5.7.2",
+    "express": "^4.18.2"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

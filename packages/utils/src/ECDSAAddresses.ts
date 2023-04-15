@@ -27,14 +27,14 @@ export const ECDSAAddresses = async ({
     throw new Error("publicKey or pkpTokenId must be provided");
   }
 
-  // if pkp contract address is not provided, use the default one 0xEA287AF8d8835eb20175875e89576bf583539B37
+  // if pkp contract address is not provided, use the default one 0xF5cB699652cED3781Dd75575EDBe075d6212DF98
   if (!pkpContractAddress) {
-    pkpContractAddress = "0xEA287AF8d8835eb20175875e89576bf583539B37";
+    pkpContractAddress = "0xF5cB699652cED3781Dd75575EDBe075d6212DF98";
   }
 
   // if default RPC url is not provided, use the default one https://endpoints.omniatech.io/v1/matic/mumbai/public
   if (!defaultRPCUrl) {
-    defaultRPCUrl = "https://endpoints.omniatech.io/v1/matic/mumbai/public";
+    defaultRPCUrl = "https://chain-rpc.litprotocol.com/http";
   }
 
   // if pkpTokenId is provided, get the public key from it

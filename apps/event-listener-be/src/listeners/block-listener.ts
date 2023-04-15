@@ -52,7 +52,7 @@ export class BlockListener implements ActionListener {
     }
 
     if (!_args.rpcUrl) {
-      this.rpcUrl = "https://rpc-mumbai.maticvigil.com";
+      this.rpcUrl = "https://lit-protocol.calderachain.xyz/http";
     }
 
     this.provider = new JsonRpcProvider(_args.rpcUrl ?? this.rpcUrl);
