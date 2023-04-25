@@ -6,5 +6,5 @@ await esbuild.build({
   outfile: "dist/main.js",
   platform: "node",
   target: "node14",
-  external: ["bull"],
+  external: [],
 });
