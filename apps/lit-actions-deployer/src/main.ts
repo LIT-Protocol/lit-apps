@@ -1,6 +1,7 @@
 import { uploadLitAction } from "@lit-dev/utils";
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+const PORT = process.env.PORT || 3000;
 
 dotenv.config();
 
@@ -22,6 +23,6 @@ app.post("/", async (req: Request, res: Response) => {
   res.json({ res: uploadRes });
 });
 
-app.listen(3003, () => {
-  console.log("LitActions Deployer listening on port 3003!");
+app.listen(PORT, () => {
+  console.log(`LitActions Deployer listening on port ${PORT}!`);
 });
