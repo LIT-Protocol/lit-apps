@@ -1,1 +1,1 @@
-worker: cd apps/lit-actions-deployer && yarn start
+web: cd apps/lit-actions-deployer && yarn start
