@@ -13,10 +13,11 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "dev:el": "turbo dev --filter event-listener-fe --filter event-listener-be",
     "dev:nodets": "turbo dev --filter playground-nodets --",
-    "dev:lit-actions-deployer": "turbo dev --filter lit-actions-deployer --",
+    "dev:lit-actions-deployer": "turbo dev --filter lit-actions-deployer",
     "build:el:fe": "turbo run build --filter event-listener-fe",
     "build:el:be": "turbo run build --filter event-listener-be",
-    "heroku-postbuild": "if [ \"$APP_ENV\" = \"event-listener-fe\" ]; then yarn build:el:fe; elif [ \"$APP_ENV\" = \"event-listener-be\" ]; then yarn run build:el:be; else echo no environment detected, please set APP_ENV; fi"
+    "build:lit-actions-deployer": "turbo run build --filter lit-actions-deployer",
+    "heroku-postbuild": "if [ \"$APP_ENV\" = \"event-listener-fe\" ]; then yarn build:el:fe; elif [ \"$APP_ENV\" = \"event-listener-be\" ]; then yarn run build:el:be; elif [ \"$APP_ENV\" = \"lit-actions-deployer\" ]; then yarn run build:lit-actions-deployer; else echo no environment detected, please set APP_ENV; fi"
   },
   "license": "MIT",
   "devDependencies": {
