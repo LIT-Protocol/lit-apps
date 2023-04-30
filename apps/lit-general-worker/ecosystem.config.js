@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "lit-actions-deployer",
+      name: "lit-general-worker",
       script: "node dist/main.js",
       instances: "1",
       env: {

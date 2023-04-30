@@ -1,5 +1,5 @@
 {
-  "name": "lit-actions-deployer",
+  "name": "lit-general-worker",
   "version": "0.0.1",
   "private": true,
   "scripts": {

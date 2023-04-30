@@ -2,6 +2,12 @@ import express from "express";
 import bodyParser from "body-parser";
 import request from "supertest";
 
+import dotenv from "dotenv";
+
+const PORT = process.env.PORT || 3031;
+
+dotenv.config();
+
 const txHandler = express();
 txHandler.use(bodyParser.json());
 
@@ -108,9 +114,7 @@ export {
   processTx,
 };
 
-const PORT = process.env.PORT || 3031;
-
 // run the server at port 3031
 txHandler.listen(PORT, () =>
-  console.log("Tx handling server listening on port " + PORT)
+  console.log("Lit General Worker " + PORT)
 );
