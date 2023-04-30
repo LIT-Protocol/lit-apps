@@ -17,7 +17,8 @@
     "build:el:fe": "turbo run build --filter event-listener-fe",
     "build:el:be": "turbo run build --filter event-listener-be",
     "build:lit-actions-deployer": "turbo run build --filter lit-actions-deployer",
-    "heroku-postbuild": "if [ \"$APP_ENV\" = \"event-listener-fe\" ]; then yarn build:el:fe; elif [ \"$APP_ENV\" = \"event-listener-be\" ]; then yarn run build:el:be; elif [ \"$APP_ENV\" = \"lit-actions-deployer\" ]; then yarn run build:lit-actions-deployer; else echo no environment detected, please set APP_ENV; fi"
+    "build:lit-general-worker": "turbo run build --filter lit-general-worker",
+    "heroku-postbuild": "node heroku-postbuild.js"
   },
   "license": "MIT",
   "devDependencies": {
