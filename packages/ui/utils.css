@@ -320,6 +320,19 @@ a.alink {
 .mt-7 {
   margin-top: 7;
 }
+.mt-8 {
+  margin-top: 8px;
+}
+.mt-9 {
+  margin-top: 9px;
+}
+.mt-10 {
+  margin-top: 10px;
+}
+.mt-12 {
+  margin-top: 12px;
+}
+
 .mb-2 {
   margin-bottom: 2px;
 }
@@ -398,6 +411,9 @@ a.alink {
 .uppercase {
   text-transform: uppercase;
 }
-.m-auto{
+.m-auto {
   margin: auto;
+}
+.z-index-999 {
+  z-index: 999;
 }

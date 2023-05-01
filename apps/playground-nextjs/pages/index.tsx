@@ -10,8 +10,8 @@ export default function Web() {
       path: "/simple-encrypt-decrypt",
     },
     {
-      name: "Cosmos Signing Demo",
-      path: "/cosmos-signing-demo",
+      name: "PKPClient Demo",
+      path: "/pkp-client-demo",
     },
   ]);
 
@@ -22,7 +22,7 @@ export default function Web() {
       <ul className="flex flex-col gap-8 pt-24">
         {links.map((link, index) => (
           <li key={index} className="m-auto">
-            <LitButton className="lit-button-2" redirect={link.path}>
+            <LitButton className="lit-button-2" href={link.path}>
               {link.name}
             </LitButton>
           </li>

@@ -194,7 +194,7 @@ button {
   border: 1px solid transparent;
 }
 .lit-button:hover {
-  border: 1px solid var(--lit-border-color);
+  border: 1px solid white;
 }
 .lit-button-2 {
   display: inline-flex;
@@ -1152,6 +1152,11 @@ p {
 [data-lit-theme="purple"] .error-box {
   border: 1px solid var(--lit-alert-color);
   color: var(--lit-alert-color);
+  padding: 4px 8px;
+}
+[data-lit-theme="purple"] .info-box {
+  border: 1px solid var(--lit-main-color);
+  color: var(--lit-main-color);
   padding: 4px 8px;
 }
 [data-lit-theme="purple"] .bg-error {

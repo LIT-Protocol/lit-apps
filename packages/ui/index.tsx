@@ -28,6 +28,7 @@ export * from "./LitMint";
 // form
 export * from "./form/LitInputTextV1";
 export * from "./form/LitEditor";
+export * from "./form/LitTable";
 
 // useContext
 export * from "./useContext/useAuth";
