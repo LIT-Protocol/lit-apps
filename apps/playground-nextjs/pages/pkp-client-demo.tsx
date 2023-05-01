@@ -409,7 +409,7 @@ export default function PKPClientDemo() {
         )}
 
         {tokens.length > 0 ? (
-          <h5 className="mt-12 text-center info-box">✅ PKPs</h5>
+          <h5 className="mt-12 text-center info-box">✅ Your PKPs</h5>
         ) : (
           ""
         )}
@@ -428,7 +428,7 @@ export default function PKPClientDemo() {
           ""
         ) : (
           <>
-            <h5 className="mt-12 text-center info-box">✅ Selected PKPs</h5>
+            <h5 className="mt-12 text-center info-box">✅ Selected PKP</h5>
             <LitNote className="mt-12">
               {/* <h1 className="mb-12">Your Selected PKP</h1> */}
 
@@ -505,7 +505,7 @@ export default function PKPClientDemo() {
 
         {signer ? (
           <>
-            <h5 className="mt-12 text-center info-box">✅ Selected {signer}</h5>
+            <h5 className="mt-12 text-center info-box">✅ Selected {signer} Signer</h5>
 
             {signer === "Cosmos" ? renderCosmosOptions() : ""}
           </>
