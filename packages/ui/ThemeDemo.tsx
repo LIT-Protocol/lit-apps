@@ -1,6 +1,8 @@
 import { BrandLogo } from "./BrandLogo";
 // import "./theme.demo.css";
 import Editor from "@monaco-editor/react";
+import Head from "next/head";
+import { useRef } from "react";
 
 // export with children
 export const ThemeDemo = ({
@@ -8,6 +10,7 @@ export const ThemeDemo = ({
   className,
   pageInfo,
   editorInfo,
+  onEditorReady,
 }: {
   children: JSX.Element | JSX.Element[];
   className?: string;
@@ -16,6 +19,7 @@ export const ThemeDemo = ({
     lang: string;
     code: any;
   };
+  onEditorReady?: (editorRef: any, monaco: any) => void;
 }) => {
   function handleEditorWillMount(monaco: any) {
     // here is the monaco instance
@@ -27,9 +31,18 @@ export const ThemeDemo = ({
       noSyntaxValidation: true,
     });
   }
+  function handleEditorDidMount(editor: any, monaco: any) {
+    if (onEditorReady) {
+      onEditorReady(editor, monaco);
+    }
+  }
 
   return (
     <div className={`${className ?? ""} App`}>
+      <Head>
+        <title>Demo: Simply Encrypt Decrypt</title>
+      </Head>
+
       <header className="App-header">
         <BrandLogo />
         <h2 className="my-12">{pageInfo.title}</h2>
@@ -74,6 +87,7 @@ export const ThemeDemo = ({
             wordWrap: "on",
           }}
           beforeMount={handleEditorWillMount}
+          onMount={handleEditorDidMount}
         />
       </div>
     </div>

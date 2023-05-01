@@ -1486,3 +1486,12 @@ p {
   font-size: 24px;
   margin-bottom: 4px;
 }
+
+.highlighted-line {
+  background-color: rgba(
+    255,
+    255,
+    0,
+    0.2
+  ); /* Set your desired background color here */
+}

@@ -17,7 +17,6 @@ import {
 import { validateParams } from "@lit-dev/utils/util-param-validator";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
-import { JsonAuthSig } from "@lit-protocol/constants";
 import { useAccount } from "wagmi";
 import Router from "next/router";
 import toast from "react-hot-toast";
@@ -199,7 +198,7 @@ export function Custom() {
     resetMessage();
 
     // -- check auth message
-    let authSig: JsonAuthSig;
+    let authSig: any;
     authSig = await LitJsSdk.checkAndSignAuthMessage({
       chain: "mumbai",
     });

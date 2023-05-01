@@ -1,7 +1,8 @@
-import { ThemeDemo } from "ui";
-import { useState } from "react";
+import { LitButton, ThemeDemo } from "ui";
+import { use, useEffect, useState } from "react";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import "ui/theme.purple.css";
+import "ui/theme.demo.css";
 
 export default function SimpleEncryptDecryptDemo({
   litDependencies,
@@ -22,15 +23,20 @@ export default function SimpleEncryptDecryptDemo({
     code: thisFile,
   });
 
+  const [editorRef, setEditorRef] = useState<any>(null);
+
+  function onEditorReadyCallback(editor: any, monaco: any) {
+    setEditorRef(editor);
+  }
+
   const [result, setResult] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
+  // Starts
   const [secretMessage, setSecretMessage] = useState<string>(
     "🔥🔥🔥🔥🔥 THIS IS A SECRET MESSAGE 🔥🔥🔥🔥🔥 "
   );
 
-  // --------------------------
-  //          Starts
-  // --------------------------
   const go = async () => {
     setLoading(true);
     const litNodeClient = new LitJsSdk.LitNodeClient({
@@ -94,7 +100,6 @@ export default function SimpleEncryptDecryptDemo({
 
     // <String> decryptedString
     let decryptedString;
-
     try {
       decryptedString = await LitJsSdk.decryptString(
         encryptedString,
@@ -108,9 +113,7 @@ export default function SimpleEncryptDecryptDemo({
     setResult(decryptedString ?? "");
     setLoading(false);
   };
-  // ------------------------
-  //          Ends
-  // ------------------------
+  // Ends
 
   const onChange = (e: any) => {
     setEditorInfo({
@@ -125,14 +128,20 @@ export default function SimpleEncryptDecryptDemo({
   };
 
   return (
-    <ThemeDemo pageInfo={pageInfo} editorInfo={editorInfo}>
+    <ThemeDemo
+      pageInfo={pageInfo}
+      editorInfo={editorInfo}
+      onEditorReady={onEditorReadyCallback}
+    >
       <div className="flex gap-12">
         <input
           placeholder="🔥 secret message.."
           type="text"
           onChange={onChange}
         />
-        <button onClick={go}>Go!</button>
+        <button className="lit-button-2" onClick={go}>
+          Go!
+        </button>
       </div>
       <div className={`${!loading ? "inactive" : ""} loading`}>
         {loading ? "Loading..." : ""}
@@ -151,15 +160,13 @@ export async function getStaticProps() {
   const filename =
     "./pages/" + __filename.split("/").pop()?.replace(".js", ".tsx");
 
-  let thisFile = fs.readFileSync(filename, "utf8");
-
-  const start = thisFile.indexOf("// -- ignore starts");
-  const end = thisFile.lastIndexOf("// -- ends");
-
-  thisFile = thisFile.substring(0, start) + thisFile.substring(end);
-
-  //   remove the line // -- ends too
-  thisFile = thisFile.replace("// -- ends", "");
+  let thisFile = fs
+    .readFileSync(filename, "utf8")
+    .replace(/\/\/ Ends[\s\S]*/, "// Ends")
+    .replace(/[\s\S]*\/\/ Starts/, "// Starts")
+    .replace("// Starts", "")
+    .replace("// Ends", "")
+    .trim();
 
   const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
 
