@@ -12,7 +12,7 @@
     "@lit-dev/utils": "*",
     "@lit-protocol/contracts-sdk": "^2.1.141",
     "@lit-protocol/lit-node-client": "^2.1.141",
-    "@lit-protocol/pkp-client": "^2.1.141",
+    "@lit-protocol/pkp-client": "^2.1.142",
     "@monaco-editor/react": "^4.4.6",
     "next": "^13.1.1",
     "react": "^18.2.0",

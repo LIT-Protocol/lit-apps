@@ -13,7 +13,7 @@ export const LitCopy = (props: LitCopyProps) => {
 
     navigator.clipboard.writeText(props.copyText);
 
-    toast(`🔥 Copied ${props.text}`, { duration: 1000 });
+    toast.success(`Copied ${props.text}`, { duration: 1000 });
   };
 
   return ( 

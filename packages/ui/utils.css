@@ -302,6 +302,12 @@ a.alink {
   padding-bottom: 30px;
 }
 /* generate margin top */
+.ml-auto {
+  margin-left: auto;
+}
+.mr-auto {
+  margin-right: auto;
+}
 .mt-2 {
   margin-top: 2px;
 }
@@ -389,6 +395,12 @@ a.alink {
 }
 .mb-39 {
   margin-bottom: 39px;
+}
+.max-width-500 {
+  max-width: 500px;
+  width: 100%;
+  padding: 10px;
+  margin: auto;
 }
 .max-width-880 {
   max-width: 880px;

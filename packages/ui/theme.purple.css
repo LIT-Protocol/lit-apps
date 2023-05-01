@@ -1159,6 +1159,13 @@ p {
   color: var(--lit-main-color);
   padding: 4px 8px;
 }
+
+[data-lit-theme="purple"] .info-brand {
+  border: 1px solid var(--brand-secondary);
+  color: var(--brand-secondary);
+  padding: 4px 8px;
+}
+
 [data-lit-theme="purple"] .bg-error {
   background: var(--lit-alert-color) !important;
 }
@@ -1499,4 +1506,8 @@ p {
     0,
     0.2
   ); /* Set your desired background color here */
+}
+
+[data-lit-theme="purple"] a {
+  color: var(--brand-secondary);
 }
