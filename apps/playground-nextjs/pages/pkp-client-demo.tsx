@@ -251,7 +251,7 @@ export default function PKPClientDemo() {
           <>
             <LitNote className="mt-12">
               <div className="error-box">
-                You don't have any balances. Please send some tokens to your
+                You don&apos;t have any balances. Please send some tokens to your
                 address
               </div>
 
@@ -381,7 +381,7 @@ export default function PKPClientDemo() {
         ) : (
           <div className="info-brand mb-12 text-sm">
             Tx Link:{" "}
-            <a href={txLink} target="_blank">
+            <a href={txLink} target="_blank" rel="noreferrer">
               {txLink}
             </a>
           </div>
@@ -397,7 +397,11 @@ export default function PKPClientDemo() {
             </LitButton>
             <LitNote className="mt-12 mb-12">
               You can get some FREE LIT from the{" "}
-              <a href="https://faucet.litprotocol.com/" target="_blank">
+              <a
+                href="https://faucet.litprotocol.com/"
+                target="_blank"
+                rel="noreferrer"
+              >
                 Lit Faucet
               </a>
             </LitNote>
