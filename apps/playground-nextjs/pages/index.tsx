@@ -17,7 +17,7 @@ export default function Web() {
 
   return (
     <div className="flex flex-col center p-12">
-      <h1>Lit Demo Apps</h1>
+      <h1 className="mt-12 mb-12">Lit Demo Apps</h1>
 
       <ul className="flex flex-col gap-8 pt-24">
         {links.map((link, index) => (

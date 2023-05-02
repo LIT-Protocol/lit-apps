@@ -3,7 +3,7 @@ import "ui/utils.css";
 import Head from "next/head";
 import { Toaster } from "react-hot-toast";
 import { toast } from "react-hot-toast";
-import { useCustomState } from "ui";
+import { BrandLogo, useCustomState } from "ui";
 
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
@@ -251,8 +251,8 @@ export default function PKPClientDemo() {
           <>
             <LitNote className="mt-12">
               <div className="error-box">
-                You don&apos;t have any balances. Please send some tokens to your
-                address
+                You don&apos;t have any balances. Please send some tokens to
+                your address
               </div>
 
               <div className="mt-12 flex">
@@ -375,6 +375,7 @@ export default function PKPClientDemo() {
 
         {/* ----- Start ----- */}
         <h1 className="mt-12 mb-12">PKPClient Demo</h1>
+        <BrandLogo color={"white"} width={124} height={124} />
 
         {!txLink ? (
           ""
@@ -505,7 +506,9 @@ export default function PKPClientDemo() {
 
         {signer ? (
           <>
-            <h5 className="mt-12 text-center info-box">✅ Selected {signer} Signer</h5>
+            <h5 className="mt-12 text-center info-box">
+              ✅ Selected {signer} Signer
+            </h5>
 
             {signer === "Cosmos" ? renderCosmosOptions() : ""}
           </>

@@ -1,8 +1,9 @@
 import { LitButton, ThemeDemo } from "ui";
 import { use, useEffect, useState } from "react";
-import * as LitJsSdk from "@lit-protocol/lit-node-client";
+import * as LitJsSdk from "@lit-protocol/lit-node-client"; // <== include this
 import "ui/theme.purple.css";
 import "ui/theme.demo.css";
+import { getLitDependenciesAndFile } from "../server-helper";
 
 export default function SimpleEncryptDecryptDemo({
   litDependencies,
@@ -153,37 +154,16 @@ export default function SimpleEncryptDecryptDemo({
   );
 }
 
-// -- ignore starts
 export async function getStaticProps() {
-  const fs = require("fs");
-
-  const filename =
-    "./pages/" + __filename.split("/").pop()?.replace(".js", ".tsx");
-
-  let thisFile = fs
-    .readFileSync(filename, "utf8")
-    .replace(/\/\/ Ends[\s\S]*/, "// Ends")
-    .replace(/[\s\S]*\/\/ Starts/, "// Starts")
-    .replace("// Starts", "")
-    .replace("// Ends", "")
-    .trim();
-
-  const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
-
-  const arr: Array<{ name: string; version: string }> = [];
-
-  Object.keys(packageJson.dependencies).map((key) => {
-    if (key.includes("@lit-protocol")) {
-      arr.push({ name: key, version: packageJson.dependencies[key] });
-    }
-  });
+  const { packageJson, litDependencies, thisFile } = getLitDependenciesAndFile([
+    "@lit-protocol/lit-node-client",
+  ]);
 
   return {
     props: {
       packageJson,
-      litDependencies: arr,
+      litDependencies,
       thisFile,
     },
   };
 }
-// -- ends
