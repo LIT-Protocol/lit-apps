@@ -375,7 +375,6 @@ export default function PKPClientDemo() {
 
         {/* ----- Start ----- */}
         <h1 className="mt-12 mb-12">PKPClient Demo</h1>
-        <BrandLogo color={"white"} width={124} height={124} />
 
         {!txLink ? (
           ""

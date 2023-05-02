@@ -30,7 +30,7 @@ const useStyles = createStyles((theme) => ({
   },
 
   title: {
-    fontFamily: `"Figtree", "Space Grotesk"`,
+    fontFamily: `Figtree, Space Grotesk, Greycliff CF, ${theme.fontFamily}`,
     fontSize: rem(48),
     fontWeight: 900,
     lineHeight: 1.1,
