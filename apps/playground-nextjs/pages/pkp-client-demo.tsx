@@ -3,7 +3,7 @@ import "ui/utils.css";
 import Head from "next/head";
 import { Toaster } from "react-hot-toast";
 import { toast } from "react-hot-toast";
-import { BrandLogo, useCustomState } from "ui";
+import { BrandLogo, useCustomState, usePKPs } from "ui";
 
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";
@@ -14,6 +14,7 @@ import { LitButton, LitInputTextV1, LitLoading, LitNote, LitTable } from "ui";
 import { useEffect, useState } from "react";
 import { getShortAddress } from "@lit-dev/utils";
 import { LitCopy } from "ui";
+import { TokenInfo } from "@lit-protocol/contracts-sdk/src/lib/addresses";
 
 const DEFAULT_RECIPIENT_ADDRESS =
   "cosmos1jyz3m6gxuwceq63e44fqpgyw2504ux85ta8vma";
@@ -40,6 +41,16 @@ export default function PKPClientDemo() {
   const [cosmosWallet, setCosmosWallet] = useState<any>();
   const [stargateClient, setStargateClient] = useState<any>();
   const [txLink, setTxLink] = useState<string | null>(null);
+
+  const [PKPdata, loadingPKPs, PKPDataError, fetchPKPs, renderPKPs] = usePKPs({
+    chain: 'cosmos'
+  });
+
+  useEffect(() => {
+    setLoading(loadingPKPs);
+    setHasPKPs(PKPdata?.length > 0);
+    setTokens(PKPdata);
+  }, [loadingPKPs]);
 
   // cosmos state
   const [cosmosState, handleCosmoState] = useCustomState({
@@ -85,63 +96,6 @@ export default function PKPClientDemo() {
 
   // Starts
 
-  /**
-   * Fetches and displays user's Public Key Proofs (PKPs), handles authentication,
-   * and manages loading state during the process.
-   */
-  const viewPKPs = async () => {
-    setLoading(true);
-
-    const litNodeClient = new LitNodeClient({
-      litNetwork: "serrano",
-    });
-
-    await litNodeClient.connect();
-    let _authSig;
-
-    try {
-      _authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain: "ethereum",
-      });
-    } catch (e) {
-      toast.error("Authentication failed");
-      setLoading(false);
-      return;
-    }
-
-    setAuthSig(_authSig);
-
-    const litContracts = new LitContracts();
-
-    await litContracts.connect();
-
-    let tokenInfos: any[] = [];
-
-    try {
-      tokenInfos =
-        await litContracts.pkpNftContractUtil.read.getTokensInfoByAddress(
-          _authSig.address
-        );
-    } catch (e) {
-      toast.error("Failed to fetch PKPs");
-      setLoading(false);
-      return;
-    }
-
-    console.log("tokenInfos", tokenInfos);
-
-    if (tokenInfos.length <= 0) {
-      toast.error("No PKPs found");
-      setHasPKPs(false);
-      setLoading(false);
-      return;
-    }
-
-    setTokens(tokenInfos);
-    setLoading(false);
-    setHasPKPs(true);
-  };
-
   const mintPKP = async () => {
     const litContracts = new LitContracts();
 
@@ -153,7 +107,7 @@ export default function PKPClientDemo() {
     try {
       mint = await litContracts.pkpNftContractUtil.write.mint();
       console.log("mint", mint);
-      viewPKPs();
+      fetchPKPs();
     } catch (e: any) {
       console.error(e);
       toast.error(e.message, { duration: 1000 });
@@ -353,7 +307,6 @@ export default function PKPClientDemo() {
   return (
     <main data-lit-theme="purple">
       <Toaster />
-
       <Head>
         <title>Demo: PKPClient</title>
       </Head>
@@ -387,7 +340,7 @@ export default function PKPClientDemo() {
           </div>
         )}
 
-        <LitButton onClick={viewPKPs}>View PKPs</LitButton>
+        <LitButton onClick={fetchPKPs}>View PKPs</LitButton>
 
         {/* Mint PKP if controller has no PKP */}
         {!hasPKPs && (
@@ -408,13 +361,13 @@ export default function PKPClientDemo() {
           </div>
         )}
 
-        {tokens.length > 0 ? (
+        {tokens?.length > 0 ? (
           <h5 className="mt-12 text-center info-box">✅ Your PKPs</h5>
         ) : (
           ""
         )}
         <div className="flex flex-col gap-8 pt-12">
-          {tokens.map((token, index) => (
+          {tokens?.map((token, index) => (
             <div key={index} className="m-auto">
               <LitButton className="lit-button" onClick={() => setPKP(token)}>
                 <div className="flex flex-col">TokenID: {token.tokenId}</div>

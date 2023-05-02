@@ -4,6 +4,7 @@ import * as LitJsSdk from "@lit-protocol/lit-node-client"; // <== include this
 import "ui/theme.purple.css";
 import "ui/theme.demo.css";
 import { getLitDependenciesAndFile } from "../server-helper";
+import Head from "next/head";
 
 export default function SimpleEncryptDecryptDemo({
   litDependencies,
@@ -133,6 +134,10 @@ export default function SimpleEncryptDecryptDemo({
       editorInfo={editorInfo}
       onEditorReady={onEditorReadyCallback}
     >
+      <Head>
+        <title>Demo: Simply Encrypt Decrypt</title>
+      </Head>
+
       <div className="flex gap-12">
         <input
           placeholder="🔥 secret message.."

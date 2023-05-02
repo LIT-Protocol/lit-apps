@@ -20,7 +20,8 @@
   "dependencies": {
     "@emotion/react": "^11.10.8",
     "@lit-dev/utils": "*",
-    "@lit-protocol/contracts-sdk": "^2.1.121",
+    "@lit-protocol/contracts-sdk": "^2.1.143",
+    "@lit-protocol/lit-node-client": "^2.1.143",
     "@mantine/core": "^6.0.9",
     "@mantine/ds": "^6.0.10",
     "@mantine/hooks": "^6.0.9",

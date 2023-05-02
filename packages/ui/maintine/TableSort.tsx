@@ -153,6 +153,7 @@ export function TableSort({ data }: TableSortProps) {
           variant="gradient"
           gradient={{ from: "#0A142D", to: "#0A142D", deg: 35 }}
           href={row.path}
+          target="_blank"
           radius={12}
           leftIcon={<IconExternalLink size="0.9rem" />}
         >

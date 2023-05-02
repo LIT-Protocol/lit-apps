@@ -1,7 +1,6 @@
 import { BrandLogo } from "./BrandLogo";
 // import "./theme.demo.css";
 import Editor from "@monaco-editor/react";
-import Head from "next/head";
 import { useRef } from "react";
 
 // export with children
@@ -39,10 +38,6 @@ export const ThemeDemo = ({
 
   return (
     <div className={`${className ?? ""} App`}>
-      <Head>
-        <title>Demo: Simply Encrypt Decrypt</title>
-      </Head>
-
       <header className="App-header">
         <BrandLogo />
         <h2 className="my-12">{pageInfo.title}</h2>

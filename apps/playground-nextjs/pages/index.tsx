@@ -1,3 +1,5 @@
+import Head from "next/head";
+
 import { useState } from "react";
 import {
   BrandLogo,
@@ -16,21 +18,12 @@ export default function Web() {
   const [links, setLinks] = useState(routeData);
 
   return (
-    // <div className="flex flex-col center p-12">
-    //   <h1 className="mt-12 mb-12">Lit Demo Apps</h1>
-
-    //   <ul className="flex flex-col gap-8 pt-24">
-    //     {links.map((link, index) => (
-    //       <li key={index} className="m-auto">
-    //         <LitButton className="lit-button-2" href={link.path}>
-    //           {link.name}
-    //         </LitButton>
-    //       </li>
-    //     ))}
-    //   </ul>
-    // </div>
-    <>
+    <div>
       <ThemeA className="app" data-lit-theme="purple">
+        <Head>
+          <title>Lit Protocol: Top Demo Apps!</title>
+        </Head>
+
         <Center maw={400} h={100} my={48} mx="auto">
           <BrandLogo type={2} width={120} height={120} />
         </Center>
@@ -49,6 +42,6 @@ export default function Web() {
           <TableSort data={routeData} />
         </Container>
       </ThemeA>
-    </>
+    </div>
   );
 }
