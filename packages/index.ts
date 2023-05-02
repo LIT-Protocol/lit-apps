@@ -1,4 +1,4 @@
-// Generated on 2023-05-02T13:39:03.572Z
+// Generated on 2023-05-02T12:11:46.862Z
 
 export * from './BrandLogo';
 export * from './Button';
@@ -8,6 +8,7 @@ export * from './LitCard';
 export * from './LitConnect';
 export * from './LitCopy';
 export * from './LitHeaderV1';
+export * from './LitHeaderV2';
 export * from './LitHero';
 export * from './LitIcon';
 export * from './LitLoading';
@@ -34,8 +35,6 @@ export * from './form/LitInputTextV1';
 export * from './form/LitTable';
 export * from './hooks/useCustomState';
 export * from './hooks/usePolling';
-export * from './maintine/HeroTitle';
-export * from './maintine/TableSort';
 export * from './radix/AlertDialog/LitAlertDialog';
 export * from './useContext/useAuth';
 export * from './useContext/usePKPConnectionContext';

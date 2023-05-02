@@ -1,5 +1,5 @@
-import { LitButton, ThemeDemo } from "ui";
-import { use, useEffect, useState } from "react";
+import { ThemeDemo } from "ui";
+import { useState } from "react";
 import * as LitJsSdk from "@lit-protocol/lit-node-client"; // <== include this
 import "ui/theme.purple.css";
 import "ui/theme.demo.css";
@@ -8,7 +8,6 @@ import { getLitDependenciesAndFile } from "../server-helper";
 export default function SimpleEncryptDecryptDemo({
   litDependencies,
   thisFile,
-  filename,
 }: {
   litDependencies: Array<{ name: string; version: string }>;
   thisFile: string;
