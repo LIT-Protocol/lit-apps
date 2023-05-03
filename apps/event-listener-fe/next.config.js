@@ -1,6 +1,6 @@
 module.exports = {
   reactStrictMode: true,
-  transpilePackages: ["ui"],
+  transpilePackages: ["@getlit/ui"],
   webpack: (config) => {
     config.resolve.fallback = { fs: false };
 

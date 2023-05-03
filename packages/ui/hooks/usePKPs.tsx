@@ -16,7 +16,7 @@ interface UsePKPsOptions {
  *
  * Example usage:
  * ```
- * const { data, loading, error, start } = usePKPs({ litNetwork: "serrano", chain: "ethereum" });
+ * const [data, loading, error, start, renderPKPs] = usePKPs({ litNetwork: "serrano", chain: "ethereum" });
  *
  * // Call start() to initiate data fetching
  * start();

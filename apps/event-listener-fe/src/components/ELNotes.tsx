@@ -1,5 +1,5 @@
 import { getShortAddress } from "@lit-dev/utils";
-import { LitNote, usePKPConnectionContext } from "ui";
+import { LitNote, usePKPConnectionContext } from "@getlit/ui";
 
 export const ELNotes = () => {
   const { pkpConnected, selectedPKP } = usePKPConnectionContext();

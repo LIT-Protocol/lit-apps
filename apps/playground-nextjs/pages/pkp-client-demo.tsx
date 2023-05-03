@@ -1,19 +1,23 @@
-import "ui/theme.purple.css";
-import "ui/utils.css";
+import "@getlit/ui/theme.purple.css";
+import "@getlit/ui/utils.css";
 import Head from "next/head";
 import { Toaster } from "react-hot-toast";
 import { toast } from "react-hot-toast";
-import { BrandLogo, useCustomState, usePKPs } from "ui";
+import { useCustomState, usePKPs } from "@getlit/hooks";
 
-import * as LitJsSdk from "@lit-protocol/lit-node-client";
-import { LitNodeClient } from "@lit-protocol/lit-node-client";
 import { PKPClient } from "@lit-protocol/pkp-client";
 import { LitContracts } from "@lit-protocol/contracts-sdk";
 
-import { LitButton, LitInputTextV1, LitLoading, LitNote, LitTable } from "ui";
+import {
+  LitButton,
+  LitInputTextV1,
+  LitLoading,
+  LitNote,
+  LitTable,
+} from "@getlit/ui";
 import { useEffect, useState } from "react";
 import { getShortAddress } from "@lit-dev/utils";
-import { LitCopy } from "ui";
+import { LitCopy } from "@getlit/ui";
 import { TokenInfo } from "@lit-protocol/contracts-sdk/src/lib/addresses";
 
 const DEFAULT_RECIPIENT_ADDRESS =
@@ -42,9 +46,7 @@ export default function PKPClientDemo() {
   const [stargateClient, setStargateClient] = useState<any>();
   const [txLink, setTxLink] = useState<string | null>(null);
 
-  const [PKPdata, loadingPKPs, PKPDataError, fetchPKPs, renderPKPs] = usePKPs({
-    chain: 'cosmos'
-  });
+  const [PKPdata, loadingPKPs, PKPDataError, fetchPKPs, renderPKPs] = usePKPs();
 
   useEffect(() => {
     setLoading(loadingPKPs);

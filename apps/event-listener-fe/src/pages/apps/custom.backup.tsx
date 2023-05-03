@@ -13,7 +13,7 @@ import {
   LitHeaderV1,
   usePKPConnectionContext,
   LitHero,
-} from "ui";
+} from "@getlit/ui";
 import { validateParams } from "@lit-dev/utils/util-param-validator";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { LitNodeClient } from "@lit-protocol/lit-node-client";

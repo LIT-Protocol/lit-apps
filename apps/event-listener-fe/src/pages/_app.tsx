@@ -1,7 +1,7 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import "ui/theme.purple.css";
-import { LitHeaderV1, PKPConnectionContext, ThemeA, Web3Auth } from "ui";
+import "@getlit/ui/theme.purple.css";
+import { LitHeaderV1, PKPConnectionContext, ThemeA, Web3Auth } from "@getlit/ui";
 import { Toaster } from "react-hot-toast";
 import { hotjar } from "react-hotjar";
 import { useEffect } from "react";

@@ -1,6 +1,6 @@
 import Router from "next/router";
 import { createContext, useContext, useEffect, useState } from "react";
-import { usePKPConnectionContext } from "ui";
+import { usePKPConnectionContext } from "@getlit/ui";
 import { useAccount } from "wagmi";
 
 interface IAuth {

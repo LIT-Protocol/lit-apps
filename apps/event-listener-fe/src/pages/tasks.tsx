@@ -1,9 +1,9 @@
 import { JobData, MergedJob, safeFetch } from "@lit-dev/utils";
 import { useEffect, useState } from "react";
 import { sha256 } from "ethers/lib/utils";
-import { AuthProviderContext, LitButton, LitLoading } from "ui";
+import { AuthProviderContext, LitButton, LitLoading } from "@getlit/ui";
 import Bull from "bull";
-import LitAlertDialog from "ui/radix/AlertDialog/LitAlertDialog";
+import LitAlertDialog from "@getlit/ui/radix/AlertDialog/LitAlertDialog";
 import { hexlify } from "@ethersproject/bytes";
 import { ethers } from "ethers";
 import { arrayify, joinSignature, keccak256 } from "ethers/lib/utils.js";

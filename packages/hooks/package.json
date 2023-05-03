@@ -1,0 +1,23 @@
+{
+  "name": "@getlit/hooks",
+  "version": "0.0.7",
+  "description": "lit protocol react hook components",
+  "main": "index.tsx",
+  "scripts": {
+    "build": "tsc",
+    "pub": "yarn build && yarn bump && npm publish",
+    "bump": "node bump-version.mjs --patch"
+  },
+  "author": "anson",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@lit-protocol/contracts-sdk": "^2.1.143",
+    "@lit-protocol/lit-node-client": "^2.1.143",
+    "react-hot-toast": "^2.4.1",
+    "crypto": "npm:crypto-browserify",
+    "stream": "npm:stream-browserify"
+  }
+}

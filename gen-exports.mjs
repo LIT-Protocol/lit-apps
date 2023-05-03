@@ -37,11 +37,15 @@ async function generateIndexFile(directoryPath, indexPath) {
   let exports = [];
 
   for await (const file of getFiles(directoryPath)) {
-    if (file.endsWith(".tsx") && !file.endsWith("index.tsx")) {
+    if (
+      file.endsWith(".tsx") &&
+      !file.endsWith("index.tsx") &&
+      !file.includes("node_modules")
+    ) {
       const relativePath = path.relative(directoryPath, file);
       const importPath =
         "./" + relativePath.replace(/\.tsx$/, "").replace(/\\/g, "/");
-      exports.push(`export * from '${importPath}';`);
+      exports.push(`export * from "${importPath}";`);
     }
   }
 
