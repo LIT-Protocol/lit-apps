@@ -1,6 +1,6 @@
 {
   "name": "@getlit/hooks",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "lit protocol react hook components",
   "main": "index.tsx",
   "scripts": {

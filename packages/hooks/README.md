@@ -6,6 +6,10 @@ yarn add @getlit/hooks
 
 # usePKPs (UMD) example
 
+usePKPs is a custom hook that fetches Public Key Pages (PKPs) data and returns
+the data, loading, and error states along with a render function for default rendering, and
+a start function to initiate fetching.
+
 ## react usage
 
 ```js
@@ -44,6 +48,7 @@ export default function Home() {
 ```
 
 ## html usage
+
 ```html
 <body>
   <div id="root"></div>
@@ -51,26 +56,39 @@ export default function Home() {
   <button id="btn-view-pkps">View PKPs</button>
 
   <!-- script -->
-  <script crossorigin src="https://unpkg.com/react/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+  <script
+    crossorigin
+    src="https://unpkg.com/react/umd/react.production.min.js"
+  ></script>
+  <script
+    crossorigin
+    src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"
+  ></script>
   <script src="https://www.unpkg.com/@getlit/hooks@0.0.12/dist/bundle.umd.js"></script>
   <script>
     const { usePKPs } = GetLitHooks;
 
     function YourComponent() {
-      const [data, loading, error, fetchPKPs, render] = usePKPs({ litNetwork: "serrano", chain: "ethereum" });
+      const [data, loading, error, fetchPKPs, render] = usePKPs({
+        litNetwork: "serrano",
+        chain: "ethereum",
+      });
 
-      document.getElementById('btn-view-pkps').onclick = async () => {
+      document.getElementById("btn-view-pkps").onclick = async () => {
         fetchPKPs();
       };
-      return React.createElement('div', null, render((pkp) => {
-        console.log(pkp);
-      }));
+      return React.createElement(
+        "div",
+        null,
+        render((pkp) => {
+          console.log(pkp);
+        })
+      );
     }
 
     ReactDOM.render(
       React.createElement(YourComponent, null),
-      document.getElementById('root')
+      document.getElementById("root")
     );
   </script>
 </body>

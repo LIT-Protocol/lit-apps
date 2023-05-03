@@ -4,11 +4,12 @@ interface UsePKPsOptions {
 }
 /**
  * usePKPs is a custom hook that fetches Public Key Pages (PKPs) data and returns
- * the data, loading, and error states along with a start function to initiate fetching.
+ * the data, loading, and error states along with a render function for default rendering, and
+ * a start function to initiate fetching.
  *
  * Example usage:
  * ```
- * const { data, loading, error, start } = usePKPs({ litNetwork: "serrano", chain: "ethereum" });
+ * const [data, loading, error, start, render] = usePKPs({ litNetwork: "serrano", chain: "ethereum" });
  *
  * // Call start() to initiate data fetching
  * start();
