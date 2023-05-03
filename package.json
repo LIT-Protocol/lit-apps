@@ -18,9 +18,9 @@
     "build:el:be": "turbo run build --filter event-listener-be",
     "build:lit-actions-deployer": "turbo run build --filter lit-actions-deployer",
     "build:lit-general-worker": "turbo run build --filter lit-general-worker",
+    "build:hooks": "yarn index:hooks && turbo run build --filter=hooks",
     "index:ui": "node ./gen-exports.mjs ./packages/ui ./packages/ui/index.tsx",
     "index:hooks": "node ./gen-exports.mjs ./packages/hooks ./packages/hooks/index.tsx",
-    "build:hooks": "yarn index:hooks && turbo run build --filter=hooks",
     "pub:hooks": "yarn index:hooks && turbo run pub --filter=hooks",
     "gen:gifs": "node gen-video-to-gif.mjs --scale=1024",
     "heroku-postbuild": "node heroku-postbuild.js"

@@ -1,5 +1,3 @@
-// Generated on 2023-05-03T13:36:38.130Z
-
 export * from "./BrandLogo";
 export * from "./Button";
 export * from "./DivWithTitle";
@@ -37,3 +35,4 @@ export * from "./maintine/TableSort";
 export * from "./radix/AlertDialog/LitAlertDialog";
 export * from "./useContext/useAuth";
 export * from "./useContext/usePKPConnectionContext";
+//# sourceMappingURL=index.d.ts.map
