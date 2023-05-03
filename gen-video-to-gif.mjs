@@ -8,13 +8,15 @@ const execAsync = promisify(exec);
 
 const FPS = 10;
 const SCALE = 100;
-const DEFAULT_DIR = "./gifs";
+const DEFAULT_INPUT_DIR = "./videos";
+const DEFAULT_OUTPUT_DIR = "./gifs";
 
 /**
  * Convert a video clip into a GIF.
  *
  * Usage:
  * node gen-video-to-gif.mjs --input=input.mov --output=output.gif --fps=10 --scale=100
+ * node gen-video-to-gif.mjs --inputDir=./videos --outputDir=./gifs --fps=10 --scale=100
  * node gen-video-to-gif.mjs
  */
 async function genVideoToGif(input, output, fps = FPS, scale = SCALE) {
@@ -40,17 +42,17 @@ async function genVideoToGif(input, output, fps = FPS, scale = SCALE) {
   }
 }
 
-async function processDirectory(dirPath, fps = FPS, scale = SCALE) {
-  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+async function processDirectory(inputDir, outputDir, fps = FPS, scale = SCALE) {
+  const entries = await fs.readdir(inputDir, { withFileTypes: true });
 
   for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry.name);
+    const fullPath = path.join(inputDir, entry.name);
 
     if (entry.isDirectory()) {
       await processDirectory(fullPath);
     } else if (entry.isFile() && path.extname(entry.name) === ".mov") {
       const output = path.join(
-        dirPath,
+        outputDir,
         `${path.basename(entry.name, ".mov")}.gif`
       );
       await genVideoToGif(fullPath, output, fps, scale);
@@ -63,12 +65,14 @@ const inputIndex = args.findIndex((arg) => arg.startsWith("--input="));
 const outputIndex = args.findIndex((arg) => arg.startsWith("--output="));
 const fpsIndex = args.findIndex((arg) => arg.startsWith("--fps="));
 const scaleIndex = args.findIndex((arg) => arg.startsWith("--scale="));
-const dirIndex = args.findIndex((arg) => arg.startsWith("--dir="));
+const inputDirIndex = args.findIndex((arg) => arg.startsWith("--inputDir="));
+const outputDirIndex = args.findIndex((arg) => arg.startsWith("--outputDir="));
 
 console.log("Starting GIF generation...");
 const fps = args[fpsIndex]?.split("=")[1] ?? FPS;
 const scale = args[scaleIndex]?.split("=")[1] ?? SCALE;
-const dir = args[dirIndex]?.split("=")[1] ?? DEFAULT_DIR;
+const inputDir = args[inputDirIndex]?.split("=")[1] ?? DEFAULT_INPUT_DIR;
+const outputDir = args[outputDirIndex]?.split("=")[1] ?? DEFAULT_OUTPUT_DIR;
 
 if (inputIndex !== -1 && outputIndex !== -1) {
   const input = args[inputIndex].split("=")[1];
@@ -79,5 +83,5 @@ if (inputIndex !== -1 && outputIndex !== -1) {
 
   genVideoToGif(input, output, fps, scale);
 } else {
-  processDirectory(dir, fps, scale);
+  processDirectory(inputDir, outputDir, fps, scale);
 }
