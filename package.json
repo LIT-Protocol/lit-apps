@@ -22,6 +22,7 @@
     "index:hooks": "node ./gen-exports.mjs ./packages/hooks ./packages/hooks/index.tsx",
     "build:hooks": "yarn index:hooks && turbo run build --filter=hooks",
     "pub:hooks": "yarn index:hooks && turbo run pub --filter=hooks",
+    "gen:gif": "node gen-video-to-gif.mjs --scale=1024",
     "heroku-postbuild": "node heroku-postbuild.js"
   },
   "license": "MIT",
