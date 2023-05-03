@@ -1,8 +1,8 @@
-import { ThemeDemo } from "ui";
+import { ThemeDemo } from "@getlit/ui";
 import { useState } from "react";
 import * as LitJsSdk from "@lit-protocol/lit-node-client"; // <== include this
-import "ui/theme.purple.css";
-import "ui/theme.demo.css";
+import "@getlit/ui/theme.purple.css";
+import "@getlit/ui/theme.demo.css";
 import { getLitDependenciesAndFile } from "../server-helper";
 import Head from "next/head";
 

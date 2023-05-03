@@ -8,10 +8,10 @@ import {
   LitIcon,
   TableSort,
   ThemeA,
-} from "ui";
-import "ui/theme.purple.css";
+} from "@getlit/ui";
+import "@getlit/ui/theme.purple.css";
 import { routeData } from "../routeData";
-// import "ui/utils.css";
+// import "@getlit/ui/utils.css";
 import { Text, Space, Container, Center } from "@mantine/core";
 
 export default function Web() {

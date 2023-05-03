@@ -5,7 +5,7 @@ import {
   PKPSelection,
   StateReducer,
   usePKPConnectionContext,
-} from "ui";
+} from "@getlit/ui";
 import { useAccount } from "wagmi";
 
 export function Login() {

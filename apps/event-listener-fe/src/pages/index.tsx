@@ -1,5 +1,5 @@
 import Router from "next/router";
-import { LitButton, LitCard, LitHeaderV1, LitHero, LitIcon } from "ui";
+import { LitButton, LitCard, LitHeaderV1, LitHero, LitIcon } from "@getlit/ui";
 
 export function Index() {
   return (

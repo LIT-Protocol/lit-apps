@@ -6,7 +6,7 @@ import {
   LitInputTextV1,
   LitNote,
   StateReducer,
-} from "ui";
+} from "@getlit/ui";
 
 const Design = () => {
   const [state, dispatch] = useReducer(StateReducer, {

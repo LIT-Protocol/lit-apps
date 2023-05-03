@@ -12,7 +12,7 @@ import {
   LitLoading,
   StateReducer,
   usePKPConnectionContext,
-} from "ui";
+} from "@getlit/ui";
 import { ELNotes } from "../../components/ELNotes";
 import { ssFetch } from "../../utils/ssFetch";
 import toast from "react-hot-toast";
