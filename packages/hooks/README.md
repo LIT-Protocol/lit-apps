@@ -1,5 +1,49 @@
+# Getting started
+
+```
+yarn add @getlit/hooks
+```
+
 # usePKPs (UMD) example
 
+## react usage
+
+```js
+import { usePKPs } from "@getlit/hooks";
+
+export default function Home() {
+  const [data, loading, errors, fetch, defaultRender] = usePKPs({
+    litNetwork: "serrano",
+    chain: "ethereum",
+  });
+
+  return (
+    <>
+      <button onClick={fetch}>View PKPs</button>
+
+      {/* -- default render -- */}
+      <h2>Default rendering</h2>
+      {defaultRender((pkp: any) => {
+        console.log(pkp);
+      })}
+
+      {/* -- custom render */}
+      <h2>Custom rendering</h2>
+      {loading ? "Loading PKPs..." : ""}
+      {errors ? "Error: " + errors : ""}
+      {data?.map((pkp: any) => {
+        return (
+          <div key={pkp.tokenId}>
+            tokenId: {pkp.tokenId} <br />
+          </div>
+        );
+      })}
+    </>
+  );
+}
+```
+
+## html usage
 ```html
 <body>
   <div id="root"></div>
@@ -9,7 +53,7 @@
   <!-- script -->
   <script crossorigin src="https://unpkg.com/react/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
-  <script src="./dist/bundle.umd.js"></script>
+  <script src="https://www.unpkg.com/@getlit/hooks@0.0.12/dist/bundle.umd.js"></script>
   <script>
     const { usePKPs } = GetLitHooks;
 
@@ -19,7 +63,6 @@
       document.getElementById('btn-view-pkps').onclick = async () => {
         fetchPKPs();
       };
-      
       return React.createElement('div', null, render((pkp) => {
         console.log(pkp);
       }));
