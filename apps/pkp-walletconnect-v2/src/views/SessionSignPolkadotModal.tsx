@@ -8,7 +8,7 @@ import { approvePolkadotRequest, rejectPolkadotRequest } from '@/utils/PolkadotR
 // import { web3wallet } from '@/utils/WalletConnectUtil'
 import { Button, Divider, Modal, Text } from '@nextui-org/react'
 import { Fragment } from 'react'
-import { pkpWalletConnect } from '@/utils/PKPWalletConnectUtil'
+import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 
 export default function SessionSignPolkadotModal() {
   // Get request and wallet data from store

@@ -8,7 +8,7 @@ import { getSignParamsMessage } from '@/utils/HelperUtil'
 // import { web3wallet } from '@/utils/WalletConnectUtil'
 import { Button, Col, Divider, Modal, Row, Text } from '@nextui-org/react'
 import { Fragment } from 'react'
-import { pkpWalletConnect } from '@/utils/PKPWalletConnectUtil'
+import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 
 export default function SessionSignModal() {
   // Get request and wallet data from store

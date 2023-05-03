@@ -4,10 +4,12 @@ import PairingCard from '@/components/PairingCard'
 import { Text } from '@nextui-org/react'
 import { getSdkError } from '@walletconnect/utils'
 import { Fragment, useState } from 'react'
-import { pkpWalletConnect } from '@/utils/PKPWalletConnectUtil'
+import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 
 export default function PairingsPage() {
-  const [pairings, setPairings] = useState(pkpWalletConnect.getSignClient().pairing.pairings.values)
+  const [pairings, setPairings] = useState(
+    pkpWalletConnect.getSignClient().core.pairing.pairings.values
+  )
 
   async function onDelete(topic: string) {
     await pkpWalletConnect.disconnectSession({ topic, reason: getSdkError('USER_DISCONNECTED') })

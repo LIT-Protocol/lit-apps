@@ -8,7 +8,7 @@ import { approveEIP155Request, rejectEIP155Request } from '@/utils/EIP155Request
 // import { web3wallet } from '@/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
 import { Fragment, useState } from 'react'
-import { pkpWalletConnect } from '@/utils/PKPWalletConnectUtil'
+import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 
 export default function SessionSendTransactionModal() {
   const [loading, setLoading] = useState(false)

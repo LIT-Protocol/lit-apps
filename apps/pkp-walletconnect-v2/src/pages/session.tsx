@@ -6,7 +6,7 @@ import { Button, Divider, Loading, Row, Text } from '@nextui-org/react'
 import { getSdkError } from '@walletconnect/utils'
 import { useRouter } from 'next/router'
 import { Fragment, useEffect, useState } from 'react'
-import { pkpWalletConnect } from '@/utils/PKPWalletConnectUtil'
+import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 
 /**
  * Component

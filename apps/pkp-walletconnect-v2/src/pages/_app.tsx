@@ -5,50 +5,21 @@ import useWalletConnectEventsManager from '@/hooks/useWalletConnectEventsManager
 import { createTheme, NextUIProvider } from '@nextui-org/react'
 import { AppProps } from 'next/app'
 import '../../public/main.css'
+import useLitAuth from '@/hooks/useLitAuth'
 
 import { WagmiConfig, createClient, configureChains } from 'wagmi'
 import { mainnet, goerli, polygon, polygonMumbai } from 'wagmi/chains'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { publicProvider } from 'wagmi/providers/public'
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
-import { Chain } from 'wagmi/chains'
-import useLitAuth from '@/hooks/useLitAuth'
-
-const chronicleChain: Chain = {
-  id: 175177,
-  name: 'Chronicle',
-  network: 'chronicle',
-  // iconUrl: 'https://example.com/icon.svg',
-  // iconBackground: '#fff',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'LIT'
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://chain-rpc.litprotocol.com/http']
-    },
-    public: {
-      http: ['https://chain-rpc.litprotocol.com/http']
-    }
-  },
-  blockExplorers: {
-    default: {
-      name: 'Chronicle - Lit Protocol Testnet',
-      url: 'https://chain.litprotocol.com'
-    }
-  },
-  testnet: true
-}
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import SignIn from '@/components/SignIn'
+import LoadingView from '@/components/LoadingView'
 
 const { provider, chains } = configureChains(
-  [chronicleChain, mainnet, polygon, goerli, polygonMumbai],
-  [
-    jsonRpcProvider({
-      rpc: chain => ({ http: chain.rpcUrls.default.http[0] })
-    })
-  ]
+  [mainnet, goerli, polygon, polygonMumbai],
+  [alchemyProvider({ apiKey: 'onvoLvV97DDoLkAmdi0Cj7sxvfglKqDh' }), publicProvider()]
 )
 
 const client = createClient({
@@ -60,17 +31,24 @@ const client = createClient({
       options: {
         appName: 'wagmi'
       }
+    }),
+    new InjectedConnector({
+      chains,
+      options: {
+        name: 'Injected',
+        shimDisconnect: true
+      }
     })
   ],
   provider
 })
 
 export default function App({ Component, pageProps }: AppProps) {
-  // Authenticate with Lit
-  const { authenticated } = useLitAuth()
-
-  // Once authenticated, initialize WalletConnect client
-  const initialized = useInitialization(authenticated)
+  // Get auth state
+  const { authenticated, pkpClient } = useLitAuth()
+  //
+  // Init WalletConnect client
+  const initialized = useInitialization({ authenticated, pkpClient })
 
   // Once initialized, set up WalletConnect event manager
   useWalletConnectEventsManager(initialized)
@@ -80,7 +58,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <NextUIProvider theme={createTheme({ type: 'dark' })}>
       <WagmiConfig client={client}>
         <Layout>
-          <Component {...pageProps} />
+          {!authenticated && <SignIn />}
+          {authenticated && !initialized && <LoadingView />}
+          {authenticated && initialized && <Component {...pageProps} />}
         </Layout>
 
         <Modal />

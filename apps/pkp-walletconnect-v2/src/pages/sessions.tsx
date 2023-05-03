@@ -3,7 +3,7 @@ import SessionCard from '@/components/SessionCard'
 // import { web3wallet } from '@/utils/WalletConnectUtil'
 import { Text } from '@nextui-org/react'
 import { Fragment, useState } from 'react'
-import { pkpWalletConnect } from '@/utils/PKPWalletConnectUtil'
+import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState(Object.values(pkpWalletConnect.getActiveSessions()))

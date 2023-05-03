@@ -20,20 +20,34 @@ import {
 import { Button, Divider, Modal, Text } from '@nextui-org/react'
 import { SessionTypes } from '@walletconnect/types'
 import { getSdkError } from '@walletconnect/utils'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 // import { nearAddresses } from '@/utils/NearWalletUtil'
-import { pkpWalletConnect } from '@/utils/PKPWalletConnectUtil'
+import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 import { useSnapshot } from 'valtio'
 import SettingsStore from '@/store/SettingsStore'
 
 export default function SessionProposalModal() {
-  const { pkpClient } = useSnapshot(SettingsStore.state)
+  const { account } = useSnapshot(SettingsStore.state)
+
+  // Get addresses
+  const [eip155Address, setEip155Address] = useState<string>('')
+  const [eip155Addresses, setEip155Addresses] = useState<string[]>([])
+
+  useEffect(() => {
+    async function getAddress() {
+      const addresses = await pkpWalletConnect.getAddresses('eip155')
+      setEip155Addresses(addresses)
+      setEip155Address(addresses[account])
+    }
+    if (!eip155Address) getAddress()
+  }, [account, eip155Address])
 
   const [selectedAccounts, setSelectedAccounts] = useState<Record<string, string[]>>({})
   const hasSelected = Object.keys(selectedAccounts).length
 
   // Get proposal data and wallet address from store
   const proposal = ModalStore.state.data?.proposal
+  console.log('proposal', proposal)
 
   // Ensure proposal is defined
   if (!proposal) {
@@ -82,7 +96,8 @@ export default function SessionProposalModal() {
       //   relayProtocol: relays[0].protocol,
       //   namespaces
       // })
-      await pkpWalletConnect.approveSessionProposal(proposal)
+      console.log('proposal', proposal)
+      await pkpWalletConnect.approveSessionProposal(proposal as any)
     }
     ModalStore.close()
   }
@@ -94,14 +109,10 @@ export default function SessionProposalModal() {
       //   id,
       //   reason: getSdkError('USER_REJECTED_METHODS')
       // })
-      await pkpWalletConnect.rejectSessionProposal(proposal)
+      await pkpWalletConnect.rejectSessionProposal(proposal as any)
     }
     ModalStore.close()
   }
-
-  // Get addresses
-  const eip155Address = pkpClient!.getEthWallet().getAccount()
-  const eip155Addresses = [eip155Address]
 
   // Render account selection checkboxes based on chain
   function renderAccountSelection(chain: string) {

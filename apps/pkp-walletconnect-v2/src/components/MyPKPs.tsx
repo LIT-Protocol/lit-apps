@@ -8,23 +8,36 @@ import { EIP155_MAINNET_CHAINS, EIP155_TEST_CHAINS } from '@/data/EIP155Data'
 // import { ELROND_MAINNET_CHAINS, ELROND_TEST_CHAINS } from '@/data/ElrondData'
 import SettingsStore from '@/store/SettingsStore'
 import { Text } from '@nextui-org/react'
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useSnapshot } from 'valtio'
 import { NEAR_TEST_CHAINS } from '@/data/NEARData'
+import useLitAuth from '@/hooks/useLitAuth'
+import LoadingView from './LoadingView'
+import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 
 export default function MyPKPs() {
   const {
     testNets,
+    account
     // eip155Address
     // cosmosAddress,
     // solanaAddress,
     // polkadotAddress,
     // nearAddress,
     // elrondAddress
-    pkpClient
+    // pkpClient
   } = useSnapshot(SettingsStore.state)
 
-  const eip155Address = pkpClient!.getEthWallet().getAccount()
+  // Get addresses
+  const [eip155Address, setEip155Address] = useState<string>('')
+
+  useEffect(() => {
+    async function getAddress() {
+      const addresses = await pkpWalletConnect.getAddresses('eip155')
+      setEip155Address(addresses[account])
+    }
+    if (!eip155Address) getAddress()
+  }, [account, eip155Address])
 
   return (
     <Fragment>

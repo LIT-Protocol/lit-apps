@@ -1,7 +1,6 @@
 import PageHeader from '@/components/PageHeader'
 import QrReader from '@/components/QrReader'
-// import { pair } from '@/utils/WalletConnectUtil'
-import { pair } from '@/utils/PKPWalletConnectUtil'
+import { pair } from '@/utils/WalletConnectUtil'
 import { Button, Input, Loading, Text } from '@nextui-org/react'
 import { Fragment, useState } from 'react'
 
