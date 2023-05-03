@@ -11,7 +11,7 @@ interface UsePKPsOptions {
 }
 
 /**
- * usePKPs is a custom hook that fetches Public Key Pages (PKPs) data and returns
+ * usePKPs is a custom hook that fetches Progrmmable Key Pairs (PKPs) data and returns
  * the data, loading, and error states along with a render function for default rendering, and 
  * a start function to initiate fetching.
  *
