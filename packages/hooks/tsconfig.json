@@ -15,10 +15,16 @@
     "isolatedModules": true,
     // "noEmit": true,
     "jsx": "react",
-    "declaration": true,
+    "declaration": true
     // "outDir": "./dist"
   },
   "extends": "tsconfig/react-library.json",
   "include": ["."],
-  "exclude": ["dist", "build", "node_modules"]
+  "exclude": [
+    "dist",
+    "build",
+    "node_modules",
+    "webpack.config.js",
+    "bump-version.mjs"
+  ]
 }
