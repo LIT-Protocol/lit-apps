@@ -35,7 +35,7 @@ export default function SessionProposalModal() {
 
   useEffect(() => {
     async function getAddress() {
-      const addresses = await pkpWalletConnect.getAddresses('eip155')
+      const addresses = await pkpWalletConnect.getAccounts('eip155')
       setEip155Addresses(addresses)
       setEip155Address(addresses[account])
     }
@@ -47,7 +47,6 @@ export default function SessionProposalModal() {
 
   // Get proposal data and wallet address from store
   const proposal = ModalStore.state.data?.proposal
-  console.log('proposal', proposal)
 
   // Ensure proposal is defined
   if (!proposal) {
@@ -96,8 +95,7 @@ export default function SessionProposalModal() {
       //   relayProtocol: relays[0].protocol,
       //   namespaces
       // })
-      console.log('proposal', proposal)
-      await pkpWalletConnect.approveSessionProposal(proposal as any)
+      await pkpWalletConnect.approveSessionProposal(proposal)
     }
     ModalStore.close()
   }
@@ -109,7 +107,7 @@ export default function SessionProposalModal() {
       //   id,
       //   reason: getSdkError('USER_REJECTED_METHODS')
       // })
-      await pkpWalletConnect.rejectSessionProposal(proposal as any)
+      await pkpWalletConnect.rejectSessionProposal(proposal)
     }
     ModalStore.close()
   }

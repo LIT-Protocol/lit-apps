@@ -20,9 +20,9 @@ interface State {
   // elrondAddress: string
   relayerRegionURL: string
   myPKPs: IRelayPKP[]
-  authMethod?: AuthMethod
-  sessionSigs?: SessionSigs
-  sessionExpiration?: string
+  authMethod: AuthMethod | undefined
+  sessionSigs: SessionSigs | undefined
+  sessionExpiration: string | undefined
   // pkpClient?: PKPClient
 }
 
@@ -39,7 +39,8 @@ const state = proxy<State>({
   // nearAddress: '',
   // elrondAddress: '',
   relayerRegionURL: '',
-  myPKPs: getStoredPKPs(),
+  myPKPs: getMyPKPs(),
+  authMethod: undefined,
   sessionSigs: getStoredSessionSigs(),
   sessionExpiration: getStoredSessionExpiration()
 })
@@ -109,10 +110,20 @@ const SettingsStore = {
     } else {
       localStorage.removeItem('TEST_NETS')
     }
+  },
+
+  clearSession() {
+    state.myPKPs = []
+    state.authMethod = undefined
+    state.sessionSigs = undefined
+    state.sessionExpiration = undefined
+    removeMyPKPs()
+    removeSessionSigs()
+    removeSessionExpiration()
   }
 }
 
-function getStoredPKPs(): IRelayPKP[] {
+function getMyPKPs(): IRelayPKP[] {
   try {
     const storedPKPs = localStorage.getItem(LIT_PKPS_KEY)
     if (storedPKPs) {
@@ -157,6 +168,24 @@ function setSessionSigs(sigs: SessionSigs): void {
 function setSessionExpiration(expiry: string): void {
   try {
     localStorage.setItem(LIT_SESSION_EXP_KEY, expiry)
+  } catch (err) {}
+}
+
+function removeMyPKPs(): void {
+  try {
+    localStorage.removeItem(LIT_PKPS_KEY)
+  } catch (err) {}
+}
+
+function removeSessionSigs(): void {
+  try {
+    localStorage.removeItem(LIT_SESSION_SIGS_KEY)
+  } catch (err) {}
+}
+
+function removeSessionExpiration(): void {
+  try {
+    localStorage.removeItem(LIT_SESSION_EXP_KEY)
   } catch (err) {}
 }
 

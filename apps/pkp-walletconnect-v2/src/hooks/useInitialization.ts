@@ -42,7 +42,7 @@ export default function useInitialization({
 
       // await createWeb3Wallet(relayerRegionURL)
 
-      await createPKPWalletConnect(pkpClient as any)
+      await createPKPWalletConnect(pkpClient)
 
       setInitialized(true)
     } catch (err: unknown) {

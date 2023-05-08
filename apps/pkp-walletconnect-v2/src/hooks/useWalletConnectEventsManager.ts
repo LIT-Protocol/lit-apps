@@ -9,17 +9,19 @@ import { SignClientTypes } from '@walletconnect/types'
 import { useCallback, useEffect } from 'react'
 import { NEAR_SIGNING_METHODS } from '@/data/NEARData'
 // import { approveNearRequest } from '@/utils/NearRequestHandlerUtil'
-import { Web3WalletTypes } from '@walletconnect/web3wallet'
 import { pkpWalletConnect } from '@/utils/WalletConnectUtil'
 
 export default function useWalletConnectEventsManager(initialized: boolean) {
   /******************************************************************************
    * 1. Open session proposal modal for confirmation / rejection
    *****************************************************************************/
-  const onSessionProposal = useCallback((proposal: any) => {
-    console.log('onSessionProposal', proposal)
-    ModalStore.open('SessionProposalModal', { proposal })
-  }, [])
+  const onSessionProposal = useCallback(
+    (proposal: SignClientTypes.EventArguments['session_proposal']) => {
+      console.log('onSessionProposal', proposal)
+      ModalStore.open('SessionProposalModal', { proposal })
+    },
+    []
+  )
 
   // const onAuthRequest = useCallback((request: Web3WalletTypes.AuthRequest) => {
   //   ModalStore.open('AuthRequestModal', { request })
@@ -28,74 +30,77 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
   /******************************************************************************
    * 3. Open request handling modal based on method that was used
    *****************************************************************************/
-  const onSessionRequest = useCallback(async (requestEvent: any) => {
-    console.log('session_request', requestEvent)
-    const { topic, params } = requestEvent
-    const { request } = params
-    // const requestSession = signClient.session.get(topic)
-    const signClient = pkpWalletConnect.getSignClient()
-    const requestSession = signClient.session.get(topic) as any
+  const onSessionRequest = useCallback(
+    async (requestEvent: SignClientTypes.EventArguments['session_request']) => {
+      console.log('onSessionRequest', requestEvent)
 
-    switch (request.method) {
-      case EIP155_SIGNING_METHODS.ETH_SIGN:
-      case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
-        return ModalStore.open('SessionSignModal', { requestEvent, requestSession })
+      const { topic, params } = requestEvent
+      const { request } = params
+      // const requestSession = signClient.session.get(topic)
+      const signClient = pkpWalletConnect.getSignClient()
+      const requestSession = signClient.session.get(topic)
 
-      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA:
-      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V3:
-      case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
-        return ModalStore.open('SessionSignTypedDataModal', { requestEvent, requestSession })
+      switch (request.method) {
+        case EIP155_SIGNING_METHODS.ETH_SIGN:
+        case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
+          return ModalStore.open('SessionSignModal', { requestEvent, requestSession })
 
-      case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
-      case EIP155_SIGNING_METHODS.ETH_SIGN_TRANSACTION:
-        return ModalStore.open('SessionSendTransactionModal', { requestEvent, requestSession })
+        case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA:
+        case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V3:
+        case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
+          return ModalStore.open('SessionSignTypedDataModal', { requestEvent, requestSession })
 
-      // case COSMOS_SIGNING_METHODS.COSMOS_SIGN_DIRECT:
-      // case COSMOS_SIGNING_METHODS.COSMOS_SIGN_AMINO:
-      //   return ModalStore.open('SessionSignCosmosModal', { requestEvent, requestSession })
+        case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
+        case EIP155_SIGNING_METHODS.ETH_SIGN_TRANSACTION:
+          return ModalStore.open('SessionSendTransactionModal', { requestEvent, requestSession })
 
-      // case SOLANA_SIGNING_METHODS.SOLANA_SIGN_MESSAGE:
-      // case SOLANA_SIGNING_METHODS.SOLANA_SIGN_TRANSACTION:
-      //   return ModalStore.open('SessionSignSolanaModal', { requestEvent, requestSession })
+        // case COSMOS_SIGNING_METHODS.COSMOS_SIGN_DIRECT:
+        // case COSMOS_SIGNING_METHODS.COSMOS_SIGN_AMINO:
+        //   return ModalStore.open('SessionSignCosmosModal', { requestEvent, requestSession })
 
-      // case POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_MESSAGE:
-      // case POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_TRANSACTION:
-      //   return ModalStore.open('SessionSignPolkadotModal', { requestEvent, requestSession })
+        // case SOLANA_SIGNING_METHODS.SOLANA_SIGN_MESSAGE:
+        // case SOLANA_SIGNING_METHODS.SOLANA_SIGN_TRANSACTION:
+        //   return ModalStore.open('SessionSignSolanaModal', { requestEvent, requestSession })
 
-      // case NEAR_SIGNING_METHODS.NEAR_SIGN_IN:
-      // case NEAR_SIGNING_METHODS.NEAR_SIGN_OUT:
-      // case NEAR_SIGNING_METHODS.NEAR_SIGN_TRANSACTION:
-      // case NEAR_SIGNING_METHODS.NEAR_SIGN_AND_SEND_TRANSACTION:
-      // case NEAR_SIGNING_METHODS.NEAR_SIGN_TRANSACTIONS:
-      // case NEAR_SIGNING_METHODS.NEAR_SIGN_AND_SEND_TRANSACTIONS:
-      // case NEAR_SIGNING_METHODS.NEAR_VERIFY_OWNER:
-      //   return ModalStore.open('SessionSignNearModal', { requestEvent, requestSession })
+        // case POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_MESSAGE:
+        // case POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_TRANSACTION:
+        //   return ModalStore.open('SessionSignPolkadotModal', { requestEvent, requestSession })
 
-      // case ELROND_SIGNING_METHODS.ELROND_SIGN_MESSAGE:
-      // case ELROND_SIGNING_METHODS.ELROND_SIGN_TRANSACTION:
-      // case ELROND_SIGNING_METHODS.ELROND_SIGN_TRANSACTIONS:
-      // case ELROND_SIGNING_METHODS.ELROND_SIGN_LOGIN_TOKEN:
-      //   return ModalStore.open('SessionSignElrondModal', { requestEvent, requestSession })
+        // case NEAR_SIGNING_METHODS.NEAR_SIGN_IN:
+        // case NEAR_SIGNING_METHODS.NEAR_SIGN_OUT:
+        // case NEAR_SIGNING_METHODS.NEAR_SIGN_TRANSACTION:
+        // case NEAR_SIGNING_METHODS.NEAR_SIGN_AND_SEND_TRANSACTION:
+        // case NEAR_SIGNING_METHODS.NEAR_SIGN_TRANSACTIONS:
+        // case NEAR_SIGNING_METHODS.NEAR_SIGN_AND_SEND_TRANSACTIONS:
+        // case NEAR_SIGNING_METHODS.NEAR_VERIFY_OWNER:
+        //   return ModalStore.open('SessionSignNearModal', { requestEvent, requestSession })
 
-      // case NEAR_SIGNING_METHODS.NEAR_GET_ACCOUNTS:
-      //   return web3wallet.respondSessionRequest({
-      //     topic,
-      //     response: await approveNearRequest(requestEvent)
-      //   })
-      default:
-        return ModalStore.open('SessionUnsuportedMethodModal', { requestEvent, requestSession })
-    }
-  }, [])
+        // case ELROND_SIGNING_METHODS.ELROND_SIGN_MESSAGE:
+        // case ELROND_SIGNING_METHODS.ELROND_SIGN_TRANSACTION:
+        // case ELROND_SIGNING_METHODS.ELROND_SIGN_TRANSACTIONS:
+        // case ELROND_SIGNING_METHODS.ELROND_SIGN_LOGIN_TOKEN:
+        //   return ModalStore.open('SessionSignElrondModal', { requestEvent, requestSession })
+
+        // case NEAR_SIGNING_METHODS.NEAR_GET_ACCOUNTS:
+        //   return web3wallet.respondSessionRequest({
+        //     topic,
+        //     response: await approveNearRequest(requestEvent)
+        //   })
+        default:
+          return ModalStore.open('SessionUnsuportedMethodModal', { requestEvent, requestSession })
+      }
+    },
+    []
+  )
 
   /******************************************************************************
    * Set up WalletConnect event listeners
    *****************************************************************************/
   useEffect(() => {
     if (initialized) {
-      console.log('subscribe to events')
       // sign
-      pkpWalletConnect.on('session_proposal', onSessionProposal as any)
-      pkpWalletConnect.on('session_request', onSessionRequest as any)
+      pkpWalletConnect.on('session_proposal', onSessionProposal)
+      pkpWalletConnect.on('session_request', onSessionRequest)
       // auth
       // web3wallet.on('auth_request', onAuthRequest)
 

@@ -33,7 +33,7 @@ export default function MyPKPs() {
 
   useEffect(() => {
     async function getAddress() {
-      const addresses = await pkpWalletConnect.getAddresses('eip155')
+      const addresses = await pkpWalletConnect.getAccounts('eip155')
       setEip155Address(addresses[account])
     }
     if (!eip155Address) getAddress()

@@ -172,6 +172,27 @@ export default function useLitAuth() {
     [litAuthClient, handleAuth]
   )
 
+  const checkIfSessionIsValid = useCallback(async () => {
+    if (sessionExpiration && Date.now() > Number(sessionExpiration)) {
+      setAuthenticated(false)
+      setPKPClient(undefined)
+      SettingsStore.clearSession()
+      return
+    }
+
+    if (myPKPs && sessionSigs && sessionExpiration) {
+      if (!authenticated) {
+        setAuthenticated(true)
+      }
+      if (!pkpClient) {
+        const pkpPublicKey = myPKPs[account].publicKey
+        createPKPClient(pkpPublicKey, sessionSigs, sessionExpiration)
+      }
+    } else {
+      setAuthenticated(false)
+    }
+  }, [authenticated, myPKPs, account, sessionSigs, sessionExpiration, pkpClient, createPKPClient])
+
   useEffect(() => {
     if (!litAuthClient) {
       const litAuthClient = new LitAuthClient({
@@ -185,19 +206,8 @@ export default function useLitAuth() {
   }, [litAuthClient])
 
   useEffect(() => {
-    if (myPKPs && sessionSigs && sessionExpiration) {
-      if (!authenticated) {
-        setAuthenticated(true)
-      }
-
-      if (!pkpClient) {
-        const pkpPublicKey = myPKPs[account].publicKey
-        createPKPClient(pkpPublicKey, sessionSigs, sessionExpiration)
-      }
-    } else {
-      setAuthenticated(false)
-    }
-  }, [authenticated, myPKPs, account, sessionSigs, sessionExpiration, pkpClient, createPKPClient])
+    checkIfSessionIsValid()
+  }, [checkIfSessionIsValid])
 
   return { authenticated, pkpClient, error, authWithEthWallet }
 }
