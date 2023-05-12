@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@lit-dev/utils": "*",
-    "@lit-dev/hooks": "*",
+    "@getlit/hooks": "*",
     "@lit-protocol/contracts-sdk": "^2.1.143",
     "@lit-protocol/lit-node-client": "^2.1.143",
     "@lit-protocol/pkp-client": "^2.1.143",
