@@ -1,5 +1,5 @@
 #!/bin/bash
 
-# npm unlink @lit-protocol/pkp-walletconnect @lit-protocol/lit-auth-client @lit-protocol/lit-node-client @lit-protocol/pkp-base @lit-protocol/pkp-client @lit-protocol/pkp-cosmos @lit-protocol/pkp-ethers @lit-protocol/constants @lit-protocol/types
+npm unlink @lit-protocol/pkp-walletconnect @lit-protocol/lit-auth-client @lit-protocol/lit-node-client @lit-protocol/pkp-base @lit-protocol/pkp-client @lit-protocol/pkp-cosmos @lit-protocol/pkp-ethers @lit-protocol/constants @lit-protocol/types --force
 
-npm link @lit-protocol/pkp-walletconnect @lit-protocol/lit-auth-client @lit-protocol/lit-node-client @lit-protocol/pkp-base @lit-protocol/pkp-client @lit-protocol/pkp-cosmos @lit-protocol/pkp-ethers @lit-protocol/constants @lit-protocol/types --save
+# npm link @lit-protocol/pkp-walletconnect @lit-protocol/lit-auth-client @lit-protocol/lit-node-client @lit-protocol/pkp-base @lit-protocol/pkp-client @lit-protocol/pkp-cosmos @lit-protocol/pkp-ethers @lit-protocol/constants @lit-protocol/types --save

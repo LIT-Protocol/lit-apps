@@ -15,13 +15,10 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
   /******************************************************************************
    * 1. Open session proposal modal for confirmation / rejection
    *****************************************************************************/
-  const onSessionProposal = useCallback(
-    (proposal: SignClientTypes.EventArguments['session_proposal']) => {
-      console.log('onSessionProposal', proposal)
-      ModalStore.open('SessionProposalModal', { proposal })
-    },
-    []
-  )
+  const onSessionProposal = useCallback((proposal: any) => {
+    console.log('onSessionProposal', proposal)
+    ModalStore.open('SessionProposalModal', { proposal })
+  }, [])
 
   // const onAuthRequest = useCallback((request: Web3WalletTypes.AuthRequest) => {
   //   ModalStore.open('AuthRequestModal', { request })
@@ -97,6 +94,8 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
    * Set up WalletConnect event listeners
    *****************************************************************************/
   useEffect(() => {
+    console.log('initialized?', initialized)
+
     if (initialized) {
       // sign
       pkpWalletConnect.on('session_proposal', onSessionProposal)
@@ -104,7 +103,7 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
       // auth
       // web3wallet.on('auth_request', onAuthRequest)
 
-      // TODOs
+      // Not applicable to web3wallet
       // signClient.on('session_ping', data => console.log('ping', data))
       // signClient.on('session_event', data => console.log('event', data))
       // signClient.on('session_update', data => console.log('update', data))
