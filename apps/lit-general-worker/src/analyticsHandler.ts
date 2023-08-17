@@ -7,8 +7,7 @@ analyticsHandler.use(bodyParser.json());
 
 // PostgreSQL connection
 const pool: Pool = new Pool({
-  connectionString:
-    process.env.LIT_GENERAL_WORKER_DB,
+  connectionString: process.env.LIT_GENERAL_WORKER_DB,
 });
 
 interface AnalyticData {
@@ -69,12 +68,14 @@ async function submitDataToDatabase() {
       console.error("Error submitting data to the database:", error);
     }
   }
+
+  // Clear the array
 }
 
-// submit every 5 seconds
-// setInterval(submitDataToDatabase, 5 * 1000);
+// submit every 30 seconds
+setInterval(submitDataToDatabase, 30 * 1000);
 
 // Set an interval to submit the data to the database every 5 minutes
-setInterval(submitDataToDatabase, 5 * 60 * 1000);
+// setInterval(submitDataToDatabase, 5 * 60 * 1000);
 
 export { analyticsHandler };
