@@ -74,9 +74,9 @@ async function submitDataToDatabase() {
 }
 
 // submit every 30 seconds
-setInterval(submitDataToDatabase, 30 * 1000);
+// setInterval(submitDataToDatabase, 30 * 1000);
 
-// Set an interval to submit the data to the database every 5 minutes
-// setInterval(submitDataToDatabase, 5 * 60 * 1000);
+// Set an interval to submit the data to the database every 10 minutes
+setInterval(submitDataToDatabase, 10 * 60 * 1000);
 
 export { analyticsHandler };
