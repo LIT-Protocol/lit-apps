@@ -47,6 +47,13 @@ The Lit General Worker is both an API and a background worker designed to handle
 }
 ```
 
+### Env
+
+```
+LIT_GENERAL_WORKER_DB=<postgres_connection_string>
+CORS_BLACKLIST=http://example.com,http://badorigin.com
+```
+
 ### Example in JS
 
 ```js
