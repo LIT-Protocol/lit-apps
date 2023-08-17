@@ -104,7 +104,7 @@ curl http://localhost:3031/retrieve
 ```
 CREATE TABLE analytics (
   id SERIAL PRIMARY KEY,
-  date DATE NOT NULL,
+  date TIMESTAMP NOT NULL,
   function_name TEXT NOT NULL,
   execution_time INTEGER
 );
