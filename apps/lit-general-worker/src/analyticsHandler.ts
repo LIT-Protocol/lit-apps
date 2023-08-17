@@ -8,6 +8,7 @@ analyticsHandler.use(bodyParser.json());
 // PostgreSQL connection
 const pool: Pool = new Pool({
   connectionString: process.env.LIT_GENERAL_WORKER_DB,
+  ssl: true,
 });
 
 interface AnalyticData {
