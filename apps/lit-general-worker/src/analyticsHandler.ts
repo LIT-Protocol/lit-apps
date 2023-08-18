@@ -70,7 +70,8 @@ async function submitDataToDatabase() {
     }
   }
 
-  // Clear the array
+  // Clear the analyticData array
+  analyticData.length = 0;
 }
 
 // submit every 30 seconds
