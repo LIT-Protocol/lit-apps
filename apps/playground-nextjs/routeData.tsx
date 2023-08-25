@@ -7,4 +7,8 @@ export const routeData = [
     name: "PKPClient Demo",
     path: "/pkp-client-demo",
   },
+  {
+    name: "Programmable MPC Wallets with Flexible Auth Demo",
+    path: "https://lit-pkp-auth-demo.vercel.app",
+  },
 ];
