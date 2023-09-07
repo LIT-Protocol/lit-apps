@@ -1,1 +1,1 @@
-web: yarn cloud:build:lit-general-worker
+web: yarn heroku:build:lit-general-worker
