@@ -1,1 +1,1 @@
-web: rm -rf playground-nextjs && rm -rf apps/playground-nodejs && rm -rf apps/playground-nodets && rm -rf apps/lit-contracts-monitor && rm -rf apps/lit-actions-deployer && cd apps/lit-general-worker && yarn start
+web: yarn cloud:build:lit-general-worker
