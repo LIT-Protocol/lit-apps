@@ -4,13 +4,15 @@ import { useState, useEffect } from "react";
 import { BrandLogo, HeroTitle, LitLoading, ThemeA } from "@getlit/ui";
 import "@getlit/ui/theme.purple.css";
 import { LitContractsTable } from "./Table";
-import { Text, Space, Container, Center, Button, Title } from "@mantine/core";
+import { Space, Container, Center, Button, Title } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
-const API = `${process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"}/contract-addresses`;
+const API = `${
+  process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
+}/contract-addresses`;
 
 export default function Web() {
   const [data, setData] = useState();
-  const [error, setError] = useState();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -21,7 +23,7 @@ export default function Web() {
 
         console.log(result.data);
       } catch (e) {
-        setError(e);
+        setError(`${e}`);
       }
     }
 
@@ -42,8 +44,6 @@ export default function Web() {
         <Container size="md">
           {/* <LitButton onClick={handleClick}>Fetch Test</LitButton> */}
 
-          {/* -- error -- */}
-          {error && <div style={{ color: "red" }}>{JSON.stringify(error)}</div>}
           <Center>
             <Title order={2}>API</Title>
           </Center>
@@ -79,19 +79,34 @@ export default function Web() {
             </div>
           </div>
 
-          <Space h="xl" />
-          {/* -- success -- */}
-          {!data ? (
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <LitLoading icon="lit-logo" text="Getting latest contracts..." />
-            </div>
+          {error !== "" ? (
+            <>
+              <Space h="xl" />
+              <Center>
+                {error && <div style={{ color: "red" }}>{error}</div>}{" "}
+                <Space h="xl" />
+              </Center>
+            </>
           ) : (
             <>
-              <Center>
-                <Title order={2}>Latest Contracts</Title>
-              </Center>
-              <Space h="4px" />
-              <LitContractsTable data={data} />
+              <Space h="xl" />
+              {/* -- success -- */}
+              {!data ? (
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <LitLoading
+                    icon="lit-logo"
+                    text="Getting latest contracts..."
+                  />
+                </div>
+              ) : (
+                <>
+                  <Center>
+                    <Title order={2}>Latest Contracts</Title>
+                  </Center>
+                  <Space h="4px" />
+                  <LitContractsTable data={data} />
+                </>
+              )}
             </>
           )}
         </Container>
