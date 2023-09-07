@@ -5,13 +5,12 @@
   "types": "./index.tsx",
   "license": "MIT",
   "scripts": {
-    "lint": "TIMING=1 eslint \"**/*.ts*\"",
-    "build": "tsc"
+    "lint": "TIMING=1 eslint \"**/*.ts*\""
   },
   "devDependencies": {
     "@radix-ui/react-alert-dialog": "^1.0.2",
-    "@types/react": "^17.0.37",
-    "@types/react-dom": "^17.0.11",
+    "@types/react": "^18.0.22",
+    "@types/react-dom": "^18.0.7",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
     "react": "^18.2.0",
