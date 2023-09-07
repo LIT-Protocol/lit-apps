@@ -24,7 +24,7 @@ async function generateScripts(dryRun = false) {
 
       // Replace 'yarn build' with the new command
       scripts[`cloud:build:${appName}`] = `${deleteCommands} && yarn && yarn build`;
-      scripts[`heroku:build:${appName}`] = `${deleteCommands} && yarn && yarn build`;
+      // scripts[`heroku:build:${appName}`] = `${deleteCommands} && yarn && yarn build`;
     }
 
     if (dryRun) {
