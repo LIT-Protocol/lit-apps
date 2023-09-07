@@ -1,8 +1,8 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from "react";
-import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, rem, Button, } from "@mantine/core";
+import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, rem, } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconExternalLink, } from "@tabler/icons-react";
+import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, } from "@tabler/icons-react";
 const useStyles = createStyles((theme) => ({
     th: {
         padding: "0 !important",
@@ -71,6 +71,6 @@ export function LitContractsTable({ data }) {
         setSearch(value);
         setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search: value }));
     };
-    const rows = sortedData.map((row) => (_jsxs("tr", { children: [_jsx(Td, { children: row.name }), _jsx(Td, { children: _jsx(Button, Object.assign({ component: "a", variant: "gradient", gradient: { from: "#0A142D", to: "#0A142D", deg: 35 }, href: row.path, target: "_blank", radius: 12, leftIcon: _jsx(IconExternalLink, { size: "0.9rem" }) }, { children: "Open in new tab" })) })] }, row.name)));
-    return (_jsxs(ScrollArea, { children: [_jsx(TextInput, { placeholder: "Search by any field", mb: "md", icon: _jsx(IconSearch, { size: "0.9rem", stroke: 1.5 }), value: search, onChange: handleSearchChange }), _jsxs(Table, Object.assign({ horizontalSpacing: "md", verticalSpacing: "xs", miw: 700, sx: { tableLayout: "fixed" } }, { children: [_jsx("thead", { children: _jsxs("tr", { children: [_jsx(Th, Object.assign({ sorted: sortBy === "name", reversed: reverseSortDirection, onSort: () => setSorting("name") }, { children: "Name" })), _jsx(Th, Object.assign({ sorted: sortBy === "path", reversed: reverseSortDirection, onSort: () => setSorting("path") }, { children: "Path" }))] }) }), _jsx("tbody", { children: rows.length > 0 ? (rows) : (_jsx("tr", { children: _jsx("td", Object.assign({ colSpan: Object.keys(data[0]).length }, { children: _jsx(Text, Object.assign({ weight: 500, align: "center" }, { children: "Nothing found" })) })) })) })] }))] }));
+    const rows = sortedData.map((row) => (_jsx("tr", { children: _jsx(Td, { children: row.name }) }, row.name)));
+    return (_jsxs(ScrollArea, { children: [_jsx(TextInput, { placeholder: "Search by any field", mb: "md", icon: _jsx(IconSearch, { size: "0.9rem", stroke: 1.5 }), value: search, onChange: handleSearchChange }), _jsxs(Table, Object.assign({ horizontalSpacing: "md", verticalSpacing: "xs", miw: 700, sx: { tableLayout: "fixed" } }, { children: [_jsx("thead", { children: _jsx("tr", { children: _jsx(Th, Object.assign({ sorted: sortBy === "name", reversed: reverseSortDirection, onSort: () => setSorting("name") }, { children: "Name" })) }) }), _jsx("tbody", { children: rows.length > 0 ? (rows) : (_jsx("tr", { children: _jsx("td", Object.assign({ colSpan: Object.keys(data[0]).length }, { children: _jsx(Text, Object.assign({ weight: 500, align: "center" }, { children: "Nothing found" })) })) })) })] }))] }));
 }

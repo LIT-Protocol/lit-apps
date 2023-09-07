@@ -28,6 +28,7 @@
     "$NODE_ENV",
     "$SERVER_PRIVATE_KEY",
     "$PINATA_API_KEY",
-    "$PINATA_SECRET_KEY"
+    "$PINATA_SECRET_KEY",
+    "$API"
   ]
 }
