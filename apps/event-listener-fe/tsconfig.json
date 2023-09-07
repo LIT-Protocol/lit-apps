@@ -1,5 +1,0 @@
-{
-  "extends": "tsconfig/nextjs.json",
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "../../packages/utils/util-param-validator.ts", "../../packages/utils/src/redisConfig.ts"],
-  "exclude": ["node_modules"]
-}
