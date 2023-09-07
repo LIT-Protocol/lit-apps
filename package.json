@@ -23,7 +23,8 @@
     "index:hooks": "node ./gen-exports.mjs ./packages/hooks ./packages/hooks/index.tsx",
     "pub:hooks": "yarn index:hooks && turbo run pub --filter=hooks",
     "gen:gifs": "node gen-video-to-gif.mjs --scale=1024",
-    "heroku-postbuild": "node heroku-postbuild.js"
+    "heroku-postbuild": "node heroku-postbuild.js",
+    "remove:ui:builds": "node ./removeBuiltFiles.mjs ./packages/ui"
   },
   "license": "MIT",
   "devDependencies": {
