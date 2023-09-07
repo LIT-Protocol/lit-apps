@@ -29,6 +29,6 @@
     "$SERVER_PRIVATE_KEY",
     "$PINATA_API_KEY",
     "$PINATA_SECRET_KEY",
-    "$API"
+    "$NEXT_PUBLIC_API"
   ]
 }
