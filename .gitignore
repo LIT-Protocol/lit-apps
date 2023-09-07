@@ -36,3 +36,7 @@ apps/playground-nodejs/.env
 packages/lit-actions/.env
 
 .env
+
+yarn.lock
+
+package-lock.json
