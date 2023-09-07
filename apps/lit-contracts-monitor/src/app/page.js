@@ -6,7 +6,7 @@ import "@getlit/ui/theme.purple.css";
 import { LitContractsTable } from "./Table";
 import { Text, Space, Container, Center, Button, Title } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
-const API = `${process.env.API ?? "http://localhost:3031"}/contract-addresses`;
+const API = `${process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"}/contract-addresses`;
 
 export default function Web() {
   const [data, setData] = useState();
