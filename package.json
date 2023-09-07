@@ -42,6 +42,9 @@
     "prettier": "latest",
     "turbo": "^1.8.1"
   },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "packageManager": "yarn@1.22.19",
   "resolutions": {
     "ethereumjs-abi": "https://registry.npmjs.org/ethereumjs-abi/-/ethereumjs-abi-0.6.8.tgz"
