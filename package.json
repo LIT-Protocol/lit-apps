@@ -26,7 +26,7 @@
     "heroku-postbuild": "node heroku-postbuild.js",
     "remove:ui:builds": "node ./removeBuiltFiles.mjs ./packages/ui",
     "cloud:build:lit-contracts-monitor": "rm -rf apps/demo-pkp-social-auth-next-ts && rm -rf apps/event-listener-be && rm -rf apps/event-listener-fe && rm -rf apps/lit-action-deployer && rm -rf apps/lit-general-worker && rm -rf apps/playground-nextjs && rm -rf apps/playground-nodejs && rm -rf apps/playground-nodets && yarn && yarn build",
-    "cloud:build:lit-general-worker": "rm -rf apps/demo-pkp-social-auth-next-ts && rm -rf apps/event-listener-be && rm -rf apps/event-listener-fe && rm -rf apps/lit-action-deployer && rm -rf apps/lit-contracts-monitor && rm -rf apps/playground-nextjs && rm -rf apps/playground-nodejs && rm -rf apps/playground-nodets && yarn && yarn build",
+    "cloud:build:lit-general-worker": "rm -rf apps/demo-pkp-social-auth-next-ts && rm -rf apps/event-listener-be && rm -rf apps/event-listener-fe && rm -rf apps/lit-action-deployer && rm -rf apps/lit-contracts-monitor && rm -rf apps/playground-nextjs && rm -rf apps/playground-nodejs && rm -rf apps/playground-nodets && yarn && yarn build"
   },
   "license": "MIT",
   "devDependencies": {
