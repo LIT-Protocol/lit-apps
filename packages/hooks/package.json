@@ -5,7 +5,7 @@
   "main": "index.tsx",
   "scripts": {
     "build": "tsc && yarn build:umd",
-    "build:umd": "webpack",
+    "build:umd": "yarn webpack",
     "pub": "yarn build && yarn bump && npm publish",
     "bump": "node bump-version.mjs --patch"
   },
