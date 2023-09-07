@@ -2,6 +2,7 @@ import express, { Express } from "express";
 import bodyParser from "body-parser";
 import { txHandler } from "./txHandler";
 import { analyticsHandler } from "./analyticsHandler";
+import { aggregator } from "./aggregator";
 import cors from "cors";
 
 const app: Express = express();
@@ -21,6 +22,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use(aggregator);
 app.use(txHandler);
 app.use(analyticsHandler);
 
