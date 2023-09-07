@@ -200,6 +200,7 @@ export default function Dashboard() {
         authMethod,
         sessionSigsParams: {
           chain: 'ethereum',
+          // @ts-ignore
           resources: [`litAction://*`],
         },
       });
@@ -307,6 +308,7 @@ export default function Dashboard() {
         authMethod,
         sessionSigsParams: {
           chain: 'ethereum',
+          // @ts-ignore
           resources: [`litAction://*`],
         },
       });
