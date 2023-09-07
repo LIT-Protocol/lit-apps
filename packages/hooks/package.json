@@ -4,7 +4,7 @@
   "description": "lit protocol react hook components",
   "main": "index.tsx",
   "scripts": {
-    "build": "tsc && yarn build:umd",
+    "build": "tsc",
     "build:umd": "yarn webpack",
     "pub": "yarn build && yarn bump && npm publish",
     "bump": "node bump-version.mjs --patch"

@@ -109,3 +109,7 @@ heroku config:set PINATA_SECRET_KEY=XXXXX -a lit-general-worker
 heroku config:set PM2_PUBLIC_KEY=XXXXX -a lit-general-worker
 heroku config:set PM2_SECRET_KEY=XXXXX -a lit-general-worker
 ```
+
+# Vercel setting
+
+![](https://i.ibb.co/Wg1bhmp/Xnapper-2023-09-07-17-18-16.png)
