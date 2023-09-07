@@ -22,7 +22,8 @@ async function generateScripts(dryRun = false) {
         .map(name => `rm -rf apps/${name}`)
         .join(' && ');
 
-      scripts[`cloud:build:${appName}`] = `${deleteCommands} && yarn && yarn build`;
+      // Replace 'yarn build' with the new command
+      scripts[`cloud:build:${appName}`] = `${deleteCommands} && yarn && yarn turbo run start --filter ${appName}`;
     }
 
     if (dryRun) {
