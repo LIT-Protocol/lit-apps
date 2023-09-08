@@ -7,7 +7,6 @@ import {
   Group,
   Text,
   Center,
-  TextInput,
   rem,
   Button,
 } from "@mantine/core";
@@ -32,13 +31,6 @@ const useStyles = createStyles((theme) => ({
   control: {
     width: "100%",
     padding: `${theme.spacing.xs} ${theme.spacing.md}`,
-
-    // "&:hover": {
-    //   backgroundColor:
-    //     theme.colorScheme === "dark"
-    //       ? theme.colors.dark[6]
-    //       : theme.colors.gray[0],
-    // },
   },
 
   icon: {
@@ -120,14 +112,6 @@ export function LitContractsTable({ data }) {
     setSortedData(sortData(data, { sortBy: field, reversed, search }));
   };
 
-  const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
-    setSortedData(
-      sortData(data, { sortBy, reversed: reverseSortDirection, search: value })
-    );
-  };
-
   const rows = sortedData.map((row) => {
     const date = new Date(row.contracts[0]["inserted_at"]);
     const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString(
@@ -162,13 +146,6 @@ export function LitContractsTable({ data }) {
 
   return (
     <ScrollArea>
-      {/* <TextInput
-        placeholder="Search by any field"
-        mb="md"
-        icon={<IconSearch size="0.9rem" stroke={1.5} />}
-        value={search}
-        onChange={handleSearchChange}
-      /> */}
       <Table
         horizontalSpacing="md"
         verticalSpacing="xs"

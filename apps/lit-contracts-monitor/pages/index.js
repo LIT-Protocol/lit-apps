@@ -1,9 +1,11 @@
+// @ts-nocheck
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { BrandLogo, HeroTitle, LitLoading, ThemeA } from "@getlit/ui";
 import "@getlit/ui/theme.purple.css";
-import { LitContractsTable } from "./Table";
+import { LitContractsTable } from "../components/Table";
 import { Space, Container, Center, Button, Title } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
 const API = `${
