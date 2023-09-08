@@ -20,50 +20,58 @@ type ContractInfo = {
 
 let cache: any = null;
 let lastUpdated: Date | null = null;
-const CACHE_DURATION = 10 * 60 * 1000;
 
-aggregator.get("/contract-addresses", async (req, res) => {
-  const now = new Date();
+// -- config
 
-  // Check if cache exists and is not older than CACHE_DURATION
-  if (
-    cache &&
-    lastUpdated &&
-    now.getTime() - lastUpdated.getTime() < CACHE_DURATION
-  ) {
+// https://github.com/LIT-Protocol/lit-assets/tree/develop/blockchain/contracts/contracts/lit-node
+const contracts = [
+  "Allowlist",
+  "ConditionValidations",
+  "HDKeyDeriver",
+  "LITToken",
+  "Multisender",
+  "PKPHelper",
+  "PKPNFT",
+  "PKPNFTMetadata",
+  "PKPPermissions",
+  "PubkeyRouter",
+  "RateLimitNFT",
+  "Staking",
+  "StakingBalances",
+  "WLIT",
+];
+
+const CONTRACT_API = `https://chain.litprotocol.com/token-autocomplete?q=`;
+const LOOKUP_API = `https://chain.litprotocol.com/api?module=account&action=txlist&address=`;
+const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
+
+const DEPLOYER_ADDRESSES = [
+  "0x046bf7bb88e0e0941358ce3f5a765c9acdda7b9c",
+  "0xa54b67b7d202f0516c340e18169882ec9b6f88d8",
+  "0xe964c013414d2d2c34c9bd319a52cf334e8bddb7",
+
+  // If user provide it in process.env, then combine it with the default ones
+  ...(process.env.DEPLOYER_ADDRESSES || "").split(","),
+];
+
+aggregator.get("/contract-addresses", (req, res) => {
+  if (cache) {
     return res.json({ success: true, data: cache });
+  } else {
+    return res
+      .status(500)
+      .json({ success: false, message: "Cache not ready yet" });
   }
+});
 
-  // https://github.com/LIT-Protocol/lit-assets/tree/develop/blockchain/contracts/contracts/lit-node
-  const contracts = [
-    "Allowlist",
-    "ConditionValidations",
-    "HDKeyDeriver",
-    "LITToken",
-    "Multisender",
-    "PKPHelper",
-    "PKPNFT",
-    "PKPNFTMetadata",
-    "PKPPermissions",
-    "PubkeyRouter",
-    "RateLimitNFT",
-    "Staking",
-    "StakingBalances",
-    "WLIT",
-  ];
+// Update cache immediately when the server starts
+updateCache();
 
-  const CONTRACT_API = `https://chain.litprotocol.com/token-autocomplete?q=`;
-  const LOOKUP_API = `https://chain.litprotocol.com/api?module=account&action=txlist&address=`;
-  const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
+// Update cache every 5 minutes
+setInterval(updateCache, 5 * 60 * 1000);
 
-  const DEPLOYER_ADDRESSES = [
-    "0x046bf7bb88e0e0941358ce3f5a765c9acdda7b9c",
-    "0xa54b67b7d202f0516c340e18169882ec9b6f88d8",
-    "0xe964c013414d2d2c34c9bd319a52cf334e8bddb7",
-
-    // If user provide it in process.env, then combine it with the default ones
-    ...(process.env.DEPLOYER_ADDRESSES || "").split(","),
-  ];
+async function updateCache() {
+  const now = new Date();
 
   let aggregatedResults = [];
 
@@ -117,9 +125,7 @@ aggregator.get("/contract-addresses", async (req, res) => {
   cache = aggregatedResults;
   lastUpdated = now;
 
-  console.log("✅ Done!")
-
-  res.json({ success: true, data: aggregatedResults });
-});
+  console.log("✅ Cache Updated!");
+}
 
 export { aggregator };
