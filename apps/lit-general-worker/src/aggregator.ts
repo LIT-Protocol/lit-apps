@@ -15,6 +15,7 @@ type ContractInfo = {
   tx_hash: string | null;
   type: "contract"; // Assuming 'type' will always have the value "contract"
   ABIUrl: string | null;
+  creator: string | null;
 };
 
 let cache: any = null;
@@ -52,31 +53,71 @@ aggregator.get("/contract-addresses", async (req, res) => {
   ];
 
   const CONTRACT_API = `https://chain.litprotocol.com/token-autocomplete?q=`;
+  const LOOKUP_API = `https://chain.litprotocol.com/api?module=account&action=txlist&address=`;
   const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
+
+  const DEPLOYER_ADDRESSES = [
+    "0x046bf7bb88e0e0941358ce3f5a765c9acdda7b9c",
+    "0xa54b67b7d202f0516c340e18169882ec9b6f88d8",
+    "0xe964c013414d2d2c34c9bd319a52cf334e8bddb7",
+
+    // If user provide it in process.env, then combine it with the default ones
+    ...(process.env.DEPLOYER_ADDRESSES || "").split(","),
+  ];
 
   let aggregatedResults = [];
 
   for (const contract of contracts) {
     const res = await fetch(`${CONTRACT_API}${contract}`);
 
-    const deployedContracts: ContractInfo[] = await res.json();
+    let deployedContracts: ContractInfo[] = await res.json();
+
+    // only show the 3 latest deployed contracts
+    deployedContracts = deployedContracts.slice(0, 2);
+
+    let skip = false;
 
     for (const [i, info] of deployedContracts.entries()) {
-      deployedContracts[i].ABIUrl = `${ABI_API}${info.address_hash}`;
+      if (info.type !== "contract") {
+        continue;
+      }
+
+      console.log(`Getting info for ${contract} ${info.address_hash}`);
+
+      // Check if contract was deployed by a deployer address
+      const lookupRes = await fetch(`${LOOKUP_API}${info.address_hash}`);
+      const lookupData = await lookupRes.json();
+
+      const creatorTx = lookupData.result.find(
+        (item: any) =>
+          item.contractAddress.toLowerCase() === info.address_hash.toLowerCase()
+      );
+
+      if (creatorTx && DEPLOYER_ADDRESSES.includes(creatorTx.from)) {
+        deployedContracts[i].ABIUrl = `${ABI_API}${info.address_hash}`;
+        deployedContracts[i].creator = creatorTx.from;
+        deployedContracts[i].tx_hash = creatorTx.hash;
+      } else {
+        skip = true;
+      }
     }
 
-    // aggregatedResults[contract] = deployedContracts;
-    if (deployedContracts.length > 0) {
-      aggregatedResults.push({
-        name: contract,
-        contracts: deployedContracts,
-      });
+    if (!skip) {
+      // aggregatedResults[contract] = deployedContracts;
+      if (deployedContracts.length > 0) {
+        aggregatedResults.push({
+          name: contract,
+          contracts: deployedContracts,
+        });
+      }
     }
   }
 
   // Update cache and lastUpdated timestamp
   cache = aggregatedResults;
   lastUpdated = now;
+
+  console.log("✅ Done!")
 
   res.json({ success: true, data: aggregatedResults });
 });
