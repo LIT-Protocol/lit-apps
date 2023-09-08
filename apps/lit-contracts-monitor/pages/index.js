@@ -8,9 +8,12 @@ import "@getlit/ui/theme.purple.css";
 import { LitContractsTable } from "../components/Table";
 import { Space, Container, Center, Button, Title } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
+
 const API = `${
   process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
 }/contract-addresses`;
+
+const SCRIPT_REPO = `https://github.com/LIT-Protocol/getlit-contracts`;
 
 export default function Web() {
   const [data, setData] = useState();
@@ -47,10 +50,42 @@ export default function Web() {
           {/* <LitButton onClick={handleClick}>Fetch Test</LitButton> */}
 
           <Center>
-            <Title order={2}>API</Title>
+            <Title order={2}>Quick Start</Title>
           </Center>
-          <Space h="4px" />
 
+          <Space h="8px" />
+          <div
+            style={{ display: "flex", justifyContent: "center", gap: "8px" }}
+          >
+            <div
+              style={{
+                background: "grey",
+                display: "flex",
+                justifyContent: "center",
+                paddingLeft: "12px",
+
+                borderRadius: "4px",
+                fontSize: "0.75rem",
+              }}
+            >
+              <span style={{ margin: "auto", paddingRight: "8px" }}>NPX</span>
+              <Button
+                style={{ width: "100%" }}
+                component="a"
+                variant="gradient"
+                gradient={{ from: "#0A142D", to: "#0A142D", deg: 35 }}
+                href={SCRIPT_REPO}
+                target="_blank"
+                radius={4}
+                leftIcon={<IconExternalLink size="0.9rem" />}
+              >
+                {/* {SCRIPT_REPO} */}
+                npx @getlit/contracts
+              </Button>
+            </div>
+          </div>
+
+          <Space h="8px" />
           <div
             style={{ display: "flex", justifyContent: "center", gap: "8px" }}
           >
