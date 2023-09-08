@@ -25,6 +25,7 @@ let lastUpdated: Date | null = null;
 
 // https://github.com/LIT-Protocol/lit-assets/tree/develop/blockchain/contracts/contracts/lit-node
 const contracts = [
+  "AccessControlConditions",
   "Allowlist",
   "ConditionValidations",
   "HDKeyDeriver",
@@ -62,6 +63,50 @@ aggregator.get("/contract-addresses", (req, res) => {
       .status(500)
       .json({ success: false, message: "Cache not ready yet" });
   }
+});
+
+aggregator.get("/serrano-contract-addresses", (req, res) => {
+  return res.json({
+    success: true,
+    data: [
+      {
+        name: "AccessControlConditions",
+        contracts: [
+          {
+            address_hash: "0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B",
+            inserted_at: "2023-04-27T00:00:00.000000Z",
+          },
+        ],
+      },
+      {
+        name: "PKPNFT",
+        contracts: [
+          {
+            address_hash: "0x8F75a53F65e31DD0D2e40d0827becAaE2299D111",
+            inserted_at: "2023-04-27T00:00:00.000000Z",
+          },
+        ],
+      },
+      {
+        name: "PKPHelper",
+        contracts: [
+          {
+            address_hash: "0x8bB62077437D918891F12c7F35d9e1B78468bF11",
+            inserted_at: "2023-04-27T00:00:00.000000Z",
+          },
+        ],
+      },
+      {
+        name: "PKPPermissions",
+        contracts: [
+          {
+            address_hash: "0x4Aed2F242E806c58758677059340e29E6B5b7619",
+            inserted_at: "2023-04-27T00:00:00.000000Z",
+          },
+        ],
+      },
+    ],
+  });
 });
 
 // Update cache immediately when the server starts

@@ -2,40 +2,57 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BrandLogo, HeroTitle, LitLoading, ThemeA } from "@getlit/ui";
 import "@getlit/ui/theme.purple.css";
 import { LitContractsTable } from "../components/Table";
-import { Space, Container, Center, Button, Title } from "@mantine/core";
+import {
+  Space,
+  Container,
+  Center,
+  Button,
+  Title,
+  NativeSelect,
+} from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
 
 const API = `${
   process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
 }/contract-addresses`;
 
+const SERRANO_API = `${
+  process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
+}/serrano-contract-addresses`;
+
 const SCRIPT_REPO = `https://github.com/LIT-Protocol/getlit-contracts`;
 
 export default function Web() {
+  const [init, setInit] = useState(false);
   const [data, setData] = useState();
   const [error, setError] = useState("");
+  const [network, setNetwork] = useState("Cayenne");
+  const networkRef = useRef(network);
 
   useEffect(() => {
+    networkRef.current = network;
+
     async function fetchData() {
       try {
-        const result = await (await fetch(API)).json();
-
+        let result;
+        if (network === "Cayenne") {
+          result = await (await fetch(API)).json();
+        } else if (network === "Serrano") {
+          result = await (await fetch(SERRANO_API)).json();
+        }
         setData(result.data);
-
-        console.log(result.data);
+        console.log("result.data:", result.data);
       } catch (e) {
         setError(`${e}`);
       }
     }
 
-    if (!data) {
-      fetchData();
-    }
-  });
+    fetchData();
+  }, [network]);
 
   return (
     <div>
@@ -106,12 +123,12 @@ export default function Web() {
                 component="a"
                 variant="gradient"
                 gradient={{ from: "#0A142D", to: "#0A142D", deg: 35 }}
-                href={API}
+                href={network === "Cayenne" ? API : SERRANO_API}
                 target="_blank"
                 radius={4}
                 leftIcon={<IconExternalLink size="0.9rem" />}
               >
-                {API}
+                {network === "Cayenne" ? API : SERRANO_API}
               </Button>
             </div>
           </div>
@@ -140,8 +157,37 @@ export default function Web() {
                   <Center>
                     <Title order={2}>Latest Contracts</Title>
                   </Center>
-                  <Space h="4px" />
-                  <LitContractsTable data={data} />
+
+                  <NativeSelect
+                    value={network}
+                    data={["Cayenne", "Serrano"]}
+                    label="Network"
+                    onChange={async (event) => {
+                      const value = event.target.value;
+                      networkRef.current = value; // Update the ref immediately
+
+                      try {
+                        let result;
+                        if (networkRef.current === "Cayenne") {
+                          result = await (await fetch(API)).json();
+                        } else if (networkRef.current === "Serrano") {
+                          result = await (await fetch(SERRANO_API)).json();
+                        }
+                        setData(result.data);
+                        console.log("result.data:", result.data);
+                      } catch (e) {
+                        setError(`${e}`);
+                      }
+
+                      setNetwork(value); // This will trigger a re-render, but the data is already updated
+                    }}
+                  />
+                  <Space h="24px" />
+                  {data.length <= 0 ? (
+                    "No contracts found."
+                  ) : (
+                    <LitContractsTable key={network} data={data} />
+                  )}
                 </>
               )}
             </>
