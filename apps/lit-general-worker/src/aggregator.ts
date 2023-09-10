@@ -50,7 +50,7 @@ const DEPLOYER_ADDRESSES = [
   "0x046bf7bb88e0e0941358ce3f5a765c9acdda7b9c",
   "0xa54b67b7d202f0516c340e18169882ec9b6f88d8",
   "0xe964c013414d2d2c34c9bd319a52cf334e8bddb7",
-  "0xD875480fdE946c74ecaF71bb643cbe9F2E68E5a8",
+  "0xd875480fde946c74ecaf71bb643cbe9f2e68e5a8",
 
   // If user provide it in process.env, then combine it with the default ones
   ...(process.env.DEPLOYER_ADDRESSES || "").split(","),
