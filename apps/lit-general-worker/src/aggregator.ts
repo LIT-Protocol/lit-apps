@@ -45,7 +45,7 @@ let lastUpdated: Date | null = null;
 // 
 // const CONTRACT_API = `https://chain.litprotocol.com/token-autocomplete?q=`;
 const LOOKUP_API = `https://chain.litprotocol.com/api?module=account&action=txlist&address=`;
-// const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
+const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
 
 const CAYENNE_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
 
@@ -232,6 +232,7 @@ async function updateCache() {
             {
               address_hash: address,
               inserted_at: date,
+              ABIUrl: `${ABI_API}${address}`,
             },
           ]
         })
