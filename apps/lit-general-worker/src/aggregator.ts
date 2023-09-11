@@ -24,38 +24,40 @@ let lastUpdated: Date | null = null;
 // -- config
 
 // https://github.com/LIT-Protocol/lit-assets/tree/develop/blockchain/contracts/contracts/lit-node
-const contracts = [
-  "Programmable Keypair",
-  "AccessControlConditions",
-  "Allowlist",
-  "ConditionValidations",
-  "HDKeyDeriver",
-  "LITToken",
-  "Multisender",
-  "PKPHelper",
-  "PKPNFT",
-  "PKPNFTMetadata",
-  "PKPPermissions",
-  "PubkeyRouter",
-  "RateLimitNFT",
-  "Staking",
-  "StakingBalances",
-  "WLIT",
-];
-
-const CONTRACT_API = `https://chain.litprotocol.com/token-autocomplete?q=`;
+// const contracts = [
+//   "Programmable Keypair",
+//   "AccessControlConditions",
+//   "Allowlist",
+//   "ConditionValidations",
+//   "HDKeyDeriver",
+//   "LITToken",
+//   "Multisender",
+//   "PKPHelper",
+//   "PKPNFT",
+//   "PKPNFTMetadata",
+//   "PKPPermissions",
+//   "PubkeyRouter",
+//   "RateLimitNFT",
+//   "Staking",
+//   "StakingBalances",
+//   "WLIT",
+// ];
+// 
+// const CONTRACT_API = `https://chain.litprotocol.com/token-autocomplete?q=`;
 const LOOKUP_API = `https://chain.litprotocol.com/api?module=account&action=txlist&address=`;
-const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
+// const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
 
-const DEPLOYER_ADDRESSES = [
-  "0x046bf7bb88e0e0941358ce3f5a765c9acdda7b9c",
-  "0xa54b67b7d202f0516c340e18169882ec9b6f88d8",
-  "0xe964c013414d2d2c34c9bd319a52cf334e8bddb7",
-  "0xd875480fde946c74ecaf71bb643cbe9f2e68e5a8",
+const CAYENNE_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
 
-  // If user provide it in process.env, then combine it with the default ones
-  ...(process.env.DEPLOYER_ADDRESSES || "").split(","),
-];
+// const DEPLOYER_ADDRESSES = [
+//   "0x046bf7bb88e0e0941358ce3f5a765c9acdda7b9c",
+//   "0xa54b67b7d202f0516c340e18169882ec9b6f88d8",
+//   "0xe964c013414d2d2c34c9bd319a52cf334e8bddb7",
+//   "0xd875480fde946c74ecaf71bb643cbe9f2e68e5a8",
+
+//   // If user provide it in process.env, then combine it with the default ones
+//   ...(process.env.DEPLOYER_ADDRESSES || "").split(","),
+// ];
 
 aggregator.get("/contract-addresses", (req, res) => {
   if (cache) {
@@ -66,6 +68,13 @@ aggregator.get("/contract-addresses", (req, res) => {
       .json({ success: false, message: "Cache not ready yet" });
   }
 });
+
+aggregator.get('/contract-addresses', (req, res) => {
+  return res.json({
+    success: true,
+    data: cache
+  })
+})
 
 aggregator.get("/serrano-contract-addresses", (req, res) => {
   return res.json({
@@ -117,75 +126,125 @@ updateCache();
 // Update cache every 5 minutes
 setInterval(updateCache, 5 * 60 * 1000);
 
+// async function updateCache() {
+//   const now = new Date();
+
+//   let aggregatedResults = [];
+
+//   for (const contract of contracts) {
+//     const res = await fetch(`${CONTRACT_API}${contract}`);
+
+//     let deployedContracts: ContractInfo[] = await res.json();
+
+//     // sort the deployedContracts by inserted_at
+//     deployedContracts.sort((a, b) => {
+//       return (
+//         new Date(b.inserted_at).getTime() - new Date(a.inserted_at).getTime()
+//       );
+//     });
+
+
+//     // only show the 3 latest deployed contracts
+//     deployedContracts = deployedContracts.slice(0, 2);
+
+//     // console.log("deployedContracts:", deployedContracts)
+
+//     let skip = false;
+
+//     for (const [i, info] of deployedContracts.entries()) {
+
+//       // if (info.type !== "contract") {
+//       //   continue;
+//       // }
+
+//       // console.log(info)
+
+//       console.log(`Getting info for ${contract} ${info.address_hash}`);
+
+//       // Check if contract was deployed by a deployer address
+//       const lookupRes = await fetch(`${LOOKUP_API}${info.address_hash}`);
+//       const lookupData = await lookupRes.json();
+
+//       const creatorTx = lookupData.result.find(
+//         (item: any) =>
+//           item.contractAddress.toLowerCase() === info.address_hash.toLowerCase()
+//       );
+
+//       if (creatorTx && DEPLOYER_ADDRESSES.includes(creatorTx.from)) {
+//         deployedContracts[i].ABIUrl = `${ABI_API}${info.address_hash}`;
+//         deployedContracts[i].creator = creatorTx.from;
+//         deployedContracts[i].tx_hash = creatorTx.hash;
+//       } else {
+//         skip = true;
+//       }
+//     }
+
+//     if (!skip) {
+//       // aggregatedResults[contract] = deployedContracts;
+//       if (deployedContracts.length > 0) {
+//         aggregatedResults.push({
+//           name: contract,
+//           contracts: deployedContracts,
+//         });
+//       }
+//     }
+//   }
+
+//   // Update cache and lastUpdated timestamp
+//   cache = aggregatedResults;
+//   lastUpdated = now;
+
+//   console.log("✅ Cache Updated!");
+// }
+
+
 async function updateCache() {
-  const now = new Date();
 
-  let aggregatedResults = [];
+  const res = await fetch(CAYENNE_CONTRACTS_JSON);
 
-  for (const contract of contracts) {
-    const res = await fetch(`${CONTRACT_API}${contract}`);
+  const resData = await res.json();
 
-    let deployedContracts: ContractInfo[] = await res.json();
+  const data = [];
 
-    // sort the deployedContracts by inserted_at
-    deployedContracts.sort((a, b) => {
-      return (
-        new Date(b.inserted_at).getTime() - new Date(a.inserted_at).getTime()
-      );
-    });
+  const mapper = {
+    'pkpNftContractAddress': 'PKPNFT',
+    'pkpHelperContractAddress': 'PKPHelper',
+    'pkpPermissionsContractAddress': 'PKPPermissions',
+    'pkpNftMetadataContractAddress': 'PKPNFTMetadata',
+    'litTokenContractAddress': 'LITToken',
+    'pubkeyRouterContractAddress': 'PubkeyRouter',
+  }
 
+  for (const [name, address] of Object.entries(resData)) {
+    if (mapper[name]) {
 
-    // only show the 3 latest deployed contracts
-    deployedContracts = deployedContracts.slice(0, 2);
+      const lookup = await fetch(`${LOOKUP_API}${address}`);
 
-    console.log("deployedContracts:", deployedContracts)
+      const lookupData = await lookup.json();
 
-    let skip = false;
+      if (lookupData.result[1]?.timeStamp) {
 
-    for (const [i, info] of deployedContracts.entries()) {
+        const date = new Date(lookupData.result[1].timeStamp * 1000).toISOString();
 
-      // if (info.type !== "contract") {
-      //   continue;
-      // }
-
-      console.log(info)
-
-      console.log(`Getting info for ${contract} ${info.address_hash}`);
-
-      // Check if contract was deployed by a deployer address
-      const lookupRes = await fetch(`${LOOKUP_API}${info.address_hash}`);
-      const lookupData = await lookupRes.json();
-
-      const creatorTx = lookupData.result.find(
-        (item: any) =>
-          item.contractAddress.toLowerCase() === info.address_hash.toLowerCase()
-      );
-
-      if (creatorTx && DEPLOYER_ADDRESSES.includes(creatorTx.from)) {
-        deployedContracts[i].ABIUrl = `${ABI_API}${info.address_hash}`;
-        deployedContracts[i].creator = creatorTx.from;
-        deployedContracts[i].tx_hash = creatorTx.hash;
-      } else {
-        skip = true;
-      }
-    }
-
-    if (!skip) {
-      // aggregatedResults[contract] = deployedContracts;
-      if (deployedContracts.length > 0) {
-        aggregatedResults.push({
-          name: contract,
-          contracts: deployedContracts,
-        });
+        data.push({
+          name: mapper[name],
+          contracts: [
+            {
+              address_hash: address,
+              inserted_at: date,
+            },
+          ]
+        })
       }
     }
   }
 
-  // Update cache and lastUpdated timestamp
-  cache = aggregatedResults;
-  lastUpdated = now;
+  // console.log(JSON.stringify(data));
+
+  cache = data;
 
   console.log("✅ Cache Updated!");
+
 }
 
 export { aggregator };
