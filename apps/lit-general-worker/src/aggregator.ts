@@ -25,6 +25,7 @@ let lastUpdated: Date | null = null;
 
 // https://github.com/LIT-Protocol/lit-assets/tree/develop/blockchain/contracts/contracts/lit-node
 const contracts = [
+  "Programmable Keypair",
   "AccessControlConditions",
   "Allowlist",
   "ConditionValidations",
@@ -126,15 +127,28 @@ async function updateCache() {
 
     let deployedContracts: ContractInfo[] = await res.json();
 
+    // sort the deployedContracts by inserted_at
+    deployedContracts.sort((a, b) => {
+      return (
+        new Date(b.inserted_at).getTime() - new Date(a.inserted_at).getTime()
+      );
+    });
+
+
     // only show the 3 latest deployed contracts
     deployedContracts = deployedContracts.slice(0, 2);
+
+    console.log("deployedContracts:", deployedContracts)
 
     let skip = false;
 
     for (const [i, info] of deployedContracts.entries()) {
-      if (info.type !== "contract") {
-        continue;
-      }
+
+      // if (info.type !== "contract") {
+      //   continue;
+      // }
+
+      console.log(info)
 
       console.log(`Getting info for ${contract} ${info.address_hash}`);
 
