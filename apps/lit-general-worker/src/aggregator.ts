@@ -18,36 +18,49 @@ type ContractInfo = {
   creator: string | null;
 };
 
-let cache: any = null;
+let cache = {
+  cayenne: null,
+  serrano: null,
+};
 let lastUpdated: Date | null = null;
 
-// -- config
 
-// https://github.com/LIT-Protocol/lit-assets/tree/develop/blockchain/contracts/contracts/lit-node
-// const contracts = [
-//   "Programmable Keypair",
-//   "AccessControlConditions",
-//   "Allowlist",
-//   "ConditionValidations",
-//   "HDKeyDeriver",
-//   "LITToken",
-//   "Multisender",
-//   "PKPHelper",
-//   "PKPNFT",
-//   "PKPNFTMetadata",
-//   "PKPPermissions",
-//   "PubkeyRouter",
-//   "RateLimitNFT",
-//   "Staking",
-//   "StakingBalances",
-//   "WLIT",
-// ];
-// 
+
+
+// -- config
+const mapper = {
+  // -- Token
+  'litTokenContractAddress': 'LITToken',
+
+  // -- PKPs
+  'pkpNftContractAddress': 'PKPNFT',
+  'pkpHelperContractAddress': 'PKPHelper',
+  'pkpPermissionsContractAddress': 'PKPPermissions',
+  'pkpNftMetadataContractAddress': 'PKPNFTMetadata',
+  'pubkeyRouterContractAddress': 'PubkeyRouter',
+
+  // -- 
+  "stakingBalancesContractAddress": "StakingBalances",
+  "stakingContractAddress": "Staking",
+  "multisenderContractAddress": "Multisender",
+
+  // -- Rate Limit NFT
+  "rateLimitNftContractAddress": "RateLimitNFT",
+  "allowlistContractAddress": "Allowlist",
+  "resolverContractAddress": "Resolver",
+
+  // -- Domain Wallet
+  "DomainWaleltRegistryAddress": "DomainWaleltRegistry",
+  "DomainWalletOracleAddress": "DomainWalletOracle",
+  "hdKeyDeriverContractAddress": "HDKeyDeriver",
+}
+
 // const CONTRACT_API = `https://chain.litprotocol.com/token-autocomplete?q=`;
 const LOOKUP_API = `https://chain.litprotocol.com/api?module=account&action=txlist&address=`;
 const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
 
 const CAYENNE_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
+const SERRANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json';
 
 // const DEPLOYER_ADDRESSES = [
 //   "0x046bf7bb88e0e0941358ce3f5a765c9acdda7b9c",
@@ -60,192 +73,98 @@ const CAYENNE_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/n
 // ];
 
 aggregator.get("/contract-addresses", (req, res) => {
-  if (cache) {
-    return res.json({ success: true, data: cache });
+  if (cache.cayenne !== null && cache.cayenne.length > 0) {
+    return res.json({ success: true, data: cache['cayenne'] });
   } else {
     return res
       .status(500)
-      .json({ success: false, message: "Cache not ready yet" });
+      .json({ success: false, message: "Cayenne Cache not ready yet" });
   }
 });
 
-aggregator.get('/contract-addresses', (req, res) => {
-  return res.json({
-    success: true,
-    data: cache
-  })
-})
-
 aggregator.get("/serrano-contract-addresses", (req, res) => {
-  return res.json({
-    success: true,
-    data: [
-      {
-        name: "AccessControlConditions",
-        contracts: [
-          {
-            address_hash: "0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B",
-            inserted_at: "2023-04-27T00:00:00.000000Z",
-          },
-        ],
-      },
-      {
-        name: "PKPNFT",
-        contracts: [
-          {
-            address_hash: "0x8F75a53F65e31DD0D2e40d0827becAaE2299D111",
-            inserted_at: "2023-04-27T00:00:00.000000Z",
-          },
-        ],
-      },
-      {
-        name: "PKPHelper",
-        contracts: [
-          {
-            address_hash: "0x8bB62077437D918891F12c7F35d9e1B78468bF11",
-            inserted_at: "2023-04-27T00:00:00.000000Z",
-          },
-        ],
-      },
-      {
-        name: "PKPPermissions",
-        contracts: [
-          {
-            address_hash: "0x4Aed2F242E806c58758677059340e29E6B5b7619",
-            inserted_at: "2023-04-27T00:00:00.000000Z",
-          },
-        ],
-      },
-    ],
-  });
+  if (cache.serrano !== null && cache.serrano.length > 0) {
+    return res.json({ success: true, data: cache['serrano'] });
+  } else {
+    return res
+      .status(500)
+      .json({ success: false, message: "Serrano Cache not ready yet" });
+  }
 });
 
 // Update cache immediately when the server starts
-updateCache();
+updateCache('cayenne');
+updateCache('serrano');
 
 // Update cache every 5 minutes
-setInterval(updateCache, 5 * 60 * 1000);
+setInterval(() => {
+  updateCache('cayenne');
+}, 5 * 60 * 1000);
 
-// async function updateCache() {
-//   const now = new Date();
-
-//   let aggregatedResults = [];
-
-//   for (const contract of contracts) {
-//     const res = await fetch(`${CONTRACT_API}${contract}`);
-
-//     let deployedContracts: ContractInfo[] = await res.json();
-
-//     // sort the deployedContracts by inserted_at
-//     deployedContracts.sort((a, b) => {
-//       return (
-//         new Date(b.inserted_at).getTime() - new Date(a.inserted_at).getTime()
-//       );
-//     });
+setInterval(() => {
+  updateCache('serrano');
+}, 5 * 60 * 1000);
 
 
-//     // only show the 3 latest deployed contracts
-//     deployedContracts = deployedContracts.slice(0, 2);
+async function updateCache(network: 'cayenne' | 'serrano') {
 
-//     // console.log("deployedContracts:", deployedContracts)
+  const API = network === 'cayenne' ? CAYENNE_CONTRACTS_JSON : SERRANO_CONTRACTS_JSON;
 
-//     let skip = false;
-
-//     for (const [i, info] of deployedContracts.entries()) {
-
-//       // if (info.type !== "contract") {
-//       //   continue;
-//       // }
-
-//       // console.log(info)
-
-//       console.log(`Getting info for ${contract} ${info.address_hash}`);
-
-//       // Check if contract was deployed by a deployer address
-//       const lookupRes = await fetch(`${LOOKUP_API}${info.address_hash}`);
-//       const lookupData = await lookupRes.json();
-
-//       const creatorTx = lookupData.result.find(
-//         (item: any) =>
-//           item.contractAddress.toLowerCase() === info.address_hash.toLowerCase()
-//       );
-
-//       if (creatorTx && DEPLOYER_ADDRESSES.includes(creatorTx.from)) {
-//         deployedContracts[i].ABIUrl = `${ABI_API}${info.address_hash}`;
-//         deployedContracts[i].creator = creatorTx.from;
-//         deployedContracts[i].tx_hash = creatorTx.hash;
-//       } else {
-//         skip = true;
-//       }
-//     }
-
-//     if (!skip) {
-//       // aggregatedResults[contract] = deployedContracts;
-//       if (deployedContracts.length > 0) {
-//         aggregatedResults.push({
-//           name: contract,
-//           contracts: deployedContracts,
-//         });
-//       }
-//     }
-//   }
-
-//   // Update cache and lastUpdated timestamp
-//   cache = aggregatedResults;
-//   lastUpdated = now;
-
-//   console.log("✅ Cache Updated!");
-// }
-
-
-async function updateCache() {
-
-  const res = await fetch(CAYENNE_CONTRACTS_JSON);
+  const res = await fetch(API);
 
   const resData = await res.json();
 
   const data = [];
 
-  const mapper = {
-    'pkpNftContractAddress': 'PKPNFT',
-    'pkpHelperContractAddress': 'PKPHelper',
-    'pkpPermissionsContractAddress': 'PKPPermissions',
-    'pkpNftMetadataContractAddress': 'PKPNFTMetadata',
-    'litTokenContractAddress': 'LITToken',
-    'pubkeyRouterContractAddress': 'PubkeyRouter',
-  }
-
   for (const [name, address] of Object.entries(resData)) {
+
     if (mapper[name]) {
 
-      const lookup = await fetch(`${LOOKUP_API}${address}`);
+      if (network === 'cayenne') {
+        const lookup = await fetch(`${LOOKUP_API}${address}`);
 
-      const lookupData = await lookup.json();
+        const lookupData = await lookup.json();
 
-      if (lookupData.result[1]?.timeStamp) {
+        if (lookupData.result[1]?.timeStamp) {
 
-        const date = new Date(lookupData.result[1].timeStamp * 1000).toISOString();
+          const date = new Date(lookupData.result[1].timeStamp * 1000).toISOString();
 
-        data.push({
+          const item = {
+            name: mapper[name],
+            contracts: [
+              {
+                address_hash: address,
+                inserted_at: date,
+                ABIUrl: `${ABI_API}${address}`,
+              },
+            ]
+          }
+
+          data.push(item)
+        }
+
+      } else {
+        const item = {
           name: mapper[name],
           contracts: [
             {
               address_hash: address,
-              inserted_at: date,
+              inserted_at: "2023-04-26T23:00:00.000Z",
               ABIUrl: `${ABI_API}${address}`,
             },
           ]
-        })
+        }
+
+        data.push(item)
       }
+
+    } else {
+      console.log(`\x1b[33m%s\x1b[0m`, `❗️ "${name}" is not mapped`);
     }
   }
+  cache[network] = data;
 
-  // console.log(JSON.stringify(data));
-
-  cache = data;
-
-  console.log("✅ Cache Updated!");
-
+  console.log(`✅ Cache Updated for "${network}"`);
 }
 
 export { aggregator };
