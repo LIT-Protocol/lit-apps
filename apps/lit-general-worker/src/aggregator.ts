@@ -22,8 +22,8 @@ const mapper = {
   pubkeyRouterContractAddress: "PubkeyRouterDiamond",
 
   // --
-  stakingBalancesContractAddress: "StakingBalances",
-  stakingContractAddress: "Staking",
+  stakingBalancesContractAddress: "StakingBalancesDiamond",
+  stakingContractAddress: "StakingDiamond",
   multisenderContractAddress: "Multisender",
 
   // -- Rate Limit NFT
