@@ -1,5 +1,24 @@
 import express from "express";
 import bodyParser from "body-parser";
+import * as dotenv from "dotenv";
+dotenv.config();
+
+// https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
+// -- config
+const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
+const USERNAME = 'LIT-Protocol'
+const REPO_NAME = 'lit-assets';
+
+const createPath = (PATH: string) => {
+  return `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${PATH}`;
+}
+
+const HEADER = {
+  headers: {
+    Authorization: `token ${TOKEN}`,
+    Accept: 'application/vnd.github.v3+json',
+  },
+};
 
 const aggregator = express();
 aggregator.use(bodyParser.json());
@@ -9,31 +28,35 @@ let cache = {
   serrano: null,
 };
 
+// https://github.com/LIT-Protocol/lit-assets/blob/develop/blockchain/contracts/deployed_contracts_cayenne.json
+// https://github.com/LIT-Protocol/lit-assets/blob/develop/blockchain/contracts/deployed_contracts_serrano.json
+
 // -- config
+// This mapper maps to the contract FILE name, not the contract name. For example, PKPPermissions is the file name without extension, while the contract name may be different. eg. PKPPermissionsDiamond
 const mapper = {
   // -- Token
   litTokenContractAddress: "LITToken",
 
   // -- PKPs
-  pkpNftContractAddress: "PKPNFTDiamond",
-  pkpHelperContractAddress: "PKPHelperDiamond",
-  pkpPermissionsContractAddress: "PKPPermissionsDiamond",
+  pkpNftContractAddress: "PKPNFT",
+  pkpHelperContractAddress: "PKPHelper",
+  pkpPermissionsContractAddress: "PKPPermissions",
   pkpNftMetadataContractAddress: "PKPNFTMetadata",
-  pubkeyRouterContractAddress: "PubkeyRouterDiamond",
+  pubkeyRouterContractAddress: "PubkeyRouter",
 
   // --
-  stakingBalancesContractAddress: "StakingBalancesDiamond",
-  stakingContractAddress: "StakingDiamond",
+  stakingBalancesContractAddress: "StakingBalances",
+  stakingContractAddress: "Staking",
   multisenderContractAddress: "Multisender",
 
   // -- Rate Limit NFT
-  rateLimitNftContractAddress: "RateLimitNFTDiamond",
+  rateLimitNftContractAddress: "RateLimitNFT",
   allowlistContractAddress: "Allowlist",
-  resolverContractAddress: "Resolver",
+  // resolverContractAddress: "Resolver",
 
   // -- Domain Wallet
-  DomainWaleltRegistryAddress: "DomainWaleltRegistry",
-  DomainWalletOracleAddress: "DomainWalletOracle",
+  // DomainWaleltRegistryAddress: "DomainWaleltRegistry",
+  // DomainWalletOracleAddress: "DomainWalletOracle",
   hdKeyDeriverContractAddress: "HDKeyDeriver",
 };
 
@@ -76,10 +99,54 @@ setInterval(() => {
   updateCache('serrano');
 }, 5 * 60 * 1000);
 
+export async function getLitContractABIs() {
+
+  const contractsData = [];
+
+  console.log(`Getting directory...`);
+
+  const filesRes = await fetch(createPath('rust/lit-core/lit-blockchain/abis'), HEADER);
+
+  const files = await filesRes.json();
+
+  for (const file of files) {
+
+    const name = file.name.replace('.json', '');
+
+    if (!Object.values(mapper).includes(name)) {
+      continue;
+    }
+
+    console.log(`Getting file ${file.download_url}`);
+
+    const fileRes = await fetch(file.download_url, HEADER);
+
+    const fileData = await fileRes.json();
+
+    contractsData.push({
+      name: file.name.replace('.json', ''),
+      contractName: fileData.contractName,
+      data: fileData.abi,
+    });
+  }
+
+  if (!contractsData.length) {
+    throw new Error('No data');
+  }
+
+  return contractsData;
+}
 
 async function updateCache(network: 'cayenne' | 'serrano') {
 
   const API = network === 'cayenne' ? CAYENNE_CONTRACTS_JSON : SERRANO_CONTRACTS_JSON;
+
+  let cayenneDiamondData = null;
+
+  if (network === 'cayenne') {
+    cayenneDiamondData = await getLitContractABIs();
+    // console.log("cayenneDiamondData:", cayenneDiamondData);
+  }
 
   const res = await fetch(API);
 
@@ -89,7 +156,9 @@ async function updateCache(network: 'cayenne' | 'serrano') {
 
   for (const [name, address] of Object.entries(resData)) {
 
-    if (mapper[name]) {
+    const contractFileName = mapper[name];
+
+    if (contractFileName) {
 
       if (network === 'cayenne') {
         const lookup = await fetch(`${LOOKUP_API}${address}`);
@@ -100,13 +169,22 @@ async function updateCache(network: 'cayenne' | 'serrano') {
 
           const date = new Date(lookupData.result[1].timeStamp * 1000).toISOString();
 
+          const ABI = cayenneDiamondData.find((item) => item.name === contractFileName);
+
+          console.log("contractFileName:", contractFileName);
+
+          if (!Object.values(mapper).includes(contractFileName)) {
+            continue;
+          }
+
           const item = {
-            name: mapper[name],
+            name: contractFileName,
             contracts: [
               {
+                network: 'cayenne',
                 address_hash: address,
                 inserted_at: date,
-                ABIUrl: `${ABI_API}${address}`,
+                ABI: ABI.data,
               },
             ]
           }
@@ -119,6 +197,7 @@ async function updateCache(network: 'cayenne' | 'serrano') {
           name: mapper[name],
           contracts: [
             {
+              network: 'serrano',
               address_hash: address,
               inserted_at: "2023-04-26T23:00:00.000Z",
               ABIUrl: `${ABI_API}${address}`,
