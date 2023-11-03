@@ -24,9 +24,15 @@ export async function getLitContractABIs() {
 
   console.log(`Getting directory...`);
 
-  const filesRes = await fetch(createPath('rust/lit-core/lit-blockchain/abis'), HEADER);
+  let files: any;
 
-  const files = await filesRes.json();
+  try {
+    const filesRes = await fetch(createPath('rust/lit-core/lit-blockchain/abis'), HEADER);
+    files = await filesRes.json();
+  } catch (e) {
+    throw new Error(`GITHUB_LIT_ASSETS_REAL_ONLY_API might be wrong. ${e}`);
+  }
+
 
   for (const file of files) {
     console.log(`Getting file ${file.name}`);
