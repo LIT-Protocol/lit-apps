@@ -24,6 +24,10 @@ const SERRANO_API = `${
   process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
 }/serrano-contract-addresses`;
 
+const INTERNALDEV_API = `${
+  process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
+}/internal-dev-contract-addresses`;
+
 const SCRIPT_REPO = `https://github.com/LIT-Protocol/getlit-contracts`;
 
 export default function Web() {
@@ -43,6 +47,8 @@ export default function Web() {
           result = await (await fetch(API)).json();
         } else if (network === "Serrano") {
           result = await (await fetch(SERRANO_API)).json();
+        } else if (network === "internalDev") {
+          result = await (await fetch(INTERNALDEV_API)).json();
         }
         setData(result.data);
         console.log("result.data:", result.data);
@@ -123,12 +129,22 @@ export default function Web() {
                 component="a"
                 variant="gradient"
                 gradient={{ from: "#0A142D", to: "#0A142D", deg: 35 }}
-                href={network === "Cayenne" ? API : SERRANO_API}
+                href={
+                  network === "Cayenne"
+                    ? API
+                    : network === "Serrano"
+                    ? SERRANO_API
+                    : INTERNALDEV_API
+                }
                 target="_blank"
                 radius={4}
                 leftIcon={<IconExternalLink size="0.9rem" />}
               >
-                {network === "Cayenne" ? API : SERRANO_API}
+                {network === "Cayenne"
+                  ? API
+                  : network === "Serrano"
+                  ? SERRANO_API
+                  : INTERNALDEV_API}
               </Button>
             </div>
           </div>
@@ -160,7 +176,7 @@ export default function Web() {
 
                   <NativeSelect
                     value={network}
-                    data={["Cayenne", "Serrano"]}
+                    data={["Cayenne", "Serrano", "internalDev"]}
                     label="Network"
                     onChange={async (event) => {
                       const value = event.target.value;
@@ -172,6 +188,8 @@ export default function Web() {
                           result = await (await fetch(API)).json();
                         } else if (networkRef.current === "Serrano") {
                           result = await (await fetch(SERRANO_API)).json();
+                        } else if (networkRef.current === "internalDev") {
+                          result = await (await fetch(INTERNALDEV_API)).json();
                         }
                         setData(result.data);
                         console.log("result.data:", result.data);
