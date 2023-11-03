@@ -1,8 +1,8 @@
 import express, { Express } from "express";
 import bodyParser from "body-parser";
-import { txHandler } from "./txHandler";
-import { analyticsHandler } from "./analyticsHandler";
-import { aggregator } from "./aggregator";
+import { txHandler } from "./handlers/txHandler";
+import { analyticsHandler } from "./handlers/analyticsHandler";
+import { contractsHandler } from "./handlers/contracts-handler/contractsHandler";
 import cors from "cors";
 
 const app: Express = express();
@@ -22,7 +22,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(aggregator);
+app.use(contractsHandler);
 app.use(txHandler);
 app.use(analyticsHandler);
 

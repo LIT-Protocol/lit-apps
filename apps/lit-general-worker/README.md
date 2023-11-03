@@ -4,6 +4,23 @@
 
 The Lit General Worker is both an API and a background worker designed to handle various tasks.
 
+# Prerequisites
+
+Environment variables
+
+```
+GITHUB_LIT_ASSETS_REAL_ONLY_API=xxx
+LIT_GENERAL_WORKER_DB=<postgres_connection_string>
+CORS_BLACKLIST=http://example.com,http://badorigin.com
+
+```
+
+# Getting started
+
+```
+GITHUB_LIT_ASSETS_REAL_ONLY_API=xxx turbo run dev --filter=lit-general-worker -- main.ts
+```
+
 # Features
 
 - **JS-SDK Transaction Handler**: Handles transactions for the JavaScript SDK.
@@ -45,13 +62,6 @@ The Lit General Worker is both an API and a background worker designed to handle
   "functionName": "myFunction",
   "executionTime": 100
 }
-```
-
-### Env
-
-```
-LIT_GENERAL_WORKER_DB=<postgres_connection_string>
-CORS_BLACKLIST=http://example.com,http://badorigin.com
 ```
 
 ### Example in JS
