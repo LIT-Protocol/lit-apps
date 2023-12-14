@@ -143,11 +143,11 @@ contractsHandler.get("/internal-dev-contract-addresses", (req, res) => {
 
 
 contractsHandler.get("/manzano-contract-addresses", (req, res) => {
-  if (cache.internalDev !== null && cache.internalDev.data.length > 0) {
+  if (cache.manzano !== null && cache.manzano.data.length > 0) {
     return res.json({
       success: true,
-      config: cache['internalDev']['config'],
-      data: cache['internalDev'].data,
+      config: cache['manzano']['config'],
+      data: cache['manzano'].data,
     });
   } else {
     return res
@@ -157,11 +157,11 @@ contractsHandler.get("/manzano-contract-addresses", (req, res) => {
 });
 
 contractsHandler.get("/habanero-contract-addresses", (req, res) => {
-  if (cache.internalDev !== null && cache.internalDev.data.length > 0) {
+  if (cache.habanero !== null && cache.habanero.data.length > 0) {
     return res.json({
       success: true,
-      config: cache['internalDev']['config'],
-      data: cache['internalDev'].data,
+      config: cache['habanero']['config'],
+      data: cache['habanero'].data,
     });
   } else {
     return res
@@ -273,7 +273,7 @@ async function updateCache(network: 'cayenne' | 'serrano' | 'internalDev' | 'man
 
   let cayenneDiamondData;
 
-  if (network === 'cayenne' || network === 'internalDev') {
+  if (network !== 'serrano') {
     cayenneDiamondData = await getLitContractABIs();
     console.log("✅ Got cayenneDiamondData");
   }
