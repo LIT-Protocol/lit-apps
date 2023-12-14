@@ -57,9 +57,9 @@ export default function Web() {
           result = await (await fetch(SERRANO_API)).json();
         } else if (network === "internalDev") {
           result = await (await fetch(INTERNALDEV_API)).json();
-        } else if (network === 'manzano') {
+        } else if (network === 'Manzano') {
           result = await(await fetch(MANZANO_API)).json();
-        } else if (network === 'habanero') {
+        } else if (network === 'Habanero') {
           result = await(await fetch(HABANERO_API)).json();
         }
 
