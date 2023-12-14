@@ -28,6 +28,14 @@ const INTERNALDEV_API = `${
   process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
 }/internal-dev-contract-addresses`;
 
+const MANZANO_API = `${
+  process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
+}/manzano-contract-addresses`;
+
+const HABANERO_API = `${
+  process.env.NEXT_PUBLIC_API ?? "http://localhost:3031"
+}/habanero-contract-addresses`;
+
 const SCRIPT_REPO = `https://github.com/LIT-Protocol/getlit-contracts`;
 
 export default function Web() {
@@ -49,7 +57,12 @@ export default function Web() {
           result = await (await fetch(SERRANO_API)).json();
         } else if (network === "internalDev") {
           result = await (await fetch(INTERNALDEV_API)).json();
+        } else if (network === 'manzano') {
+          result = await(await fetch(MANZANO_API)).json();
+        } else if (network = 'habanero') {
+          result = await(await fetch(HABANERO_API)).json();
         }
+
         setData(result.data);
         console.log("result.data:", result.data);
       } catch (e) {
@@ -176,7 +189,7 @@ export default function Web() {
 
                   <NativeSelect
                     value={network}
-                    data={["Cayenne", "Serrano", "internalDev"]}
+                    data={["Cayenne", "Serrano", "internalDev", "Manzano", "Habanero"]}
                     label="Network"
                     onChange={async (event) => {
                       const value = event.target.value;
@@ -190,6 +203,10 @@ export default function Web() {
                           result = await (await fetch(SERRANO_API)).json();
                         } else if (networkRef.current === "internalDev") {
                           result = await (await fetch(INTERNALDEV_API)).json();
+                        } else if (network === 'Manzano') {
+                          result = await(await fetch(MANZANO_API)).json();
+                        } else if (network = 'Habanero') {
+                          result = await(await fetch(HABANERO_API)).json();
                         }
                         setData(result.data);
                         console.log("result.data:", result.data);
