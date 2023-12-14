@@ -59,7 +59,7 @@ export default function Web() {
           result = await (await fetch(INTERNALDEV_API)).json();
         } else if (network === 'manzano') {
           result = await(await fetch(MANZANO_API)).json();
-        } else if (network = 'habanero') {
+        } else if (network === 'habanero') {
           result = await(await fetch(HABANERO_API)).json();
         }
 
@@ -205,7 +205,7 @@ export default function Web() {
                           result = await (await fetch(INTERNALDEV_API)).json();
                         } else if (network === 'Manzano') {
                           result = await(await fetch(MANZANO_API)).json();
-                        } else if (network = 'Habanero') {
+                        } else if (network === 'Habanero') {
                           result = await(await fetch(HABANERO_API)).json();
                         }
                         setData(result.data);
