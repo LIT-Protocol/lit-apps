@@ -141,7 +141,6 @@ contractsHandler.get("/internal-dev-contract-addresses", (req, res) => {
   }
 });
 
-
 contractsHandler.get("/manzano-contract-addresses", (req, res) => {
   if (cache.manzano !== null && cache.manzano.data.length > 0) {
     return res.json({
@@ -345,7 +344,7 @@ async function updateCache(network: 'cayenne' | 'serrano' | 'internalDev' | 'man
       console.log(`\x1b[33m%s\x1b[0m`, `❗️ "${name}" is not mapped`);
     }
   }
-  if (network === 'internalDev') {
+  if (network !== 'serrano' && network !== 'cayenne') {
     cache[network]['data'] = data;
   } else {
     cache[network] = data;
