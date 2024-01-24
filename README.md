@@ -14,6 +14,19 @@ yarn
 
 ## Running apps
 
+### Starting general worker (since this is most used atm.)
+
+```
+GITHUB_LIT_ASSETS_REAL_ONLY_API=XXX turbo run dev --filter lit-general-worker -- main.ts
+```
+
+Then, you should be able to see your network contract addresses from these apis:
+
+- http://localhost:3031/manzano-contract-addresses
+- http://localhost:3031/habanero-contract-addresses
+- http://localhost:3031/serrano-contract-addresses
+- http://localhost:3031/contract-addresses <-- cayenne
+
 ### Starting a specific app
 
 ```
