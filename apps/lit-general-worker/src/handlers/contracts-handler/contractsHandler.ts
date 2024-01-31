@@ -7,6 +7,13 @@ import bodyParser from "body-parser";
 
 type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero';
 
+const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
+const CAYENNE_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
+const SERRANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json';
+const INTERNAL_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json';
+const MANZANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json';
+const HABANERO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json';
+
 // -- config
 const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
 const USERNAME = 'LIT-Protocol'
@@ -76,9 +83,6 @@ let cache = {
   }
 };
 
-// https://github.com/LIT-Protocol/lit-assets/blob/develop/blockchain/contracts/deployed_contracts_cayenne.json
-// https://github.com/LIT-Protocol/lit-assets/blob/develop/blockchain/contracts/deployed_contracts_serrano.json
-
 // -- config
 // This mapper maps to the contract FILE name, not the contract name. For example, PKPPermissions is the file name without extension, while the contract name may be different. eg. PKPPermissionsDiamond
 const mapper = {
@@ -108,15 +112,7 @@ const mapper = {
   // hdKeyDeriverContractAddress: "HDKeyDeriver",
 };
 
-const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
-
-const CAYENNE_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
-const SERRANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json';
-const INTERNAL_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json';
-const MANZANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json';
-const HABANERO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json';
-
-function handleResponse(networkName: string) {
+function handleContractsResponse(networkName: LitNetwork) {
   return (req: any, res: any) => {
     if (cache[networkName] !== null && cache[networkName]?.data?.length > 0) {
       return res.json({
@@ -140,66 +136,155 @@ function handleResponse(networkName: string) {
   };
 }
 
+function handleAddressesResponse(networkName: LitNetwork) {
+  function getData(network: LitNetwork) {
+    try {
+
+      // manzano & habanero has .data property
+      const data = cache[network].data ?? cache[network];
+
+      return data.map((item: { name: string, contracts: any[] }) => {
+        return {
+          name: item.name,
+          address: item.contracts[0].address_hash,
+        };
+      });
+
+    } catch (e) {
+      console.log(e);
+      console.log(`❌ Failed to get cache from network ${network}`);
+    }
+  }
+
+  return (req: any, res: any) => {
+    return res.json({
+      addresses: getData(networkName),
+    });
+  }
+}
+
+// Function to get the appropriate handler function by name
+function getHandlerFunction(handlerName: string, networkName: LitNetwork) {
+  const handlers = {
+    handleContractsResponse: handleContractsResponse(networkName),
+    handleAddressesResponse: handleAddressesResponse(networkName),
+    // Add more handler functions here as needed
+  };
+  return handlers[handlerName];
+}
+
+
 // ========== API list =========
 const BASE = process.env.ENV === 'dev' ? 'http://localhost:3031' : process.env.DOMAIN ?? 'https://lit-general-worker.getlit.dev';
 
-contractsHandler.get("/apis", (req, res) => {
+contractsHandler.get("/", (req, res) => {
   res.json({
     env: {
-      ENV: process.env.ENV,
+      ENV: process.env.ENV ?? 'not set',
       DOMAIN: process.env.DOMAIN ?? 'not set',
     },
-    addresses: `${BASE}/network/addresses`,
-    habanero: {
-      type: 'decentralised mainnet',
-      contracts: `${BASE}/habanero/contracts`,
-    },
-    manzano: {
-      type: 'decentralised testnet',
-      contracts: `${BASE}/manzano/contracts`,
-    },
-    cayenne: {
-      type: 'testnet',
-      contracts: `${BASE}/cayenne/contracts`,
-    },
-    serrano: {
-      type: 'testnet',
-      contracts: `${BASE}/serrano/contracts`,
-    },
-    internalDev: {
-      type: 'local',
-      contracts: `${BASE}/internal-dev/contracts`,
+    network: {
+      addresses: `${BASE}/network/addresses`,
+      habanero: {
+        decentralized: true,
+        type: 'mainnet',
+        contracts: `${BASE}/habanero/contracts`,
+        addresses: `${BASE}/habanero/addresses`,
+      },
+      manzano: {
+        decentralized: true,
+        type: 'testnet',
+        contracts: `${BASE}/manzano/contracts`,
+        addresses: `${BASE}/manzano/addresses`,
+      },
+      cayenne: {
+        decentralized: false,
+        type: 'testnet',
+        contracts: `${BASE}/cayenne/contracts`,
+        addresses: `${BASE}/cayenne/addresses`,
+      },
+      serrano: {
+        decentralized: false,
+        type: 'testnet',
+        contracts: `${BASE}/serrano/contracts`,
+        addresses: `${BASE}/serrano/addresses`,
+      },
+      internalDev: {
+        decentralized: false,
+        type: 'devnet',
+        contracts: `${BASE}/internal-dev/contracts`,
+        addresses: `${BASE}/internal-dev/addresses`,
+      },
     },
   });
 });
 
-// ========== Cayenne ==========
-// TODO: TO BE DEPRECATED
-contractsHandler.get("/contract-addresses", handleResponse("cayenne"));
-// TODO: TO BE DEPRECATED
-contractsHandler.get("/cayenne-contract-addresses", handleResponse("cayenne"));
-contractsHandler.get("/cayenne/contracts", handleResponse("cayenne"));
+const networks = [
+  {
+    name: "cayenne",
+    endpoints: [
+      { path: "/cayenne/contracts", handler: "handleContractsResponse" },
+      { path: "/cayenne/addresses", handler: "handleAddressesResponse" },
 
-// ========== Serrano ==========
-// TODO: TO BE DEPRECATED
-contractsHandler.get("/serrano-contract-addresses", handleResponse("serrano"));
-contractsHandler.get("/serrano/contracts", handleResponse("serrano"));
+      // @deprecated
+      { path: "/cayenne-contrat-addresses", handler: "handleContractsResponse" },
+      { path: "/contract-addresses", handler: "handleContractsResponse" },
+    ],
+  },
+  {
+    name: "serrano",
+    endpoints: [
+      { path: "/serrano/contracts", handler: "handleContractsResponse" },
+      { path: "/serrano/addresses", handler: "handleAddressesResponse" },
 
-// ========== Internal Dev ==========
-// TODO: TO BE DEPRECATED
-contractsHandler.get("/internal-dev-contract-addresses", handleResponse("internalDev"));
-contractsHandler.get("/internal-dev/contracts", handleResponse("internalDev"));
+      // @deprecated
+      { path: "/serrano-contract-addresses", handler: "handleContractsResponse" },
+    ],
+  },
+  {
+    name: 'internalDev',
+    endpoints: [
+      { path: "/internal-dev/contracts", handler: "handleContractsResponse" },
+      { path: "/internal-dev/addresses", handler: "handleAddressesResponse" },
 
+      // @deprecated
+      { path: "/internal-dev-contract-addresses", handler: "handleContractsResponse" },
+    ],
+  },
+  {
+    name: 'manzano',
+    endpoints: [
+      { path: "/manzano/contracts", handler: "handleContractsResponse" },
+      { path: "/manzano/addresses", handler: "handleAddressesResponse" },
 
-// ========== Manzano ==========
-// TODO: TO BE DEPRECATED
-contractsHandler.get("/manzano-contract-addresses", handleResponse("manzano"));
-contractsHandler.get("/manzano/contracts", handleResponse("manzano"));
+      // @deprecated
+      { path: "/manzano-contract-addresses", handler: "handleContractsResponse" },
+    ],
+  },
+  {
+    name: 'habanero',
+    endpoints: [
+      { path: "/habanero/contracts", handler: "handleContractsResponse" },
+      { path: "/habanero/addresses", handler: "handleAddressesResponse" },
 
-// ========== Habanero ==========
-// TODO: TO BE DEPRECATED
-contractsHandler.get("/habanero-contract-addresses", handleResponse("habanero"));
-contractsHandler.get("/habanero/contracts", handleResponse("habanero"));
+      // @deprecated
+      { path: "/habanero-contract-addresses", handler: "handleContractsResponse" },
+    ],
+  }
+];
+
+// ========== Loop through each network and register endpoint ==========
+networks.forEach(({ name, endpoints }: {
+  name: LitNetwork,
+  endpoints: { path: string, handler: string }[]
+}) => {
+
+  // Register current endpoints with their specific handlers
+  endpoints.forEach(({ path, handler }) => {
+    const handlerFunction = getHandlerFunction(handler, name);
+    contractsHandler.get(path, handlerFunction);
+  });
+});
 
 // ========== All Networks ==========
 contractsHandler.get("/network/addresses", (req, res) => {
