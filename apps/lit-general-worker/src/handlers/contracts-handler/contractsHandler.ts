@@ -1,5 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
+import { LitContracts } from "@lit-protocol/contracts-sdk";
 // import * as dotenv from "dotenv";
 // dotenv.config();
 //
@@ -67,7 +68,11 @@ const contractsHandler = express();
 contractsHandler.use(bodyParser.json());
 
 let cache = {
-  cayenne: null,
+  cayenne: {
+    stats: {
+      totalPkps: 'not ready yet' as number | string,
+    }
+  },
   serrano: null,
   internalDev: {
     config: null,
@@ -76,10 +81,16 @@ let cache = {
   manzano: {
     config: null,
     data: null,
+    stats: {
+      totalPkps: 'not ready yet' as number | string,
+    }
   },
   habanero: {
     config: null,
-    data: null
+    data: null,
+    stats: {
+      totalPkps: 'not ready yet' as number | string,
+    }
   }
 };
 
@@ -163,11 +174,30 @@ function handleAddressesResponse(networkName: LitNetwork) {
   }
 }
 
+function handleStatsResponse(networkName: LitNetwork) {
+
+  function getData(network: LitNetwork) {
+    try {
+      return cache[network].stats;
+    } catch (e) {
+      console.log(e);
+      console.log(`❌ Failed to get stats cache from network ${network}`);
+    }
+  }
+
+  return (req: any, res: any) => {
+    return res.json({
+      stats: getData(networkName),
+    });
+  }
+}
+
 // Function to get the appropriate handler function by name
 function getHandlerFunction(handlerName: string, networkName: LitNetwork) {
   const handlers = {
     handleContractsResponse: handleContractsResponse(networkName),
     handleAddressesResponse: handleAddressesResponse(networkName),
+    handleStatsResponse: handleStatsResponse(networkName),
     // Add more handler functions here as needed
   };
   return handlers[handlerName];
@@ -201,12 +231,14 @@ contractsHandler.get("/", (req, res) => {
         type: 'testnet',
         contracts: `${HOST}/manzano/contracts`,
         addresses: `${HOST}/manzano/addresses`,
+        stats: `${HOST}/manzano/stats`,
       },
       cayenne: {
         decentralized: false,
         type: 'testnet',
         contracts: `${HOST}/cayenne/contracts`,
         addresses: `${HOST}/cayenne/addresses`,
+        stats: `${HOST}/cayenne/stats`,
       },
       serrano: {
         decentralized: false,
@@ -230,6 +262,7 @@ const networks = [
     endpoints: [
       { path: "/cayenne/contracts", handler: "handleContractsResponse" },
       { path: "/cayenne/addresses", handler: "handleAddressesResponse" },
+      { path: "/cayenne/stats", handler: "handleStatsResponse" },
 
       // @deprecated
       { path: "/cayenne-contrat-addresses", handler: "handleContractsResponse" },
@@ -261,6 +294,7 @@ const networks = [
     endpoints: [
       { path: "/manzano/contracts", handler: "handleContractsResponse" },
       { path: "/manzano/addresses", handler: "handleAddressesResponse" },
+      { path: "/manzano/stats", handler: "handleStatsResponse" },
 
       // @deprecated
       { path: "/manzano-contract-addresses", handler: "handleContractsResponse" },
@@ -271,6 +305,7 @@ const networks = [
     endpoints: [
       { path: "/habanero/contracts", handler: "handleContractsResponse" },
       { path: "/habanero/addresses", handler: "handleAddressesResponse" },
+      { path: "/habanero/stats", handler: "handleStatsResponse" },
 
       // @deprecated
       { path: "/habanero-contract-addresses", handler: "handleContractsResponse" },
@@ -329,13 +364,17 @@ contractsHandler.get("/network/addresses", (req, res) => {
 
 const litNetworks = ['cayenne', 'serrano', 'internalDev', 'manzano', 'habanero'];
 
-// Initial update for all items, and pdate cache immediately when the server starts
-litNetworks.forEach((pepper: LitNetwork) => updateCache(pepper));
+// Initial update for all items, and update cache immediately when the server starts
+litNetworks.forEach((pepper: LitNetwork) => {
+  getNetworkStats(pepper);
+  updateCache(pepper);
+});
 
 // Update cache every 5 minutes for each item
 litNetworks.forEach((pepper: LitNetwork) => {
   setInterval(() => {
     updateCache(pepper);
+    getNetworkStats(pepper);
   }, 5 * 60 * 1000);
 });
 
@@ -383,6 +422,68 @@ export async function getLitContractABIs(network: string) {
   return contractsData;
 }
 
+// Binary search
+async function binarySearchTotalTokens(network: LitNetwork): Promise<number> {
+
+  let low = 0;
+  let high = 1;
+  let mid;
+  let hasFailed = false;
+
+  const contractClient = new LitContracts({
+
+    // @ts-ignore
+    network,
+  });
+
+  await contractClient.connect();
+
+  // First, find a high bound where the operation fails
+  while (!hasFailed) {
+    console.log(`[${network}] high:`, high);
+    try {
+      await contractClient.pkpNftContract.read.tokenByIndex(high);
+      low = high;
+      high *= 2; // Double the high index to expand the search space quickly
+    } catch (error) {
+      hasFailed = true; // Found a high bound where it fails
+    }
+  }
+
+  console.log(`[${network}] ✅ high bound found!`);
+  // Now, use binary search between low and high to find the exact failing index
+  while (low <= high) {
+    mid = Math.floor((low + high) / 2);
+    console.log(`[${network}] mid:`, mid);
+
+    try {
+      await contractClient.pkpNftContract.read.tokenByIndex(mid);
+      low = mid + 1; // Move the low up, since mid did not fail
+    } catch (error) {
+      high = mid - 1; // Move the high down, since mid failed
+    }
+  }
+
+  console.log(`[${network}] ✅ low found!`);
+  // The loop exits when low > high, and high + 1 is the index where it first fails
+  return low; // low is now the smallest index that fails
+}
+
+async function getNetworkStats(network: LitNetwork) {
+
+  // -- serrano is not supported
+  if (network === 'serrano' || network === 'internalDev') {
+    return;
+  }
+
+  // -- stats
+  let totalPkps = await binarySearchTotalTokens(network);
+  console.log(`[${network}] totalPkps:`, totalPkps);
+
+  cache[network].stats = {
+    totalPkps,
+  };
+};
 
 async function updateCache(network: LitNetwork) {
 
