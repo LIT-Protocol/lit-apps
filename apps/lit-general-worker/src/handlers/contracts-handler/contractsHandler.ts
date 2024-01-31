@@ -108,7 +108,6 @@ const mapper = {
   // hdKeyDeriverContractAddress: "HDKeyDeriver",
 };
 
-const LOOKUP_API = `https://chain.litprotocol.com/api?module=account&action=txlist&address=`;
 const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
 
 const CAYENNE_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
@@ -117,67 +116,59 @@ const INTERNAL_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/
 const MANZANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json';
 const HABANERO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json';
 
-// TODO: TO BE DEPRECATED, this is just an cayenne endpoint, but we want a more 
-// specific naming convention for each network
-// Removing this might break any apps that rely on this endpoint
-contractsHandler.get("/contract-addresses", (req, res) => {
-  if (cache.cayenne !== null && cache.cayenne.length > 0) {
-    return res.json({ success: true, data: cache['cayenne'] });
-  } else {
-    return res
-      .status(500)
-      .json({ success: false, message: "Cayenne Cache not ready yet" });
-  }
-});
+function handleResponse(networkName: string) {
+  return (req: any, res: any) => {
+    if (cache[networkName] !== null && cache[networkName]?.data?.length > 0) {
+      return res.json({
+        success: true,
+        config: cache[networkName]['config'],
+        data: cache[networkName].data,
+      });
+    }
+    // serrano & cayenne don't have .data property
+    if (cache[networkName] !== null && cache[networkName]?.length > 0) {
+      return res.json({
+        success: true,
+        config: null,
+        data: cache[networkName],
+      });
+    } else {
+      return res
+        .status(500)
+        .json({ success: false, message: `${networkName} Cache not ready yet` });
+    }
+  };
+}
 
-contractsHandler.get("/cayenne-contract-addresses", (req, res) => {
-  if (cache.cayenne !== null && cache.cayenne.length > 0) {
-    return res.json({ success: true, data: cache['cayenne'] });
-  } else {
-    return res
-      .status(500)
-      .json({ success: false, message: "Cayenne Cache not ready yet" });
-  }
-});
+// ========== Cayenne ==========
+// TODO: TO BE DEPRECATED
+contractsHandler.get("/contract-addresses", handleResponse("cayenne"));
+// TODO: TO BE DEPRECATED
+contractsHandler.get("/cayenne-contract-addresses", handleResponse("cayenne"));
+contractsHandler.get("/cayenne/contracts", handleResponse("cayenne"));
 
-contractsHandler.get("/serrano-contract-addresses", (req, res) => {
-  if (cache.serrano !== null && cache.serrano.length > 0) {
-    return res.json({ success: true, data: cache['serrano'] });
-  } else {
-    return res
-      .status(500)
-      .json({ success: false, message: "Serrano Cache not ready yet" });
-  }
-});
+// ========== Serrano ==========
+// TODO: TO BE DEPRECATED
+contractsHandler.get("/serrano-contract-addresses", handleResponse("serrano"));
+contractsHandler.get("/serrano/contracts", handleResponse("serrano"));
 
-contractsHandler.get("/internal-dev-contract-addresses", (req, res) => {
-  if (cache.internalDev !== null && cache.internalDev.data.length > 0) {
-    return res.json({
-      success: true,
-      config: cache['internalDev']['config'],
-      data: cache['internalDev'].data,
-    });
-  } else {
-    return res
-      .status(500)
-      .json({ success: false, message: "internalDev Cache not ready yet" });
-  }
-});
+// ========== Internal Dev ==========
+// TODO: TO BE DEPRECATED
+contractsHandler.get("/internal-dev-contract-addresses", handleResponse("internalDev"));
+contractsHandler.get("/internal-dev/contracts", handleResponse("internalDev"));
 
-contractsHandler.get("/manzano-contract-addresses", (req, res) => {
-  if (cache.manzano !== null && cache.manzano.data.length > 0) {
-    return res.json({
-      success: true,
-      config: cache['manzano']['config'],
-      data: cache['manzano'].data,
-    });
-  } else {
-    return res
-      .status(500)
-      .json({ success: false, message: "manzano Cache not ready yet" });
-  }
-});
 
+// ========== Manzano ==========
+// TODO: TO BE DEPRECATED
+contractsHandler.get("/manzano-contract-addresses", handleResponse("manzano"));
+contractsHandler.get("/manzano/contracts", handleResponse("manzano"));
+
+// ========== Habanero ==========
+// TODO: TO BE DEPRECATED
+contractsHandler.get("/habanero-contract-addresses", handleResponse("habanero"));
+contractsHandler.get("/habanero/contracts", handleResponse("habanero"));
+
+// ========== All Networks ==========
 contractsHandler.get("/network/addresses", (req, res) => {
   if (cache.manzano !== null && cache.manzano.data.length > 0) {
 
@@ -209,21 +200,7 @@ contractsHandler.get("/network/addresses", (req, res) => {
   } else {
     return res
       .status(500)
-      .json({ success: false, message: "manzano Cache not ready yet" });
-  }
-});
-
-contractsHandler.get("/habanero-contract-addresses", (req, res) => {
-  if (cache.habanero !== null && cache.habanero.data.length > 0) {
-    return res.json({
-      success: true,
-      config: cache['habanero']['config'],
-      data: cache['habanero'].data,
-    });
-  } else {
-    return res
-      .status(500)
-      .json({ success: false, message: "habanero Cache not ready yet" });
+      .json({ success: false, message: "cache not ready yet" });
   }
 });
 
