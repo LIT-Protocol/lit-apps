@@ -175,45 +175,50 @@ function getHandlerFunction(handlerName: string, networkName: LitNetwork) {
 
 
 // ========== API list =========
-const BASE = process.env.ENV === 'dev' ? 'http://localhost:3031' : process.env.DOMAIN ?? 'https://lit-general-worker.getlit.dev';
+const HOST = process.env.ENV === 'dev' ? 'http://localhost:3031' : process.env.HOST ?? 'https://apis.getlit.dev';
 
 contractsHandler.get("/", (req, res) => {
   res.json({
     env: {
-      ENV: process.env.ENV ?? 'not set',
-      DOMAIN: process.env.DOMAIN ?? 'not set',
+      HOST: process.env.HOST ?? 'https://apis.getlit.dev',
+      FAUCET_LINK: process.env.FAUCET_LINK ?? 'https://chronicle-faucet-app.vercel.app/',
+      CHAIN_EXPLORER: process.env.CHAIN_EXPLORER ?? 'https://chain.litprotocol.com/',
+      CHAIN_ID: process.env.CHAIN_ID ?? '175177',
+      CHAIN_NAME: process.env.CHAIN_NAME ?? 'lit',
+      RPC_URL: process.env.RPC_URL ?? 'https://lit-protocol.calderachain.xyz/http',
     },
     network: {
-      addresses: `${BASE}/network/addresses`,
+      addresses: `${HOST}/network/addresses`,
       habanero: {
         decentralized: true,
         type: 'mainnet',
-        contracts: `${BASE}/habanero/contracts`,
-        addresses: `${BASE}/habanero/addresses`,
+        contracts: `${HOST}/habanero/contracts`,
+        addresses: `${HOST}/habanero/addresses`,
+        stats: `${HOST}/habanero/stats`,
       },
       manzano: {
         decentralized: true,
         type: 'testnet',
-        contracts: `${BASE}/manzano/contracts`,
-        addresses: `${BASE}/manzano/addresses`,
+        contracts: `${HOST}/manzano/contracts`,
+        addresses: `${HOST}/manzano/addresses`,
       },
       cayenne: {
         decentralized: false,
         type: 'testnet',
-        contracts: `${BASE}/cayenne/contracts`,
-        addresses: `${BASE}/cayenne/addresses`,
+        contracts: `${HOST}/cayenne/contracts`,
+        addresses: `${HOST}/cayenne/addresses`,
       },
       serrano: {
         decentralized: false,
         type: 'testnet',
-        contracts: `${BASE}/serrano/contracts`,
-        addresses: `${BASE}/serrano/addresses`,
+        contracts: `${HOST}/serrano/contracts`,
+        addresses: `${HOST}/serrano/addresses`,
       },
       internalDev: {
         decentralized: false,
         type: 'devnet',
-        contracts: `${BASE}/internal-dev/contracts`,
-        addresses: `${BASE}/internal-dev/addresses`,
+        contracts: `${HOST}/internal-dev/contracts`,
+        addresses: `${HOST}/internal-dev/addresses`,
       },
     },
   });
