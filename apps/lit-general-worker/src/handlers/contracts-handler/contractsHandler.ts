@@ -4,6 +4,9 @@ import bodyParser from "body-parser";
 // dotenv.config();
 //
 // https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
+
+type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero';
+
 // -- config
 const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
 const USERNAME = 'LIT-Protocol'
@@ -22,8 +25,15 @@ function extractPathAfterMain(urlString: string): string {
   return desiredPath;
 }
 
-async function getLastModified(filePath: string) {
+async function getLastModified(filePath: string, network: string) {
+
+  // lit-general-worker:dev: Lit General Worker 3031
+  console.log("filePath:", filePath);
+
   const fileAPI = `https://api.github.com/repos/${USERNAME}/networks/commits?path=${filePath}`;
+
+  // console.log("fileAPI:", fileAPI);
+
   try {
     const response = await fetch(fileAPI, HEADER);
     const commits = await response.json();
@@ -32,10 +42,10 @@ async function getLastModified(filePath: string) {
     if (commits.length > 0) {
       return commits[0].commit.author.date;
     }
-    console.error('No commits found for', filePath);
+    console.error(`[${network}] No commits found for ${filePath}`);
     return null;
   } catch (error) {
-    console.error('Error fetching last modified date:', error);
+    console.error(`[${network}] Error fetching last modified date: ${error.toString()}`);
   }
 }
 
@@ -107,7 +117,20 @@ const INTERNAL_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/
 const MANZANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json';
 const HABANERO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json';
 
+// TODO: TO BE DEPRECATED, this is just an cayenne endpoint, but we want a more 
+// specific naming convention for each network
+// Removing this might break any apps that rely on this endpoint
 contractsHandler.get("/contract-addresses", (req, res) => {
+  if (cache.cayenne !== null && cache.cayenne.length > 0) {
+    return res.json({ success: true, data: cache['cayenne'] });
+  } else {
+    return res
+      .status(500)
+      .json({ success: false, message: "Cayenne Cache not ready yet" });
+  }
+});
+
+contractsHandler.get("/cayenne-contract-addresses", (req, res) => {
   if (cache.cayenne !== null && cache.cayenne.length > 0) {
     return res.json({ success: true, data: cache['cayenne'] });
   } else {
@@ -151,7 +174,42 @@ contractsHandler.get("/manzano-contract-addresses", (req, res) => {
   } else {
     return res
       .status(500)
-      .json({ success: false, message: "internalDev Cache not ready yet" });
+      .json({ success: false, message: "manzano Cache not ready yet" });
+  }
+});
+
+contractsHandler.get("/network/addresses", (req, res) => {
+  if (cache.manzano !== null && cache.manzano.data.length > 0) {
+
+    function getData(network: LitNetwork) {
+      try {
+
+        // manzano & habanero has .data property
+        const data = cache[network].data ?? cache[network];
+
+        return data.map((item: { name: string, contracts: any[] }) => {
+          return {
+            name: item.name,
+            address: item.contracts[0].address_hash,
+          };
+        });
+
+      } catch (e) {
+        console.log(e);
+        console.log(`❌ Failed to get cache from network ${network}`);
+      }
+    }
+
+    return res.json({
+      manzano: getData('manzano'),
+      habanero: getData('habanero'),
+      cayenne: getData('cayenne'),
+      serrano: getData('serrano'),
+    });
+  } else {
+    return res
+      .status(500)
+      .json({ success: false, message: "manzano Cache not ready yet" });
   }
 });
 
@@ -165,49 +223,37 @@ contractsHandler.get("/habanero-contract-addresses", (req, res) => {
   } else {
     return res
       .status(500)
-      .json({ success: false, message: "internalDev Cache not ready yet" });
+      .json({ success: false, message: "habanero Cache not ready yet" });
   }
 });
 
+const litNetworks = ['cayenne', 'serrano', 'internalDev', 'manzano', 'habanero'];
 
-// Update cache immediately when the server starts
-updateCache('cayenne');
-updateCache('serrano');
-updateCache('internalDev');
-updateCache('manzano');
-updateCache('habanero');
+// Initial update for all items, and pdate cache immediately when the server starts
+litNetworks.forEach((pepper: LitNetwork) => updateCache(pepper));
 
-// Update cache every 5 minutes
-setInterval(() => {
-  updateCache('cayenne');
-}, 5 * 60 * 1000);
+// Update cache every 5 minutes for each item
+litNetworks.forEach((pepper: LitNetwork) => {
+  setInterval(() => {
+    updateCache(pepper);
+  }, 5 * 60 * 1000);
+});
 
-setInterval(() => {
-  updateCache('internalDev');
-}, 5 * 60 * 1000);
-
-setInterval(() => {
-  updateCache('serrano');
-}, 5 * 60 * 1000);
-
-setInterval(() => {
-  updateCache('manzano');
-}, 5 * 60 * 1000);
-
-setInterval(() => {
-  updateCache('habanero');
-}, 5 * 60 * 1000);
-
-export async function getLitContractABIs() {
+export async function getLitContractABIs(network: string) {
 
   const contractsData = [];
 
-  console.log(`Getting directory...`);
+  const path = createPath('rust/lit-core/lit-blockchain/abis');
+  // console.log(`[${network}] Getting files from "${path}"`);
+  console.log("path:", path);
 
-  const filesRes = await fetch(createPath('rust/lit-core/lit-blockchain/abis'), HEADER);
+  const filesRes = await fetch(path, HEADER);
 
   const files = await filesRes.json();
-  console.log("files length:", files.length)
+
+  if (files.length <= 0) {
+    console.log(`[${network}] files length: ${files.length}`);
+  }
 
   for (const file of files) {
 
@@ -217,7 +263,7 @@ export async function getLitContractABIs() {
       continue;
     }
 
-    console.log(`Getting file ${file.download_url}`);
+    console.log(`[${network}] Getting file ${file.download_url}`);
 
     const fileRes = await fetch(file.download_url, HEADER);
 
@@ -231,13 +277,14 @@ export async function getLitContractABIs() {
   }
 
   if (!contractsData.length) {
-    throw new Error('No data');
+    throw new Error(`[${network}] No data`);
   }
 
   return contractsData;
 }
 
-async function updateCache(network: 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero') {
+
+async function updateCache(network: LitNetwork) {
 
   let API: string;
   let filePath: string;
@@ -247,7 +294,7 @@ async function updateCache(network: 'cayenne' | 'serrano' | 'internalDev' | 'man
     case 'cayenne':
       filePath = extractPathAfterMain(CAYENNE_CONTRACTS_JSON);
       API = CAYENNE_CONTRACTS_JSON;
-      lastModified = await getLastModified(filePath);
+      lastModified = await getLastModified(filePath, network);
       break;
     case 'serrano':
       API = SERRANO_CONTRACTS_JSON;
@@ -256,25 +303,33 @@ async function updateCache(network: 'cayenne' | 'serrano' | 'internalDev' | 'man
     case 'internalDev':
       API = INTERNAL_CONTRACTS_JSON;
       filePath = extractPathAfterMain(INTERNAL_CONTRACTS_JSON);
-      lastModified = await getLastModified(filePath);
+      lastModified = await getLastModified(filePath, network);
       break;
     case 'manzano':
-      filePath = extractPathAfterMain(MANZANO_CONTRACTS_JSON);  
+      filePath = extractPathAfterMain(MANZANO_CONTRACTS_JSON);
       API = MANZANO_CONTRACTS_JSON;
-      lastModified = await getLastModified(MANZANO_CONTRACTS_JSON);
+      lastModified = await getLastModified(filePath, network);
       break;
     case 'habanero':
       filePath = extractPathAfterMain(HABANERO_CONTRACTS_JSON);
       API = HABANERO_CONTRACTS_JSON;
-      lastModified = await getLastModified(HABANERO_CONTRACTS_JSON);
+      lastModified = await getLastModified(filePath, network);
+      break;
   }
 
 
-  let cayenneDiamondData;
+  let diamonData: any;
 
   if (network !== 'serrano') {
-    cayenneDiamondData = await getLitContractABIs();
-    console.log("✅ Got cayenneDiamondData");
+    console.log(`[${network}] Trying to get lit contract ABIs`);
+
+    try {
+      diamonData = await getLitContractABIs(network);
+      console.log(`✅ [${network}] Got diamonData`);
+    } catch (e: any) {
+      console.log(`❌ [${network}] Error getting lit contract ABIs => ${e.toString()}`);
+    }
+
   }
 
   const res = await fetch(API);
@@ -301,11 +356,17 @@ async function updateCache(network: 'cayenne' | 'serrano' | 'internalDev' | 'man
     if (contractFileName) {
 
       if (network !== 'serrano') {
-        const ABI = cayenneDiamondData.find((item) => item.name === contractFileName);
+
+        if (!diamonData) {
+          console.error(`❗️❗️ [${network}] diamonData is ${diamonData}`);
+        }
+
+        const ABI = diamonData.find((item: { name: string }) => item.name === contractFileName);
 
         if (!ABI) {
-          console.log(`❗️❗️ contractFileName: ${contractFileName} not found in cayenneDiamondData`);
+          console.log(`❗️❗️ contractFileName: ${contractFileName} not found in diamonData`);
         }
+
         if (!Object.values(mapper).includes(contractFileName)) {
           continue;
         }
@@ -350,7 +411,7 @@ async function updateCache(network: 'cayenne' | 'serrano' | 'internalDev' | 'man
     cache[network] = data;
   }
 
-  console.log(`✅ Cache Updated for "${network}"`);
+  console.log(`✅ [${network}] Cache Updated`);
 }
 
 export { contractsHandler };
