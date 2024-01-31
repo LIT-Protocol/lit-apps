@@ -140,6 +140,39 @@ function handleResponse(networkName: string) {
   };
 }
 
+// ========== API list =========
+const BASE = process.env.ENV === 'dev' ? 'http://localhost:3031' : process.env.DOMAIN ?? 'https://lit-general-worker.getlit.dev';
+
+contractsHandler.get("/apis", (req, res) => {
+  res.json({
+    env: {
+      ENV: process.env.ENV,
+      DOMAIN: process.env.DOMAIN ?? 'not set',
+    },
+    addresses: `${BASE}/network/addresses`,
+    habanero: {
+      type: 'decentralised mainnet',
+      contracts: `${BASE}/habanero/contracts`,
+    },
+    manzano: {
+      type: 'decentralised testnet',
+      contracts: `${BASE}/manzano/contracts`,
+    },
+    cayenne: {
+      type: 'testnet',
+      contracts: `${BASE}/cayenne/contracts`,
+    },
+    serrano: {
+      type: 'testnet',
+      contracts: `${BASE}/serrano/contracts`,
+    },
+    internalDev: {
+      type: 'local',
+      contracts: `${BASE}/internal-dev/contracts`,
+    },
+  });
+});
+
 // ========== Cayenne ==========
 // TODO: TO BE DEPRECATED
 contractsHandler.get("/contract-addresses", handleResponse("cayenne"));
