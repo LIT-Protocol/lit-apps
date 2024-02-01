@@ -9,11 +9,11 @@ import { LitContracts } from "@lit-protocol/contracts-sdk";
 type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero';
 
 const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
-const CAYENNE_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
-const SERRANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json';
-const INTERNAL_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json';
-const MANZANO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json';
-const HABANERO_CONTRACTS_JSON = 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json';
+const CAYENNE_CONTRACTS_JSON = process.env.CAYENNE_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
+const SERRANO_CONTRACTS_JSON = process.env.SERRANO_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json';
+const INTERNAL_CONTRACTS_JSON = process.env.INTERNAL_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json';
+const MANZANO_CONTRACTS_JSON = process.env.MANZANO_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json';
+const HABANERO_CONTRACTS_JSON = process.env.HABANERO_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json';
 
 // -- config
 const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
@@ -68,11 +68,7 @@ const contractsHandler = express();
 contractsHandler.use(bodyParser.json());
 
 let cache = {
-  cayenne: {
-    stats: {
-      totalPkps: 'not ready yet' as number | string,
-    }
-  },
+  cayenne: null,
   serrano: null,
   internalDev: {
     config: null,
@@ -81,18 +77,24 @@ let cache = {
   manzano: {
     config: null,
     data: null,
-    stats: {
-      totalPkps: 'not ready yet' as number | string,
-    }
   },
   habanero: {
     config: null,
     data: null,
-    stats: {
-      totalPkps: 'not ready yet' as number | string,
-    }
   }
 };
+
+let statsCache = {
+  manzano: {
+    totalPkps: 'not ready yet' as number | string,
+  },
+  habanero: {
+    totalPkps: 'not ready yet' as number | string,
+  },
+  cayenne: {
+    totalPkps: 'not ready yet' as number | string,
+  },
+}
 
 // -- config
 // This mapper maps to the contract FILE name, not the contract name. For example, PKPPermissions is the file name without extension, while the contract name may be different. eg. PKPPermissionsDiamond
@@ -178,7 +180,7 @@ function handleStatsResponse(networkName: LitNetwork) {
 
   function getData(network: LitNetwork) {
     try {
-      return cache[network].stats;
+      return statsCache[network];
     } catch (e) {
       console.log(e);
       console.log(`❌ Failed to get stats cache from network ${network}`);
@@ -216,6 +218,13 @@ contractsHandler.get("/", (req, res) => {
       CHAIN_ID: process.env.CHAIN_ID ?? '175177',
       CHAIN_NAME: process.env.CHAIN_NAME ?? 'lit',
       RPC_URL: process.env.RPC_URL ?? 'https://lit-protocol.calderachain.xyz/http',
+      source: {
+        HABANERO_CONTRACTS_JSON,
+        MANZANO_CONTRACTS_JSON,
+        CAYENNE_CONTRACTS_JSON,
+        SERRANO_CONTRACTS_JSON,
+        INTERNAL_CONTRACTS_JSON,
+      },
     },
     network: {
       addresses: `${HOST}/network/addresses`,
@@ -473,6 +482,7 @@ async function getNetworkStats(network: LitNetwork) {
 
   // -- serrano is not supported
   if (network === 'serrano' || network === 'internalDev') {
+    console.log(`❗️ [${network}] getNetworkStats is not supported`);
     return;
   }
 
@@ -480,9 +490,7 @@ async function getNetworkStats(network: LitNetwork) {
   let totalPkps = await binarySearchTotalTokens(network);
   console.log(`[${network}] totalPkps:`, totalPkps);
 
-  cache[network].stats = {
-    totalPkps,
-  };
+  statsCache[network].totalPkps = totalPkps;
 };
 
 async function updateCache(network: LitNetwork) {
