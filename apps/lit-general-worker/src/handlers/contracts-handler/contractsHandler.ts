@@ -433,6 +433,7 @@ export async function getLitContractABIs(network: string) {
 
 // Binary search
 async function binarySearchTotalTokens(network: LitNetwork): Promise<number> {
+  console.log(`binarySearchTotalTokens(${network})`)
 
   let low = 0;
   let high = 1;
