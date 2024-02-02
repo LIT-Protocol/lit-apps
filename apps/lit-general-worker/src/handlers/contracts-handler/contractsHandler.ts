@@ -1,9 +1,8 @@
+// TODO: Remove Serrano network support after the Serrano network is deprecated
+
 import express from "express";
 import bodyParser from "body-parser";
 import { LitContracts } from "@lit-protocol/contracts-sdk";
-// import * as dotenv from "dotenv";
-// dotenv.config();
-//
 // https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
 
 type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero';
@@ -374,16 +373,16 @@ contractsHandler.get("/network/addresses", (req, res) => {
 const litNetworks = ['cayenne', 'serrano', 'internalDev', 'manzano', 'habanero'];
 
 // Initial update for all items, and update cache immediately when the server starts
-litNetworks.forEach((pepper: LitNetwork) => {
-  getNetworkStats(pepper);
-  updateCache(pepper);
+litNetworks.forEach(async (pepper: LitNetwork) => {
+  await updateContractsCache(pepper);
+  await updateStatsCache(pepper);
 });
 
 // Update cache every 5 minutes for each item
-litNetworks.forEach((pepper: LitNetwork) => {
-  setInterval(() => {
-    updateCache(pepper);
-    getNetworkStats(pepper);
+litNetworks.forEach(async (pepper: LitNetwork) => {
+  setInterval(async () => {
+    await updateContractsCache(pepper);
+    await updateStatsCache(pepper);
   }, 5 * 60 * 1000);
 });
 
@@ -478,22 +477,26 @@ async function binarySearchTotalTokens(network: LitNetwork): Promise<number> {
   return low; // low is now the smallest index that fails
 }
 
-async function getNetworkStats(network: LitNetwork) {
+async function updateStatsCache(network: LitNetwork) {
 
   // -- serrano is not supported
   if (network === 'serrano' || network === 'internalDev') {
-    console.log(`❗️ [${network}] getNetworkStats is not supported`);
+    console.log(`❗️ [${network}] updateStatsCache is not supported`);
     return;
   }
 
   // -- stats
-  let totalPkps = await binarySearchTotalTokens(network);
-  console.log(`[${network}] totalPkps:`, totalPkps);
+  try {
+    let totalPkps = await binarySearchTotalTokens(network);
+    console.log(`[${network}] totalPkps:`, totalPkps);
 
-  statsCache[network].totalPkps = totalPkps;
+    statsCache[network].totalPkps = totalPkps;
+  } catch (e) {
+    console.log("Contracts endpoint is not ready yet. Self-referential error occurred");
+  }
 };
 
-async function updateCache(network: LitNetwork) {
+async function updateContractsCache(network: LitNetwork) {
 
   let API: string;
   let filePath: string;
@@ -541,9 +544,21 @@ async function updateCache(network: LitNetwork) {
 
   }
 
-  const res = await fetch(API);
+  let res: any;
 
-  const resData = await res.json();
+  try {
+    res = await fetch(API);
+  } catch (e) {
+    console.log(`❌ [${network}] Error fetching API => ${e.toString()}`);
+  }
+
+  let resData: any;
+
+  try {
+    resData = await res.json();
+  } catch (e) {
+    console.log(`❌ [${network}] Error parsing res.json() => ${e.toString()}`);
+  }
 
   const data = [];
 
