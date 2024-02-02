@@ -424,7 +424,7 @@ export async function getLitContractABIs(network: string) {
   }
 
   if (!contractsData.length) {
-    throw new Error(`[${network}] No data`);
+    console.log((`[${network}] No data`));
   }
 
   return contractsData;
