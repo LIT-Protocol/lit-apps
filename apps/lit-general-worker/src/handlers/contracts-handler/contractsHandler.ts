@@ -86,12 +86,15 @@ let cache = {
 let statsCache = {
   manzano: {
     totalPkps: 'not ready yet' as number | string,
+    totalCcs: 'not ready yet' as number | string,
   },
   habanero: {
     totalPkps: 'not ready yet' as number | string,
+    totalCcs: 'not ready yet' as number | string,
   },
   cayenne: {
     totalPkps: 'not ready yet' as number | string,
+    totalCcs: 'not ready yet' as number | string,
   },
 }
 
@@ -430,53 +433,6 @@ export async function getLitContractABIs(network: string) {
   return contractsData;
 }
 
-// Binary search
-async function binarySearchTotalTokens(network: LitNetwork): Promise<number> {
-
-  let low = 0;
-  let high = 1;
-  let mid;
-  let hasFailed = false;
-
-  const contractClient = new LitContracts({
-
-    // @ts-ignore
-    network,
-  });
-
-  await contractClient.connect();
-
-  // First, find a high bound where the operation fails
-  while (!hasFailed) {
-    console.log(`[${network}] high:`, high);
-    try {
-      await contractClient.pkpNftContract.read.tokenByIndex(high);
-      low = high;
-      high *= 2; // Double the high index to expand the search space quickly
-    } catch (error) {
-      hasFailed = true; // Found a high bound where it fails
-    }
-  }
-
-  console.log(`[${network}] ✅ high bound found!`);
-  // Now, use binary search between low and high to find the exact failing index
-  while (low <= high) {
-    mid = Math.floor((low + high) / 2);
-    console.log(`[${network}] mid:`, mid);
-
-    try {
-      await contractClient.pkpNftContract.read.tokenByIndex(mid);
-      low = mid + 1; // Move the low up, since mid did not fail
-    } catch (error) {
-      high = mid - 1; // Move the high down, since mid failed
-    }
-  }
-
-  console.log(`[${network}] ✅ low found!`);
-  // The loop exits when low > high, and high + 1 is the index where it first fails
-  return low; // low is now the smallest index that fails
-}
-
 async function updateStatsCache(network: LitNetwork) {
 
   // -- serrano is not supported
@@ -485,12 +441,28 @@ async function updateStatsCache(network: LitNetwork) {
     return;
   }
 
-  // -- stats
+  const contractClient = new LitContracts({
+    network: network as 'cayenne' | 'habanero' | 'manzano',
+  });
+
+  await contractClient.connect();
+
+  // -- total pkps
   try {
-    let totalPkps = await binarySearchTotalTokens(network);
+    let totalPkps = (await contractClient!.pkpNftContract.read.totalSupply()).toNumber();
     console.log(`[${network}] totalPkps:`, totalPkps);
 
     statsCache[network].totalPkps = totalPkps;
+  } catch (e) {
+    console.log("Contracts endpoint is not ready yet. Self-referential error occurred");
+  }
+
+  // -- total ccs
+  try {
+    let totalCcs = (await contractClient!.rateLimitNftContract.read.totalSupply()).toNumber();
+    console.log(`[${network}] totalCcs:`, totalCcs);
+
+    statsCache[network].totalCcs = totalCcs;
   } catch (e) {
     console.log("Contracts endpoint is not ready yet. Self-referential error occurred");
   }
