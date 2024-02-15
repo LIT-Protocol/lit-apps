@@ -3,24 +3,10 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { LitContracts } from "@lit-protocol/contracts-sdk";
-// https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
-
-type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero';
-
-const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
-const CAYENNE_CONTRACTS_JSON = process.env.CAYENNE_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
-const SERRANO_CONTRACTS_JSON = process.env.SERRANO_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json';
-const INTERNAL_CONTRACTS_JSON = process.env.INTERNAL_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json';
-const MANZANO_CONTRACTS_JSON = process.env.MANZANO_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json';
-const HABANERO_CONTRACTS_JSON = process.env.HABANERO_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json';
-
-// -- config
-const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
-const USERNAME = 'LIT-Protocol'
-const REPO_NAME = 'lit-assets';
+import { ABI_API, CAYENNE_CONTRACTS_JSON, HABANERO_CONTRACTS_JSON, INTERNAL_CONTRACTS_JSON, LitNetwork, MANZANO_CONTRACTS_JSON, LIT_ASSETS_REPO, SERRANO_CONTRACTS_JSON, GITHUB_USERNAME, GITHUB_LIT_ASSETS_TOKEN } from "../../env";
 
 const createPath = (PATH: string) => {
-  return `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${PATH}`;
+  return `https://api.github.com/repos/${GITHUB_USERNAME}/${LIT_ASSETS_REPO}/contents/${PATH}`;
 }
 
 function extractPathAfterMain(urlString: string): string {
@@ -35,11 +21,7 @@ function extractPathAfterMain(urlString: string): string {
 async function getLastModified(filePath: string, network: string) {
 
   // lit-general-worker:dev: Lit General Worker 3031
-  console.log("filePath:", filePath);
-
-  const fileAPI = `https://api.github.com/repos/${USERNAME}/networks/commits?path=${filePath}`;
-
-  // console.log("fileAPI:", fileAPI);
+  const fileAPI = `https://api.github.com/repos/${GITHUB_USERNAME}/networks/commits?path=${filePath}`;
 
   try {
     const response = await fetch(fileAPI, HEADER);
@@ -58,7 +40,7 @@ async function getLastModified(filePath: string, network: string) {
 
 const HEADER = {
   headers: {
-    Authorization: `token ${TOKEN}`,
+    Authorization: `token ${GITHUB_LIT_ASSETS_TOKEN}`,
     Accept: 'application/vnd.github.v3+json',
   },
 };
@@ -206,66 +188,6 @@ function getHandlerFunction(handlerName: string, networkName: LitNetwork) {
   };
   return handlers[handlerName];
 }
-
-
-// ========== API list =========
-const HOST = process.env.ENV === 'dev' ? 'http://localhost:3031' : process.env.HOST ?? 'https://apis.getlit.dev';
-
-contractsHandler.get("/", (req, res) => {
-  res.json({
-    env: {
-      HOST: process.env.HOST ?? 'https://apis.getlit.dev',
-      FAUCET_LINK: process.env.FAUCET_LINK ?? 'https://chronicle-faucet-app.vercel.app/',
-      CHAIN_EXPLORER: process.env.CHAIN_EXPLORER ?? 'https://chain.litprotocol.com/',
-      CHAIN_ID: process.env.CHAIN_ID ?? '175177',
-      CHAIN_NAME: process.env.CHAIN_NAME ?? 'lit',
-      RPC_URL: process.env.RPC_URL ?? 'https://lit-protocol.calderachain.xyz/http',
-      source: {
-        HABANERO_CONTRACTS_JSON,
-        MANZANO_CONTRACTS_JSON,
-        CAYENNE_CONTRACTS_JSON,
-        SERRANO_CONTRACTS_JSON,
-        INTERNAL_CONTRACTS_JSON,
-      },
-    },
-    network: {
-      addresses: `${HOST}/network/addresses`,
-      habanero: {
-        decentralized: true,
-        type: 'mainnet',
-        contracts: `${HOST}/habanero/contracts`,
-        addresses: `${HOST}/habanero/addresses`,
-        stats: `${HOST}/habanero/stats`,
-      },
-      manzano: {
-        decentralized: true,
-        type: 'testnet',
-        contracts: `${HOST}/manzano/contracts`,
-        addresses: `${HOST}/manzano/addresses`,
-        stats: `${HOST}/manzano/stats`,
-      },
-      cayenne: {
-        decentralized: false,
-        type: 'testnet',
-        contracts: `${HOST}/cayenne/contracts`,
-        addresses: `${HOST}/cayenne/addresses`,
-        stats: `${HOST}/cayenne/stats`,
-      },
-      serrano: {
-        decentralized: false,
-        type: 'testnet',
-        contracts: `${HOST}/serrano/contracts`,
-        addresses: `${HOST}/serrano/addresses`,
-      },
-      internalDev: {
-        decentralized: false,
-        type: 'devnet',
-        contracts: `${HOST}/internal-dev/contracts`,
-        addresses: `${HOST}/internal-dev/addresses`,
-      },
-    },
-  });
-});
 
 const networks = [
   {
