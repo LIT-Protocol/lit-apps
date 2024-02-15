@@ -10,6 +10,27 @@ const HEADER = {
 
 const cache = [];
 
+function removeBackticks(str: any): string { // Changed type to 'any' for demonstration
+  // Ensure 'str' is a string
+  if (typeof str !== 'string') {
+    // Optionally, handle the case where 'str' is not a string
+    console.error('Provided value is not a string:', str);
+    return ''; // Return an empty string or handle as needed
+  }
+
+  // Check if the first character is a backtick
+  if (str.startsWith('`')) {
+    str = str.substring(1);
+  }
+
+  // Check if the last character is a backtick
+  if (str.endsWith('`')) {
+    str = str.substring(0, str.length - 1);
+  }
+
+  return str;
+}
+
 async function getFiles() {
   const response = await fetch(LIT_ACTION_EXAMPLES_API, HEADER);
   const data = await response.json();
@@ -24,14 +45,17 @@ async function getFileContent(url: string, fileName: string) {
 
   // -- only get between the ` ` quote and export it 
   const regex = /`([^`]+)`/g;
-  const exportName = `${fileName.split('.')[0]}Action`;
-  const innerContent = content.match(regex);
+  // const exportName = `${fileName.split('.')[0]}Action`;
+  let innerContent: any = content.match(regex);
 
   if (innerContent == null) {
     return null;
   }
 
-  return `export const ${exportName} = ${innerContent}`;
+  innerContent = removeBackticks(innerContent[0]);
+
+  // return `export const ${exportName} = ${innerContent}`;
+  return innerContent;
 }
 
 async function listFilesAndContents() {
