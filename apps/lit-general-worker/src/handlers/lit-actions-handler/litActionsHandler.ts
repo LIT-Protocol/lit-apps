@@ -8,7 +8,7 @@ const HEADER = {
   }
 };
 
-const cache = [];
+let cache = [];
 
 function removeBackticks(str: any): string { // Changed type to 'any' for demonstration
   // Ensure 'str' is a string
@@ -61,13 +61,14 @@ async function getFileContent(url: string, fileName: string) {
 async function listFilesAndContents() {
   const files = await getFiles();
 
-  console.log("files:", files);
+  const temp = [];
 
   for (const file of files) {
     const content = await getFileContent(file.url, file.name);
 
     if (content) {
-      cache.push({
+
+      temp.push({
         file: file.name,
         content: content,
       })
@@ -77,16 +78,18 @@ async function listFilesAndContents() {
 
   }
 
-  return cache;
+  return temp;
 }
 
 listFilesAndContents().then((d) => {
-  console.log(d);
+  console.log("Lit Action Examples Init");
+  cache = d;
 })
 
 setInterval(async () => {
   listFilesAndContents().then((d) => {
-    console.log(d);
+    console.log("Lit Action Examples Updated!");
+    cache = d;
   })
 }, 10 * 60 * 1000);
 
