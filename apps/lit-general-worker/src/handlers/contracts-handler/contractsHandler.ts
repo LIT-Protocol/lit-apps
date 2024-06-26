@@ -600,32 +600,20 @@ async function updateContractsCache(network: LitNetwork) {
         }catch(e){
           console.error(`❗️❗️ [${network}] Error finding contractFileName in diamonData => ${e.toString()}`);
 
-          const path = require('path');
 
           if (network === 'datil-dev') {
+
             const supportedContracts = {
-              'PKPNFT': path.join(__dirname, 'datil-dev', 'PKPNFTFacet.json'),
-              'PKPPermissions': path.join(__dirname, 'datil-dev', 'PKPPermissionsFacet.json'),
-              'PKPHelper': path.join(__dirname, 'datil-dev', 'PKPHelper.json'),
+              'PKPNFT': PKPNFTFacetABI,
+              'PKPPermissions': PKPPermissionsFacetABI,
+              'PKPHelper': PKPHelperABI,
             };
           
             if (contractFileName in supportedContracts) {
               console.log(`💭 [datil-dev] Using static ABI for "${contractFileName}" contract`);
               
-              const filePath = supportedContracts[contractFileName];
-              if (filePath) {
-                console.log(`[datil-dev] Loading ABI from "${filePath}"`)
-          
-                try {
-                  const res = require(filePath);
-                  console.log(`[datil-dev] Loaded ABI for "${contractFileName}", res:`, res)
-                  ABI = { data: res.abi };
-                } catch (error) {
-                  console.error(`❗️[datil-dev] Cannot find or load ABI for "${contractFileName}" in datil-dev:`, error);
-                }
-              } else {
-                console.error(`❗️[datil-dev] ABI file path not defined for "${contractFileName}" in datil-dev`);
-              }
+              const abi = supportedContracts[contractFileName];
+              ABI = { data: abi };
             } else {
               console.error(`❗️[datil-dev] contractFileName: ${contractFileName} not supported`);
             }
