@@ -598,10 +598,13 @@ async function updateContractsCache(network: LitNetwork) {
           console.error(`❗️❗️ [${network}] Error finding contractFileName in diamonData => ${e.toString()}`);
 
           if (network === 'datil-dev') {
+
+            const path = require('path');
+
             const supportedContracts = {
-              'PKPNFT': './datil-dev/PKPNFTFacet.json',
-              'PKPPermissions': './datil-dev/PKPPermissionsFacet.json',
-              'PKPHelper': './datil-dev/PKPHelper.json',
+              'PKPNFT': path.join(__dirname, './datil-dev/PKPNFTFacet.json'),
+              'PKPPermissions': path.join(__dirname, './datil-dev/PKPPermissionsFacet.json'),
+              'PKPHelper': path.join(__dirname, './datil-dev/PKPHelper.json'),
             };
           
             if (contractFileName in supportedContracts) {
