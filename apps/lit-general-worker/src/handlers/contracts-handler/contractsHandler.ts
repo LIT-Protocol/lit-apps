@@ -4,6 +4,9 @@ import express from "express";
 import bodyParser from "body-parser";
 import { LitContracts } from "@lit-protocol/contracts-sdk";
 // https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
+import { PKPNFTFacetABI } from "./datil-dev/PKPNFTFacetABI";
+import { PKPPermissionsFacetABI } from "./datil-dev/PKPPermissionsFacetABI";
+import { PKPHelperABI } from "./datil-dev/PKPHelperAbi";
 
 type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero' | 'datil-dev';
 
@@ -599,12 +602,10 @@ async function updateContractsCache(network: LitNetwork) {
 
           if (network === 'datil-dev') {
 
-            const path = require('path');
-
             const supportedContracts = {
-              'PKPNFT': path.join(__dirname, './datil-dev/PKPNFTFacet.json'),
-              'PKPPermissions': path.join(__dirname, './datil-dev/PKPPermissionsFacet.json'),
-              'PKPHelper': path.join(__dirname, './datil-dev/PKPHelper.json'),
+              'PKPNFT': PKPNFTFacetABI,
+              'PKPPermissions': PKPPermissionsFacetABI,
+              'PKPHelper': PKPHelperABI,
             };
           
             if (contractFileName in supportedContracts) {
