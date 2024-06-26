@@ -603,9 +603,9 @@ async function updateContractsCache(network: LitNetwork) {
           if (network === 'datil-dev') {
 
             const supportedContracts = {
-              'PKPNFT': './datil-dev/PKPNFTFacetABI.ts',
-              'PKPPermissions': './datil-dev/PKPPermissionsFacetABI.ts',
-              'PKPHelper': './datil-dev/PKPHelperAbi.ts',
+              'PKPNFT': './datil-dev/PKPNFTFacet.json',
+              'PKPPermissions': './datil-dev/PKPPermissionsFacet.json',
+              'PKPHelper': './datil-dev/PKPHelper.json',
             };
           
             if (contractFileName in supportedContracts) {
