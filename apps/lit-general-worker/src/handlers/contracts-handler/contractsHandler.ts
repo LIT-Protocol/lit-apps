@@ -417,7 +417,7 @@ litNetworks.forEach(async (pepper: LitNetwork) => {
   }, 5 * 60 * 1000);
 });
 
-export async function getLitContractABIs(network: string) {
+export async function getLitContractABIs(network: LitNetwork) {
 
   const contractsData = [];
 
@@ -596,6 +596,32 @@ async function updateContractsCache(network: LitNetwork) {
           diamonData.find((item: { name: string }) => item.name === contractFileName);
         }catch(e){
           console.error(`❗️❗️ [${network}] Error finding contractFileName in diamonData => ${e.toString()}`);
+
+          if (network === 'datil-dev') {
+            const supportedContracts = {
+              'PKPNFT': './datil-dev/PKPNFTFacet.json',
+              'PKPPermissions': './datil-dev/PKPPermissionsFacet.json',
+              'PKPHelper': './datil-dev/PKPHelper.json',
+            };
+          
+            if (contractFileName in supportedContracts) {
+              console.log(`💭 [datil-dev] Using static ABI for "${contractFileName}" contract`);
+              
+              const filePath = supportedContracts[contractFileName];
+              if (filePath) {
+                try {
+                  const { abi } = require(filePath);
+                  ABI = { data: abi };
+                } catch (error) {
+                  console.error(`Cannot find or load ABI for "${contractFileName}" in datil-dev:`, error);
+                }
+              } else {
+                console.error(`ABI file path not defined for "${contractFileName}" in datil-dev`);
+              }
+            } else {
+              console.error(`❗️❗️ [datil-dev] contractFileName: ${contractFileName} not supported`);
+            }
+          }
         }
 
         if (!ABI) {
