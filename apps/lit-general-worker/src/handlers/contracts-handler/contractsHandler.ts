@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import { LitContracts } from "@lit-protocol/contracts-sdk";
 // https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
 
-type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero';
+type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero' | 'datil-dev';
 
 const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
 const CAYENNE_CONTRACTS_JSON = process.env.CAYENNE_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json';
@@ -13,6 +13,8 @@ const SERRANO_CONTRACTS_JSON = process.env.SERRANO_CONTRACTS_JSON ?? 'https://ra
 const INTERNAL_CONTRACTS_JSON = process.env.INTERNAL_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json';
 const MANZANO_CONTRACTS_JSON = process.env.MANZANO_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json';
 const HABANERO_CONTRACTS_JSON = process.env.HABANERO_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json';
+
+const DATILDEV_CONTRACTS_JSON = process.env.DATILDEV_CONTRACTS_JSON ?? 'https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-dev/deployed-lit-node-contracts-temp.json';
 
 // -- config
 const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
@@ -78,6 +80,10 @@ let cache = {
     data: null,
   },
   habanero: {
+    config: null,
+    data: null,
+  },
+  ['datil-dev']: {
     config: null,
     data: null,
   }
@@ -226,10 +232,20 @@ contractsHandler.get("/", (req, res) => {
         CAYENNE_CONTRACTS_JSON,
         SERRANO_CONTRACTS_JSON,
         INTERNAL_CONTRACTS_JSON,
+
+        // Added on 26 June 2024
+        DATILDEV_CONTRACTS_JSON,
       },
     },
     network: {
       addresses: `${HOST}/network/addresses`,
+      ['datil-dev']: {
+        decentralized: true,
+        type: 'devnet',
+        contracts: `${HOST}/datil-dev/contracts`,
+        addresses: `${HOST}/datil-dev/addresses`,
+        stats: `${HOST}/datil-dev/stats`,
+      },
       habanero: {
         decentralized: true,
         type: 'mainnet',
@@ -321,6 +337,17 @@ const networks = [
       // @deprecated
       { path: "/habanero-contract-addresses", handler: "handleContractsResponse" },
     ],
+  },
+  {
+    name: 'datil-dev',
+    endpoints: [
+      { path: "/datil-dev/contracts", handler: "handleContractsResponse" },
+      { path: "/datil-dev/addresses", handler: "handleAddressesResponse" },
+      { path: "/datil-dev/stats", handler: "handleStatsResponse" },
+
+      // @deprecated
+      { path: "/datil-dev-contract-addresses", handler: "handleContractsResponse" },
+    ],
   }
 ];
 
@@ -363,6 +390,7 @@ contractsHandler.get("/network/addresses", (req, res) => {
     return res.json({
       manzano: getData('manzano'),
       habanero: getData('habanero'),
+      ['datil-dev']: getData('datil-dev'),
       cayenne: getData('cayenne'),
       serrano: getData('serrano'),
     });
@@ -373,7 +401,7 @@ contractsHandler.get("/network/addresses", (req, res) => {
   }
 });
 
-const litNetworks = ['cayenne', 'serrano', 'internalDev', 'manzano', 'habanero'];
+const litNetworks = ['cayenne', 'serrano', 'internalDev', 'manzano', 'habanero', 'datil-dev'];
 
 // Initial update for all items, and update cache immediately when the server starts
 litNetworks.forEach(async (pepper: LitNetwork) => {
@@ -436,7 +464,7 @@ export async function getLitContractABIs(network: string) {
 async function updateStatsCache(network: LitNetwork) {
 
   // -- serrano is not supported
-  if (network === 'serrano' || network === 'internalDev') {
+  if (network === 'serrano' || network === 'internalDev' || network === 'datil-dev') {
     console.log(`❗️ [${network}] updateStatsCache is not supported`);
     return;
   }
@@ -499,6 +527,11 @@ async function updateContractsCache(network: LitNetwork) {
       API = HABANERO_CONTRACTS_JSON;
       lastModified = await getLastModified(filePath, network);
       break;
+    case 'datil-dev':
+      filePath = extractPathAfterMain(DATILDEV_CONTRACTS_JSON);
+      API = DATILDEV_CONTRACTS_JSON;
+      lastModified = await getLastModified(filePath, network);
+      break;
   }
 
 
@@ -557,7 +590,13 @@ async function updateContractsCache(network: LitNetwork) {
           console.error(`❗️❗️ [${network}] diamonData is ${diamonData}`);
         }
 
-        const ABI = diamonData.find((item: { name: string }) => item.name === contractFileName);
+        let ABI: any;
+
+        try{
+          diamonData.find((item: { name: string }) => item.name === contractFileName);
+        }catch(e){
+          console.error(`❗️❗️ [${network}] Error finding contractFileName in diamonData => ${e.toString()}`);
+        }
 
         if (!ABI) {
           console.log(`❗️❗️ contractFileName: ${contractFileName} not found in diamonData`);
