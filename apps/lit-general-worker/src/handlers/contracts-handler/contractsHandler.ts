@@ -613,17 +613,21 @@ async function updateContractsCache(network: LitNetwork) {
               
               const filePath = supportedContracts[contractFileName];
               if (filePath) {
+                
+                console.log(`[datil-dev] Loading ABI from "${filePath}"`)
+
                 try {
-                  const { abi } = require(filePath);
-                  ABI = { data: abi };
+                  const res = require(filePath);
+                  console.log(`[datil-dev] Loaded ABI for "${contractFileName}", res:`, res)
+                  ABI = { data: res.abi };
                 } catch (error) {
-                  console.error(`Cannot find or load ABI for "${contractFileName}" in datil-dev:`, error);
+                  console.error(`❗️[datil-dev] Cannot find or load ABI for "${contractFileName}" in datil-dev:`, error);
                 }
               } else {
-                console.error(`ABI file path not defined for "${contractFileName}" in datil-dev`);
+                console.error(`❗️[datil-dev] ABI file path not defined for "${contractFileName}" in datil-dev`);
               }
             } else {
-              console.error(`❗️❗️ [datil-dev] contractFileName: ${contractFileName} not supported`);
+              console.error(`❗️[datil-dev] contractFileName: ${contractFileName} not supported`);
             }
           }
         }
