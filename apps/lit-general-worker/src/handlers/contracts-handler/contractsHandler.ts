@@ -600,12 +600,13 @@ async function updateContractsCache(network: LitNetwork) {
         }catch(e){
           console.error(`❗️❗️ [${network}] Error finding contractFileName in diamonData => ${e.toString()}`);
 
-          if (network === 'datil-dev') {
+          const path = require('path');
 
+          if (network === 'datil-dev') {
             const supportedContracts = {
-              'PKPNFT': './datil-dev/PKPNFTFacet.json',
-              'PKPPermissions': './datil-dev/PKPPermissionsFacet.json',
-              'PKPHelper': './datil-dev/PKPHelper.json',
+              'PKPNFT': path.join(__dirname, 'datil-dev', 'PKPNFTFacet.json'),
+              'PKPPermissions': path.join(__dirname, 'datil-dev', 'PKPPermissionsFacet.json'),
+              'PKPHelper': path.join(__dirname, 'datil-dev', 'PKPHelper.json'),
             };
           
             if (contractFileName in supportedContracts) {
@@ -613,9 +614,8 @@ async function updateContractsCache(network: LitNetwork) {
               
               const filePath = supportedContracts[contractFileName];
               if (filePath) {
-                
                 console.log(`[datil-dev] Loading ABI from "${filePath}"`)
-
+          
                 try {
                   const res = require(filePath);
                   console.log(`[datil-dev] Loaded ABI for "${contractFileName}", res:`, res)
