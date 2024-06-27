@@ -6,7 +6,7 @@ import { LitContracts } from "@lit-protocol/contracts-sdk";
 // https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
 import { PKPNFTFacetABI } from "./datil-dev/PKPNFTFacetABI";
 import { PKPPermissionsFacetABI } from "./datil-dev/PKPPermissionsFacetABI";
-import { PKPHelperABI } from "./datil-dev/PKPHelperABI";
+import { PKPHelperABI } from "./datil-dev/PKPHelperAbi";
 import { StakingABI } from "./datil-dev/StakingAbi";
 
 type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero' | 'datil-dev';
