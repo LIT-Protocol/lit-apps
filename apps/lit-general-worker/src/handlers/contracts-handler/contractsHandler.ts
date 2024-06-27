@@ -8,6 +8,7 @@ import { PKPNFTFacetABI } from "./datil-dev/PKPNFTFacetABI";
 import { PKPPermissionsFacetABI } from "./datil-dev/PKPPermissionsFacetABI";
 import { PKPHelperABI } from "./datil-dev/PKPHelperAbi";
 import { StakingABI } from "./datil-dev/StakingAbi";
+import { RateLimitNftAbi } from "./datil-dev/RateLimitNFTAbi";
 
 type LitNetwork = 'cayenne' | 'serrano' | 'internalDev' | 'manzano' | 'habanero' | 'datil-dev';
 
@@ -609,6 +610,7 @@ async function updateContractsCache(network: LitNetwork) {
               'PKPPermissions': PKPPermissionsFacetABI,
               'PKPHelper': PKPHelperABI,
               'Staking': StakingABI,
+              'RateLimitNFT': RateLimitNftAbi
             };
           
             if (contractFileName in supportedContracts) {
