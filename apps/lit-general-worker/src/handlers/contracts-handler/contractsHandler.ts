@@ -663,7 +663,7 @@ async function updateContractsCache(network: LitNetwork) {
             `❗️❗️ [${network}] Error finding contractFileName in diamonData => ${e.toString()}`
           );
 
-          if (network === "datil-dev") {
+          if (network === "datil-dev" || network === "internalDev") {
             const supportedContracts = {
               PKPNFT: PKPNFTFacetABI,
               PKPPermissions: PKPPermissionsFacetABI,
