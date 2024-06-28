@@ -655,7 +655,7 @@ async function updateContractsCache(network: LitNetwork) {
         let ABI: any;
 
         try {
-          diamonData.find(
+          ABI = diamonData.find(
             (item: { name: string }) => item.name === contractFileName
           );
         } catch (e) {
