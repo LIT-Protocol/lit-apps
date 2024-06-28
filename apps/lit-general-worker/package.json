@@ -10,7 +10,7 @@
   "dependencies": {
     "@lit-dev/lit-actions": "*",
     "@lit-dev/utils": "*",
-    "@lit-protocol/contracts-sdk": "^3.1.1",
+    "@lit-protocol/contracts-sdk": "^6.1.0-datil-dev.alpha.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "esbuild": "^0.17.5",
