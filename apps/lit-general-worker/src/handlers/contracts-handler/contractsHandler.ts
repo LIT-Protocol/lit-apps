@@ -9,6 +9,7 @@ import { PKPPermissionsFacetABI } from "./datil-dev/PKPPermissionsFacetABI";
 import { PKPHelperABI } from "./datil-dev/PKPHelperAbi";
 import { StakingABI } from "./datil-dev/StakingAbi";
 import { RateLimitNftAbi } from "./datil-dev/RateLimitNFTAbi";
+import { PubkeyRouterAbi } from "./datil-dev/PubkeyRouterAbi";
 
 type LitNetwork =
   | "cayenne"
@@ -126,7 +127,7 @@ let statsCache = {
     totalPkps: "not ready yet" as number | string,
     totalCcs: "not ready yet" as number | string,
   },
-  ['datil-dev']: {
+  ["datil-dev"]: {
     totalPkps: "not ready yet" as number | string,
     totalCcs: "not ready yet" as number | string,
   },
@@ -669,6 +670,7 @@ async function updateContractsCache(network: LitNetwork) {
               PKPHelper: PKPHelperABI,
               Staking: StakingABI,
               RateLimitNFT: RateLimitNftAbi,
+              PubkeyRouter: PubkeyRouterAbi,
             };
 
             if (contractFileName in supportedContracts) {
