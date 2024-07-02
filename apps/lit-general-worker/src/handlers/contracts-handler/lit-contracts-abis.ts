@@ -22,7 +22,6 @@ export async function getLitContractABIs() {
   const contractsData = [];
 
   console.log(`Getting directory...`);
-  console.log(`Token: ${TOKEN}`);
 
   let files: any;
 
