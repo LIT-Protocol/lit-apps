@@ -45,6 +45,8 @@ const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
 const USERNAME = "LIT-Protocol";
 const REPO_NAME = "lit-assets";
 
+console.log(`Token: ${TOKEN}`);
+
 const createPath = (PATH: string) => {
   return `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${PATH}`;
 };
@@ -65,6 +67,8 @@ async function getLastModified(filePath: string, network: string) {
   const fileAPI = `https://api.github.com/repos/${USERNAME}/networks/commits?path=${filePath}`;
 
   // console.log("fileAPI:", fileAPI);
+
+  console.log(`HEADER:`, HEADER);
 
   try {
     const response = await fetch(fileAPI, HEADER);
@@ -155,6 +159,7 @@ const mapper = {
   rateLimitNftContractAddress: "RateLimitNFT",
   allowlistContractAddress: "Allowlist",
   // resolverContractAddress: "Resolver",
+  paymentDelegationContractAddress: "PaymentDelegation",
 
   // -- Domain Wallet
   // DomainWaleltRegistryAddress: "DomainWaleltRegistry",
