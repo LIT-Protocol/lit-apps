@@ -155,6 +155,7 @@ const mapper = {
   rateLimitNftContractAddress: "RateLimitNFT",
   allowlistContractAddress: "Allowlist",
   // resolverContractAddress: "Resolver",
+  paymentDelegationContractAddress: "PaymentDelegation",
 
   // -- Domain Wallet
   // DomainWaleltRegistryAddress: "DomainWaleltRegistry",
