@@ -48,7 +48,7 @@ const DATILTEST_CONTRACTS_JSON =
 // -- config
 const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
 const USERNAME = "LIT-Protocol";
-const REPO_NAME = "lit-assets";
+const REPO_NAME = "networks";
 
 const createPath = (PATH: string) => {
   return `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${PATH}`;
@@ -526,7 +526,7 @@ litNetworks.forEach(async (pepper: LitNetwork) => {
 export async function getLitContractABIs(network: LitNetwork) {
   const contractsData = [];
 
-  const path = createPath("rust/lit-core/lit-blockchain/abis");
+  const path = createPath("abis");
   // console.log(`[${network}] Getting files from "${path}"`);
   console.log("path:", path);
 
@@ -539,7 +539,7 @@ export async function getLitContractABIs(network: LitNetwork) {
   }
 
   for (const file of files) {
-    const name = file.name.replace(".json", "");
+    const name = file.name.replace(".abi", "");
 
     if (!Object.values(mapper).includes(name)) {
       continue;
@@ -552,9 +552,9 @@ export async function getLitContractABIs(network: LitNetwork) {
     const fileData = await fileRes.json();
 
     contractsData.push({
-      name: file.name.replace(".json", ""),
+      name: file.name.replace(".abi", ""),
       contractName: fileData.contractName,
-      data: fileData.abi,
+      data: fileData,
     });
   }
 
