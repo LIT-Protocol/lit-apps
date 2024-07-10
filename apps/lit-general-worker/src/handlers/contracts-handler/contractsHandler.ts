@@ -17,7 +17,8 @@ type LitNetwork =
   | "internalDev"
   | "manzano"
   | "habanero"
-  | "datil-dev";
+  | "datil-dev"
+  | "datil-test";
 
 const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
 const CAYENNE_CONTRACTS_JSON =
@@ -40,10 +41,14 @@ const DATILDEV_CONTRACTS_JSON =
   process.env.DATILDEV_CONTRACTS_JSON ??
   "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-dev/deployed-lit-node-contracts-temp.json";
 
+const DATILTEST_CONTRACTS_JSON =
+  process.env.DATILDEV_CONTRACTS_JSON ??
+  "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-test/deployed-lit-node-contracts-temp.json";
+
 // -- config
 const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
 const USERNAME = "LIT-Protocol";
-const REPO_NAME = "lit-assets";
+const REPO_NAME = "networks";
 
 const createPath = (PATH: string) => {
   return `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${PATH}`;
@@ -112,6 +117,10 @@ let cache = {
     config: null,
     data: null,
   },
+  ["datil-test"]: {
+    config: null,
+    data: null,
+  },
 };
 
 let statsCache = {
@@ -128,6 +137,10 @@ let statsCache = {
     totalCcs: "not ready yet" as number | string,
   },
   ["datil-dev"]: {
+    totalPkps: "not ready yet" as number | string,
+    totalCcs: "not ready yet" as number | string,
+  },
+  ["datil-test"]: {
     totalPkps: "not ready yet" as number | string,
     totalCcs: "not ready yet" as number | string,
   },
@@ -268,16 +281,26 @@ contractsHandler.get("/", (req, res) => {
 
         // Added on 26 June 2024
         DATILDEV_CONTRACTS_JSON,
+
+        // Added on 4 July 2024
+        DATILTEST_CONTRACTS_JSON,
       },
     },
     network: {
       addresses: `${HOST}/network/addresses`,
       ["datil-dev"]: {
-        decentralized: true,
+        decentralized: false,
         type: "devnet",
         contracts: `${HOST}/datil-dev/contracts`,
         addresses: `${HOST}/datil-dev/addresses`,
         stats: `${HOST}/datil-dev/stats`,
+      },
+      ["datil-test"]: {
+        decentralized: true,
+        type: "testnet",
+        contracts: `${HOST}/datil-test/contracts`,
+        addresses: `${HOST}/datil-test/addresses`,
+        stats: `${HOST}/datil-test/stats`,
       },
       habanero: {
         decentralized: true,
@@ -400,6 +423,20 @@ const networks = [
       },
     ],
   },
+  {
+    name: "datil-test",
+    endpoints: [
+      { path: "/datil-test/contracts", handler: "handleContractsResponse" },
+      { path: "/datil-test/addresses", handler: "handleAddressesResponse" },
+      { path: "/datil-test/stats", handler: "handleStatsResponse" },
+
+      // @deprecated
+      {
+        path: "/datil-test-contract-addresses",
+        handler: "handleContractsResponse",
+      },
+    ],
+  },
 ];
 
 // ========== Loop through each network and register endpoint ==========
@@ -443,6 +480,7 @@ contractsHandler.get("/network/addresses", (req, res) => {
       manzano: getData("manzano"),
       habanero: getData("habanero"),
       ["datil-dev"]: getData("datil-dev"),
+      ["datil-test"]: getData("datil-test"),
       cayenne: getData("cayenne"),
       serrano: getData("serrano"),
     });
@@ -460,12 +498,16 @@ const litNetworks = [
   "manzano",
   "habanero",
   "datil-dev",
+  "datil-test",
 ];
 
 // Initial update for all items, and update cache immediately when the server starts
 litNetworks.forEach(async (pepper: LitNetwork) => {
   await updateContractsCache(pepper);
-  await updateStatsCache(pepper);
+
+  if (pepper !== `datil-test`) {
+    await updateStatsCache(pepper);
+  }
 });
 
 // Update cache every 5 minutes for each item
@@ -473,7 +515,9 @@ litNetworks.forEach(async (pepper: LitNetwork) => {
   setInterval(
     async () => {
       await updateContractsCache(pepper);
-      await updateStatsCache(pepper);
+      if (pepper !== `datil-test`) {
+        await updateStatsCache(pepper);
+      }
     },
     5 * 60 * 1000
   );
@@ -482,7 +526,7 @@ litNetworks.forEach(async (pepper: LitNetwork) => {
 export async function getLitContractABIs(network: LitNetwork) {
   const contractsData = [];
 
-  const path = createPath("rust/lit-core/lit-blockchain/abis");
+  const path = createPath("abis");
   // console.log(`[${network}] Getting files from "${path}"`);
   console.log("path:", path);
 
@@ -495,7 +539,7 @@ export async function getLitContractABIs(network: LitNetwork) {
   }
 
   for (const file of files) {
-    const name = file.name.replace(".json", "");
+    const name = file.name.replace(".abi", "");
 
     if (!Object.values(mapper).includes(name)) {
       continue;
@@ -508,9 +552,9 @@ export async function getLitContractABIs(network: LitNetwork) {
     const fileData = await fileRes.json();
 
     contractsData.push({
-      name: file.name.replace(".json", ""),
+      name: file.name.replace(".abi", ""),
       contractName: fileData.contractName,
-      data: fileData.abi,
+      data: fileData,
     });
   }
 
@@ -529,7 +573,12 @@ async function updateStatsCache(network: LitNetwork) {
   }
 
   const contractClient = new LitContracts({
-    network: network as "cayenne" | "habanero" | "manzano" | "datil-dev",
+    network: network as
+      | "cayenne"
+      | "habanero"
+      | "manzano"
+      | "datil-dev"
+      | "datil-test",
   });
 
   await contractClient.connect();
@@ -598,6 +647,11 @@ async function updateContractsCache(network: LitNetwork) {
       API = DATILDEV_CONTRACTS_JSON;
       lastModified = await getLastModified(filePath, network);
       break;
+    case "datil-test":
+      filePath = extractPathAfterMain(DATILTEST_CONTRACTS_JSON);
+      API = DATILTEST_CONTRACTS_JSON;
+      lastModified = await getLastModified(filePath, network);
+      break;
   }
 
   let diamonData: any;
@@ -664,7 +718,7 @@ async function updateContractsCache(network: LitNetwork) {
             `❗️❗️ [${network}] Error finding contractFileName in diamonData => ${e.toString()}`
           );
 
-          if (network === "datil-dev") {
+          if (network === "datil-dev" || network === "datil-test") {
             const supportedContracts = {
               PKPNFT: PKPNFTFacetABI,
               PKPPermissions: PKPPermissionsFacetABI,
@@ -676,14 +730,14 @@ async function updateContractsCache(network: LitNetwork) {
 
             if (contractFileName in supportedContracts) {
               console.log(
-                `💭 [datil-dev] Using static ABI for "${contractFileName}" contract`
+                `💭 [${network}] Using static ABI for "${contractFileName}" contract`
               );
 
               const abi = supportedContracts[contractFileName];
               ABI = { data: abi };
             } else {
               console.error(
-                `❗️[datil-dev] contractFileName: ${contractFileName} not supported`
+                `❗️[${network}] contractFileName: ${contractFileName} not supported`
               );
             }
           }
