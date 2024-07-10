@@ -5,7 +5,7 @@ dotenv.config();
 // -- config
 const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
 const USERNAME = "LIT-Protocol";
-const REPO_NAME = "lit-assets";
+const REPO_NAME = "networks";
 
 const createPath = (PATH: string) => {
   return `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${PATH}`;
@@ -26,10 +26,7 @@ export async function getLitContractABIs() {
   let files: any;
 
   try {
-    const filesRes = await fetch(
-      createPath("rust/lit-core/lit-blockchain/abis"),
-      HEADER
-    );
+    const filesRes = await fetch(createPath("abis"), HEADER);
     files = await filesRes.json();
   } catch (e) {
     throw new Error(`GITHUB_LIT_ASSETS_REAL_ONLY_API might be wrong. ${e}`);
