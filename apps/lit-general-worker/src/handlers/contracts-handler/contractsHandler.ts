@@ -279,7 +279,7 @@ contractsHandler.get("/", (req, res) => {
         SERRANO_CONTRACTS_JSON,
         INTERNAL_CONTRACTS_JSON,
 
-        // Added on 26 June 2024
+        // Added on 22 July 2024
         DATILDEV_CONTRACTS_JSON,
 
         // Added on 4 July 2024
