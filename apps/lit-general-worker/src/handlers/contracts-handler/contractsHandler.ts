@@ -3,13 +3,159 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { LitContracts } from "@lit-protocol/contracts-sdk";
-// https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
-import { PKPNFTFacetABI } from "./datil-dev/PKPNFTFacetABI";
-import { PKPPermissionsFacetABI } from "./datil-dev/PKPPermissionsFacetABI";
-import { PKPHelperABI } from "./datil-dev/PKPHelperAbi";
-import { StakingABI } from "./datil-dev/StakingAbi";
-import { RateLimitNftAbi } from "./datil-dev/RateLimitNFTAbi";
-import { PubkeyRouterAbi } from "./datil-dev/PubkeyRouterAbi";
+
+type ABISource = {
+  repoName: string;
+  path: string;
+  fileExtensionToRemove: string;
+
+  /**
+   * eg. If the Json file is in the format of:
+   * {
+   *   foo,
+   *   bar: {
+   *     abi: []
+   *   }
+   * }
+   *
+   * then the value of this key should be `["bar", "abi"]`
+   */
+  abiSourceInJson: any[];
+
+  /**
+   * This maps to the contract file name, not the contract name.
+   * For example, PKPPermissions is the file name without the extension, while the contract name may be different, such as PKPPermissionsDiamond.
+   *
+   * The map is based on the values here: (we are mapping these manually to the contract file names)
+   * https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-dev/deployed-lit-node-contracts-temp.json
+   * That was deployed here:
+   * https://github.com/LIT-Protocol/lit-assets/blob/39db2b512f89fee1f54ff5318587cf0a6b17dbb5/blockchain/contracts/scripts/deploy_lit_node_contracts.js#L760-L789
+   * and:
+   * https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
+   */
+  contractNameMap: any;
+  deployedContract: {
+    internalDev: string;
+    serrano: string;
+    cayenne: string;
+    manzano: string;
+    habanero: string;
+    datilDev: string;
+    datilTest: string;
+  };
+};
+const LIT_ABI_SOURCE = {
+  /**
+   * Development environment
+   * https://github.com/LIT-Protocol/lit-assets
+   */
+  dev: {
+    repoName: "lit-assets",
+    path: "rust/lit-core/lit-blockchain/abis",
+    fileExtensionToRemove: ".json",
+    abiSourceInJson: ["abi"],
+    contractNameMap: {
+      // -- Token
+      litTokenContractAddress: "LITToken",
+
+      // -- PKPs
+      pkpNftContractAddress: "PKPNFT",
+      pkpHelperContractAddress: "PKPHelper",
+      pkpPermissionsContractAddress: "PKPPermissions",
+      pkpNftMetadataContractAddress: "PKPNFTMetadata",
+      pubkeyRouterContractAddress: "PubkeyRouter",
+
+      // -- Rate Limit NFT
+      rateLimitNftContractAddress: "RateLimitNFT",
+
+      // -- Staking
+      stakingBalancesContractAddress: "StakingBalances",
+      stakingContractAddress: "Staking",
+
+      // -- Other
+      multisenderContractAddress: "Multisender",
+      allowlistContractAddress: "Allowlist",
+      paymentDelegationContractAddress: "PaymentDelegation",
+      priceFeedContractAddress: "PriceFeed",
+    },
+    deployedContract: {
+      internalDev:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json",
+      serrano:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json",
+      cayenne:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json",
+      manzano:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json",
+      habanero:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json",
+      datilDev:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-dev/deployed-lit-node-contracts-temp.json",
+      datilTest:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-test/deployed-lit-node-contracts-temp.json",
+    },
+  },
+
+  /**
+   * Production environment
+   * https://github.com/LIT-Protocol/networks/
+   */
+  prod: {
+    repoName: "networks",
+    path: "abis",
+    fileExtensionToRemove: ".abi",
+    abiSourceInJson: [],
+    contractNameMap: {
+      // -- Token
+      litTokenContractAddress: "LITToken",
+
+      // -- PKPs
+      pkpNftContractAddress: "PKPNFT",
+      pkpHelperContractAddress: "PKPHelper",
+      pkpPermissionsContractAddress: "PKPPermissions",
+      pkpNftMetadataContractAddress: "PKPNFTMetadata",
+      pubkeyRouterContractAddress: "PubkeyRouter",
+
+      // -- Rate Limit NFT
+      rateLimitNftContractAddress: "RateLimitNFT",
+
+      // -- Staking
+      stakingBalancesContractAddress: "StakingBalances",
+      stakingContractAddress: "Staking",
+
+      // -- Other
+      multisenderContractAddress: "Multisender",
+      allowlistContractAddress: "Allowlist",
+      paymentDelegationContractAddress: "PaymentDelegation",
+    },
+    deployedContract: {
+      internalDev:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json",
+      serrano:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json",
+      cayenne:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json",
+      manzano:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json",
+      habanero:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json",
+      datilDev:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-dev/deployed-lit-node-contracts-temp.json",
+      datilTest:
+        "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-test/deployed-lit-node-contracts-temp.json",
+    },
+  },
+};
+
+type LIT_ABI_SOURCE_TYPES = keyof typeof LIT_ABI_SOURCE;
+
+const SOURCE_BY_ENV: { [key in LIT_ABI_SOURCE_TYPES]: ABISource } = {
+  dev: LIT_ABI_SOURCE.dev,
+  prod: LIT_ABI_SOURCE.prod,
+};
+
+const source: ABISource =
+  process.env.LIT_ABI_SOURCE === "dev" ? SOURCE_BY_ENV.dev : SOURCE_BY_ENV.prod;
 
 type LitNetwork =
   | "cayenne"
@@ -21,34 +167,11 @@ type LitNetwork =
   | "datil-test";
 
 const ABI_API = `https://chain.litprotocol.com/api?module=contract&action=getabi&address=`;
-const CAYENNE_CONTRACTS_JSON =
-  process.env.CAYENNE_CONTRACTS_JSON ??
-  "https://raw.githubusercontent.com/LIT-Protocol/networks/main/cayenne/deployed-lit-node-contracts-temp.json";
-const SERRANO_CONTRACTS_JSON =
-  process.env.SERRANO_CONTRACTS_JSON ??
-  "https://raw.githubusercontent.com/LIT-Protocol/networks/main/serrano/deployed-lit-node-contracts-temp.json";
-const INTERNAL_CONTRACTS_JSON =
-  process.env.INTERNAL_CONTRACTS_JSON ??
-  "https://raw.githubusercontent.com/LIT-Protocol/networks/main/internal-dev/deployed-lit-node-contracts-temp.json";
-const MANZANO_CONTRACTS_JSON =
-  process.env.MANZANO_CONTRACTS_JSON ??
-  "https://raw.githubusercontent.com/LIT-Protocol/networks/main/manzano/deployed-lit-node-contracts-temp.json";
-const HABANERO_CONTRACTS_JSON =
-  process.env.HABANERO_CONTRACTS_JSON ??
-  "https://raw.githubusercontent.com/LIT-Protocol/networks/main/habanero/deployed-lit-node-contracts-temp.json";
-
-const DATILDEV_CONTRACTS_JSON =
-  process.env.DATILDEV_CONTRACTS_JSON ??
-  "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-dev/deployed-lit-node-contracts-temp.json";
-
-const DATILTEST_CONTRACTS_JSON =
-  process.env.DATILDEV_CONTRACTS_JSON ??
-  "https://raw.githubusercontent.com/LIT-Protocol/networks/main/datil-test/deployed-lit-node-contracts-temp.json";
 
 // -- config
 const TOKEN = process.env.GITHUB_LIT_ASSETS_REAL_ONLY_API;
 const USERNAME = "LIT-Protocol";
-const REPO_NAME = "networks";
+const REPO_NAME = source.repoName;
 
 const createPath = (PATH: string) => {
   return `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${PATH}`;
@@ -144,36 +267,6 @@ let statsCache = {
     totalPkps: "not ready yet" as number | string,
     totalCcs: "not ready yet" as number | string,
   },
-};
-
-// -- config
-// This mapper maps to the contract FILE name, not the contract name. For example, PKPPermissions is the file name without extension, while the contract name may be different. eg. PKPPermissionsDiamond
-const mapper = {
-  // -- Token
-  litTokenContractAddress: "LITToken",
-
-  // -- PKPs
-  pkpNftContractAddress: "PKPNFT",
-  pkpHelperContractAddress: "PKPHelper",
-  pkpPermissionsContractAddress: "PKPPermissions",
-  pkpNftMetadataContractAddress: "PKPNFTMetadata",
-  pubkeyRouterContractAddress: "PubkeyRouter",
-
-  // --
-  stakingBalancesContractAddress: "StakingBalances",
-  stakingContractAddress: "Staking",
-  multisenderContractAddress: "Multisender",
-
-  // -- Rate Limit NFT
-  rateLimitNftContractAddress: "RateLimitNFT",
-  allowlistContractAddress: "Allowlist",
-  // resolverContractAddress: "Resolver",
-  paymentDelegationContractAddress: "PaymentDelegation",
-
-  // -- Domain Wallet
-  // DomainWaleltRegistryAddress: "DomainWaleltRegistry",
-  // DomainWalletOracleAddress: "DomainWalletOracle",
-  // hdKeyDeriverContractAddress: "HDKeyDeriver",
 };
 
 function handleContractsResponse(networkName: LitNetwork) {
@@ -273,17 +366,17 @@ contractsHandler.get("/", (req, res) => {
       RPC_URL:
         process.env.RPC_URL ?? "https://lit-protocol.calderachain.xyz/http",
       source: {
-        HABANERO_CONTRACTS_JSON,
-        MANZANO_CONTRACTS_JSON,
-        CAYENNE_CONTRACTS_JSON,
-        SERRANO_CONTRACTS_JSON,
-        INTERNAL_CONTRACTS_JSON,
+        HABANERO_CONTRACTS_JSON: source.deployedContract.habanero,
+        MANZANO_CONTRACTS_JSON: source.deployedContract.manzano,
+        CAYENNE_CONTRACTS_JSON: source.deployedContract.cayenne,
+        SERRANO_CONTRACTS_JSON: source.deployedContract.serrano,
+        INTERNAL_CONTRACTS_JSON: source.deployedContract.internalDev,
 
         // Added on 26 June 2024
-        DATILDEV_CONTRACTS_JSON,
+        DATILDEV_CONTRACTS_JSON: source.deployedContract.datilDev,
 
         // Added on 4 July 2024
-        DATILTEST_CONTRACTS_JSON,
+        DATILTEST_CONTRACTS_JSON: source.deployedContract.datilTest,
       },
     },
     network: {
@@ -526,7 +619,7 @@ litNetworks.forEach(async (pepper: LitNetwork) => {
 export async function getLitContractABIs(network: LitNetwork) {
   const contractsData = [];
 
-  const path = createPath("abis");
+  const path = createPath(source.path);
   // console.log(`[${network}] Getting files from "${path}"`);
   console.log("path:", path);
 
@@ -539,9 +632,10 @@ export async function getLitContractABIs(network: LitNetwork) {
   }
 
   for (const file of files) {
-    const name = file.name.replace(".abi", "");
+    const name = file.name.replace(source.fileExtensionToRemove, "");
+    console.log("name:", name);
 
-    if (!Object.values(mapper).includes(name)) {
+    if (!Object.values(source.contractNameMap).includes(name)) {
       continue;
     }
 
@@ -551,10 +645,23 @@ export async function getLitContractABIs(network: LitNetwork) {
 
     const fileData = await fileRes.json();
 
+    const getData = (fileData: any, abiSourceInJson: any[]): any => {
+      if (abiSourceInJson.length > 0) {
+        return abiSourceInJson.reduce((acc, key) => acc[key], fileData);
+      }
+      return fileData;
+    };
+
+    const data = getData(fileData, source.abiSourceInJson);
+
+    if (!data) {
+      console.log(`[${network}] No data for ${name}`);
+    }
+
     contractsData.push({
-      name: file.name.replace(".abi", ""),
+      name: file.name.replace(source.fileExtensionToRemove, ""),
       contractName: fileData.contractName,
-      data: fileData,
+      data,
     });
   }
 
@@ -619,37 +726,37 @@ async function updateContractsCache(network: LitNetwork) {
 
   switch (network) {
     case "cayenne":
-      filePath = extractPathAfterMain(CAYENNE_CONTRACTS_JSON);
-      API = CAYENNE_CONTRACTS_JSON;
+      filePath = extractPathAfterMain(source.deployedContract.cayenne);
+      API = source.deployedContract.cayenne;
       lastModified = await getLastModified(filePath, network);
       break;
     case "serrano":
-      API = SERRANO_CONTRACTS_JSON;
+      API = source.deployedContract.serrano;
       lastModified = "2023-04-26T23:00:00.000Z";
       break;
     case "internalDev":
-      API = INTERNAL_CONTRACTS_JSON;
-      filePath = extractPathAfterMain(INTERNAL_CONTRACTS_JSON);
+      API = source.deployedContract.internalDev;
+      filePath = extractPathAfterMain(source.deployedContract.internalDev);
       lastModified = await getLastModified(filePath, network);
       break;
     case "manzano":
-      filePath = extractPathAfterMain(MANZANO_CONTRACTS_JSON);
-      API = MANZANO_CONTRACTS_JSON;
+      filePath = extractPathAfterMain(source.deployedContract.manzano);
+      API = source.deployedContract.manzano;
       lastModified = await getLastModified(filePath, network);
       break;
     case "habanero":
-      filePath = extractPathAfterMain(HABANERO_CONTRACTS_JSON);
-      API = HABANERO_CONTRACTS_JSON;
+      filePath = extractPathAfterMain(source.deployedContract.habanero);
+      API = source.deployedContract.habanero;
       lastModified = await getLastModified(filePath, network);
       break;
     case "datil-dev":
-      filePath = extractPathAfterMain(DATILDEV_CONTRACTS_JSON);
-      API = DATILDEV_CONTRACTS_JSON;
+      filePath = extractPathAfterMain(source.deployedContract.datilDev);
+      API = source.deployedContract.datilDev;
       lastModified = await getLastModified(filePath, network);
       break;
     case "datil-test":
-      filePath = extractPathAfterMain(DATILTEST_CONTRACTS_JSON);
-      API = DATILTEST_CONTRACTS_JSON;
+      filePath = extractPathAfterMain(source.deployedContract.datilTest);
+      API = source.deployedContract.datilTest;
       lastModified = await getLastModified(filePath, network);
       break;
   }
@@ -699,7 +806,7 @@ async function updateContractsCache(network: LitNetwork) {
   }
 
   for (const [name, address] of Object.entries(resData)) {
-    const contractFileName = mapper[name];
+    const contractFileName = source.contractNameMap[name];
 
     if (contractFileName) {
       if (network !== "serrano") {
@@ -717,30 +824,6 @@ async function updateContractsCache(network: LitNetwork) {
           console.error(
             `❗️❗️ [${network}] Error finding contractFileName in diamonData => ${e.toString()}`
           );
-
-          if (network === "datil-dev" || network === "datil-test") {
-            const supportedContracts = {
-              PKPNFT: PKPNFTFacetABI,
-              PKPPermissions: PKPPermissionsFacetABI,
-              PKPHelper: PKPHelperABI,
-              Staking: StakingABI,
-              RateLimitNFT: RateLimitNftAbi,
-              PubkeyRouter: PubkeyRouterAbi,
-            };
-
-            if (contractFileName in supportedContracts) {
-              console.log(
-                `💭 [${network}] Using static ABI for "${contractFileName}" contract`
-              );
-
-              const abi = supportedContracts[contractFileName];
-              ABI = { data: abi };
-            } else {
-              console.error(
-                `❗️[${network}] contractFileName: ${contractFileName} not supported`
-              );
-            }
-          }
         }
 
         if (!ABI) {
@@ -749,7 +832,7 @@ async function updateContractsCache(network: LitNetwork) {
           );
         }
 
-        if (!Object.values(mapper).includes(contractFileName)) {
+        if (!Object.values(source.contractNameMap).includes(contractFileName)) {
           continue;
         }
 
@@ -766,7 +849,7 @@ async function updateContractsCache(network: LitNetwork) {
         });
       } else if (network === "serrano") {
         const item = {
-          name: mapper[name],
+          name: source.contractNameMap[name],
           contracts: [
             {
               network: "serrano",
