@@ -1,3 +1,7 @@
+# ⚠️ Notice: End of Maintenance for This Package
+
+This package is no longer actively maintained. Moving forward, only critical security patches will be applied. We encourage users to use the [@lit-protocol/contracts](https://www.npmjs.com/package/@lit-protocol/contracts?activeTab=versions) NPM package instead
+
 # Prerequisite
 
 ```

@@ -1,12 +1,20 @@
-import express, { Express } from "express";
 import bodyParser from "body-parser";
-import { txHandler } from "./handlers/txHandler";
-import { analyticsHandler } from "./handlers/analyticsHandler";
-import { contractsHandler } from "./handlers/contracts-handler/contractsHandler";
 import cors from "cors";
+import express, { Express } from "express";
+import { contractsHandler } from "./handlers/contracts-handler/contractsHandler";
+import { rateLimit } from "express-rate-limit";
+
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  limit: 60, // Limit each IP to 60 requests per `window` (here, per 1 minutes).
+  standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  // store: ... , // Redis, Memcached, etc. See below.
+});
 
 const app: Express = express();
 app.use(bodyParser.json());
+app.use(limiter);
 
 const blacklist = (process.env.CORS_BLACKLIST || "").split(",");
 
@@ -21,10 +29,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
 app.use(contractsHandler);
-app.use(txHandler);
-app.use(analyticsHandler);
 
 const PORT: string | number = process.env.PORT || 3031;
 app.listen(PORT, () => console.log("Lit General Worker " + PORT));
