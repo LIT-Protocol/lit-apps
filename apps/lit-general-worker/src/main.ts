@@ -12,7 +12,7 @@ const limiter = rateLimit({
   // store: ... , // Redis, Memcached, etc. See below.
   handler: (req, res) => {
     const clientIp = req.headers["x-forwarded-for"] || req.ip;
-    console.log(`❗️ Too many requests from ${clientIp}`);
+    console.log(`❗️ Too many requests from ${typeof clientIp} ${clientIp}`);
 
     res
       .status(429)
