@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import cors from "cors";
-import express, { Express } from "express";
+import express, { Express, Request, Response, NextFunction } from "express";
 import { contractsHandler } from "./handlers/contracts-handler/contractsHandler";
 import { rateLimit } from "express-rate-limit";
 
@@ -13,7 +13,7 @@ const limiter = rateLimit({
   handler: (req, res) => {
     const clientIp = req.headers["x-forwarded-for"] || req.ip;
     console.log(`❗️ Too many requests from ${clientIp}`);
-    
+
     res
       .status(429)
       .send(
@@ -23,6 +23,29 @@ const limiter = rateLimit({
 });
 
 const app: Express = express();
+
+// Load banned IPs from environment variable
+const bannedIPsEnv = process.env.BANNED_IPS || "";
+let bannedIPs: Set<string> = new Set(
+  bannedIPsEnv
+    .split(",")
+    .map((ip) => ip.trim())
+    .filter((ip) => ip !== "")
+);
+
+console.log(`Loaded ${bannedIPs.size} banned IPs`);
+
+// Middleware to check for banned IPs
+const checkBannedIP = (req: Request, res: Response, next: NextFunction) => {
+  const clientIP = (req.headers["x-forwarded-for"] || req.ip) as string;
+  if (bannedIPs.has(clientIP)) {
+    console.log(`Blocked request from banned IP: ${clientIP}`);
+    return res.status(403).send("Access Denied");
+  }
+  next();
+};
+
+app.use(checkBannedIP);
 app.use(bodyParser.json());
 app.use(limiter);
 
