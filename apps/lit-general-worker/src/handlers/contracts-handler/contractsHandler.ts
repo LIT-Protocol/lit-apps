@@ -1,9 +1,5 @@
-// TODO: Remove Serrano network support after the Serrano network is deprecated
-
 import express from "express";
 import bodyParser from "body-parser";
-import { LitContracts } from "@lit-protocol/contracts-sdk";
-// https://github.com/LIT-Protocol/lit-assets/tree/develop/rust/lit-core/lit-blockchain/abis
 import { PKPNFTFacetABI } from "./datil-dev/PKPNFTFacetABI";
 import { PKPPermissionsFacetABI } from "./datil-dev/PKPPermissionsFacetABI";
 import { PKPHelperABI } from "./datil-dev/PKPHelperAbi";
@@ -68,8 +64,6 @@ async function getLastModified(filePath: string, network: string) {
   console.log("filePath:", filePath);
 
   const fileAPI = `https://api.github.com/repos/${USERNAME}/networks/commits?path=${filePath}`;
-
-  // console.log("fileAPI:", fileAPI);
 
   try {
     const response = await fetch(fileAPI, HEADER);
@@ -505,9 +499,7 @@ const litNetworks = [
 litNetworks.forEach(async (pepper: LitNetwork) => {
   await updateContractsCache(pepper);
 
-  if (pepper !== `datil-test`) {
-    await updateStatsCache(pepper);
-  }
+
 });
 
 // Update cache every 5 minutes for each item
@@ -515,9 +507,7 @@ litNetworks.forEach(async (pepper: LitNetwork) => {
   setInterval(
     async () => {
       await updateContractsCache(pepper);
-      if (pepper !== `datil-test`) {
-        await updateStatsCache(pepper);
-      }
+
     },
     5 * 60 * 1000
   );
@@ -561,56 +551,10 @@ export async function getLitContractABIs(network: LitNetwork) {
   if (!contractsData.length) {
     console.log(`[${network}] No data`);
   }
-
   return contractsData;
 }
 
-async function updateStatsCache(network: LitNetwork) {
-  // -- serrano is not supported
-  if (network === "serrano" || network === "internalDev") {
-    console.log(`❗️ [${network}] updateStatsCache is not supported`);
-    return;
-  }
 
-  const contractClient = new LitContracts({
-    network: network as
-      | "cayenne"
-      | "habanero"
-      | "manzano"
-      | "datil-dev"
-      | "datil-test",
-  });
-
-  await contractClient.connect();
-
-  // -- total pkps
-  try {
-    let totalPkps = (
-      await contractClient!.pkpNftContract.read.totalSupply()
-    ).toNumber();
-    console.log(`[${network}] totalPkps:`, totalPkps);
-
-    statsCache[network].totalPkps = totalPkps;
-  } catch (e) {
-    console.log(
-      `[${network}] Contracts endpoint is not ready yet. Self-referential error occurred`
-    );
-  }
-
-  // -- total ccs
-  try {
-    let totalCcs = (
-      await contractClient!.rateLimitNftContract.read.totalSupply()
-    ).toNumber();
-    console.log(`[${network}] totalCcs:`, totalCcs);
-
-    statsCache[network].totalCcs = totalCcs;
-  } catch (e) {
-    console.log(
-      `[${network}] Contracts endpoint is not ready yet. Self-referential error occurred`
-    );
-  }
-}
 
 async function updateContractsCache(network: LitNetwork) {
   let API: string;
