@@ -10,6 +10,14 @@ const limiter = rateLimit({
   standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
   // store: ... , // Redis, Memcached, etc. See below.
+  handler: (req, res) => {
+    console.log(`❗️ Too many requests from ${req.ip}`);
+    res
+      .status(429)
+      .send(
+        "Too many requests, please try again later. For uninterrupted use, please use SDK version 6.30 and above."
+      );
+  },
 });
 
 const app: Express = express();
