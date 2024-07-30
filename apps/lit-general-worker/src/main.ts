@@ -50,12 +50,27 @@ console.log(`Loaded ${bannedIPs.size} banned IPs`);
 const checkBannedIP = (req: Request, res: Response, next: NextFunction) => {
   const clientIP = getClientIp(req);
   if (bannedIPs.has(clientIP)) {
-    console.log(`Blocked request from banned IP: ${clientIP}`);
+    console.log(`❗️Blocked request from banned IP: ${clientIP}`);
+    return res.status(403).send("Access Denied");
+  }
+  next();
+};
+const blockSyntheticMonitoringAgent = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userAgent = req.headers["user-agent"] || "";
+  if (userAgent.includes("synthetic-monitoring-agent")) {
+    console.log(
+      `❗️Blocked request from synthetic monitoring agent: ${userAgent}`
+    );
     return res.status(403).send("Access Denied");
   }
   next();
 };
 
+app.use(blockSyntheticMonitoringAgent);
 app.use(checkBannedIP);
 app.use(bodyParser.json());
 app.use(limiter);
